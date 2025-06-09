@@ -6,4 +6,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WPHBookingSystem.Domain\WPHBookingSystem.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DTOs\Room\" />
+    <Folder Include="Interfaces\" />
+  </ItemGroup>
+
 </Project>
