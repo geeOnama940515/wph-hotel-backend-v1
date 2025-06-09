@@ -12,6 +12,8 @@ namespace WPHBookingSystem.Domain.Enums
         Confirmed,
         Cancelled,
         CheckedIn,
-        CheckedOut
+        CheckedOut,
+        Booked,
+        Completed
     }
 }

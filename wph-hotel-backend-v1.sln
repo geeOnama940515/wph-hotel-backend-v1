@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPHBookingSystem.Infrastruc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPHBookingSystem.WebUI", "WPHBookingSystem.WebUI\WPHBookingSystem.WebUI.csproj", "{C50DBED0-F942-4912-A7E3-C48E47F4E91E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPHBookingSystem.Domain.Tests", "WPHBookingSystem.Domain.Tests\WPHBookingSystem.Domain.Tests.csproj", "{C7CD446A-0776-4FC3-85BB-4D1590B6FF96}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{C50DBED0-F942-4912-A7E3-C48E47F4E91E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C50DBED0-F942-4912-A7E3-C48E47F4E91E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C50DBED0-F942-4912-A7E3-C48E47F4E91E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7CD446A-0776-4FC3-85BB-4D1590B6FF96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7CD446A-0776-4FC3-85BB-4D1590B6FF96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7CD446A-0776-4FC3-85BB-4D1590B6FF96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7CD446A-0776-4FC3-85BB-4D1590B6FF96}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
