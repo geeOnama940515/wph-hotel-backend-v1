@@ -10,8 +10,4 @@
     <ProjectReference Include="..\WPHBookingSystem.Domain\WPHBookingSystem.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="UseCases\Rooms\" />
-  </ItemGroup>
-
 </Project>
