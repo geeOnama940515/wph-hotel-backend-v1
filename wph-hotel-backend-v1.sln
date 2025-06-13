@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36202.13 d17.14
+VisualStudioVersion = 17.14.36202.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPHBookingSystem.Domain", "WPHBookingSystem.Domain\WPHBookingSystem.Domain.csproj", "{6C5ABD93-8D0A-4B34-8A6E-A79BA63BDCCC}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPHBookingSystem.WebUI", "WPHBookingSystem.WebUI\WPHBookingSystem.WebUI.csproj", "{C50DBED0-F942-4912-A7E3-C48E47F4E91E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPHBookingSystem.Domain.Tests", "WPHBookingSystem.Domain.Tests\WPHBookingSystem.Domain.Tests.csproj", "{C7CD446A-0776-4FC3-85BB-4D1590B6FF96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPHBookingSystem.Application.Tests", "WPHBookingSystem.Application.Tests\WPHBookingSystem.Application.Tests.csproj", "{546B719A-1335-4CE8-A0A5-65B94A408859}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{C7CD446A-0776-4FC3-85BB-4D1590B6FF96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7CD446A-0776-4FC3-85BB-4D1590B6FF96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7CD446A-0776-4FC3-85BB-4D1590B6FF96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{546B719A-1335-4CE8-A0A5-65B94A408859}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{546B719A-1335-4CE8-A0A5-65B94A408859}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{546B719A-1335-4CE8-A0A5-65B94A408859}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{546B719A-1335-4CE8-A0A5-65B94A408859}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
