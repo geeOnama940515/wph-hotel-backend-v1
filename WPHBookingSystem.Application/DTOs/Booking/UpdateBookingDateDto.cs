@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace WPHBookingSystem.Application.DTOs.Booking
 {
-    public class UpdateBookingDatesDto
+    public class UpdateBookingDateDto
     {
-        public Guid BookingId { get; set; }
-        public DateTime NewCheckIn { get; set; }
-        public DateTime NewCheckOut { get; set; }
+        public DateTime CheckIn { get; set; }
+        public DateTime CheckOut { get; set; }
     }
 }
