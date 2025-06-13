@@ -29,7 +29,7 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                 CheckOut = b.CheckOut,
                 Guests = b.Guests,
                 TotalAmount = b.TotalAmount,
-                Status = b.Status.ToString(),
+                Status = b.Status,
                 SpecialRequests = b.SpecialRequests,
                 RoomName = b.Room?.Name ?? string.Empty,
             }).ToList();
