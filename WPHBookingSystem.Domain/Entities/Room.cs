@@ -14,7 +14,12 @@ namespace WPHBookingSystem.Domain.Entities
         public string Description { get; private set; } = string.Empty;
         public decimal Price { get; private set; }
         public int Capacity { get; private set; }
-        public string Image { get; private set; } = string.Empty;
+        public string? Image { get; private set; } = string.Empty;
+        public string? Image2 { get; private set; } = string.Empty;
+        public string? Image3 { get; private set; } = string.Empty;
+        public string? Image4 { get; private set; } = string.Empty;
+        public string? Image5 { get; private set; } = string.Empty;
+        public string? Image6 { get; private set; } = string.Empty;
         public RoomStatus Status { get; private set; } = RoomStatus.Available;
 
         private readonly List<Booking> _bookings = new();
