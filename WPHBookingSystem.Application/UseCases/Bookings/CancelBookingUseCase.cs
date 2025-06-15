@@ -17,12 +17,12 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
             _unitOfWork = unitOfWork;
         }
 
-        public async Task ExecuteAsync(Guid bookingId, Guid userId)
+        public async Task ExecuteAsync(Guid bookingId, string emailAddress)
         {
             var booking = await _unitOfWork.Bookings.GetByIdAsync(bookingId)
                           ?? throw new DomainException("Booking not found.");
 
-            if (booking.UserId != userId)
+            if (booking.EmailAddress != emailAddress)
                 throw new DomainException("You are not authorized to cancel this booking.");
 
             booking.Cancel();

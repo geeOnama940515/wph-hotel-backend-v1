@@ -7,6 +7,7 @@ using WPHBookingSystem.Application.DTOs.Booking;
 using WPHBookingSystem.Application.Interfaces;
 using WPHBookingSystem.Domain.Entities;
 using WPHBookingSystem.Domain.Exceptions;
+using WPHBookingSystem.Domain.ValueObjects;
 
 namespace WPHBookingSystem.Application.UseCases.Bookings
 {
@@ -24,17 +25,16 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
 
             if (!room.IsAvailable(dto.CheckIn, dto.CheckOut))
                 throw new DomainException("Room is not available on selected dates.");
-
+            var contactInfo = new ContactInfo(dto.Phone, dto.Address);
             var booking = Booking.Create(
-                userId,
                 room.Id,
                 dto.CheckIn,
                 dto.CheckOut,
                 dto.Guests,
                 room.Price * (decimal)(dto.CheckOut - dto.CheckIn).TotalDays,
+                contactInfo,
                 dto.SpecialRequests,
-                dto.Phone,
-                dto.Address
+                dto.EmailAddress
             );
 
             await _unitOfWork.Bookings.AddAsync(booking);

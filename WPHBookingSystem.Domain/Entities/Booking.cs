@@ -2,6 +2,7 @@
 using WPHBookingSystem.Domain.Entities.Common;
 using WPHBookingSystem.Domain.Enums;
 using WPHBookingSystem.Domain.Exceptions;
+using WPHBookingSystem.Domain.ValueObjects;
 
 namespace WPHBookingSystem.Domain.Entities
 {
@@ -13,27 +14,26 @@ namespace WPHBookingSystem.Domain.Entities
         public DateTime CheckIn { get; private set; }
         public DateTime CheckOut { get; private set; }
         public int Guests { get; private set; }
+        public ContactInfo ContactInfo { get; private set; }
+        public string EmailAddress { get; private set; }
         public decimal TotalAmount { get; private set; }
         public BookingStatus Status { get; private set; } = BookingStatus.Pending;
         public string SpecialRequests { get; private set; } = string.Empty;
-        public string Phone { get; private set; } = string.Empty;
-        public string Address { get; private set; } = string.Empty;
+        public string CancellationToken { get; private set; }
         public virtual Room? Room { get; set; }
 
-        // Private constructor for EF Core
         private Booking() { }
 
-        // --- Static Factory Method ---
         public static Booking Create(
-            Guid userId,
             Guid roomId,
             DateTime checkIn,
             DateTime checkOut,
             int guests,
             decimal totalAmount,
-            string specialRequests = "",
-            string phone = "",
-            string address = "")
+            ContactInfo contactInfo,
+            string emailAddress = "",
+            string specialRequests = ""
+        )
         {
             if (checkIn >= checkOut)
                 throw new DomainException("Check-out must be after check-in.");
@@ -43,20 +43,19 @@ namespace WPHBookingSystem.Domain.Entities
             return new Booking
             {
                 Id = Guid.NewGuid(),
-                UserId = userId,
                 RoomId = roomId,
                 CheckIn = checkIn,
                 CheckOut = checkOut,
                 Guests = guests,
                 TotalAmount = totalAmount,
+                ContactInfo = contactInfo,
+                EmailAddress = emailAddress,
                 SpecialRequests = specialRequests,
-                Phone = phone,
-                Address = address,
-                Status = BookingStatus.Pending
+                Status = BookingStatus.Pending,
+                CancellationToken = Guid.NewGuid().ToString("N")
             };
         }
 
-        // --- Domain Logic Methods ---
         public void Confirm()
         {
             if (Status != BookingStatus.Pending)
@@ -96,15 +95,6 @@ namespace WPHBookingSystem.Domain.Entities
         public bool IsDateValid()
         {
             return CheckIn < CheckOut && CheckIn.Date >= DateTime.UtcNow.Date;
-        }
-
-        // Private helper method for date validation (kept for potential future use)
-        private static void ValidateDates(DateTime checkIn, DateTime checkOut)
-        {
-            if (checkIn >= checkOut)
-                throw new DomainException("Check-out must be after check-in.");
-            if (checkIn.Date < DateTime.UtcNow.Date)
-                throw new DomainException("Check-in date must not be in the past.");
         }
     }
 }

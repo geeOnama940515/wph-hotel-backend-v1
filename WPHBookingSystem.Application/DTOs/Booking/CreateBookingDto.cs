@@ -5,7 +5,6 @@ namespace WPHBookingSystem.Application.DTOs.Booking
 {
     public class CreateBookingDto
     {
-
         [Required(ErrorMessage = "Room ID is required.")]
         public Guid RoomId { get; set; }
 
@@ -24,11 +23,17 @@ namespace WPHBookingSystem.Application.DTOs.Booking
         [StringLength(1000, ErrorMessage = "Special requests cannot exceed 1000 characters.")]
         public string SpecialRequests { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Phone number is required.")]
         [Phone(ErrorMessage = "Phone number is not valid.")]
         [StringLength(20, ErrorMessage = "Phone number cannot exceed 20 characters.")]
         public string Phone { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Address is required.")]
         [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
         public string Address { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email address is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email format.")]
+        public string EmailAddress { get; set; } = string.Empty;
     }
 }
