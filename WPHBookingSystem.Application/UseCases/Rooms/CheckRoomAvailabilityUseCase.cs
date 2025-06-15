@@ -22,8 +22,8 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
 
         public async Task<CheckRoomAvailabilityResponse> ExecuteAsync(CheckRoomAvailabilityRequest request)
         {
-            var room = await _unitOfWork.Rooms.GetByIdAsync(request.RoomId)
-                        ?? throw new NotFoundException("Room not found.");
+            var room = await _unitOfWork.Rooms.GetByIdWithBookingsAsync(request.RoomId)
+                            ?? throw new NotFoundException("Room not found.");
 
             var isAvailable = room.IsAvailable(request.CheckIn, request.CheckOut);
             return new CheckRoomAvailabilityResponse(isAvailable);

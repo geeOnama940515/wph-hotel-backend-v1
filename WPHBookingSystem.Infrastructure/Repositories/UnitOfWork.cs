@@ -1,24 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WPHBookingSystem.Application.Interfaces;
+﻿using WPHBookingSystem.Application.Interfaces;
 using WPHBookingSystem.Infrastructure.Persistence.Data;
 
 namespace WPHBookingSystem.Infrastructure.Repositories
 {
-    public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
-        private readonly ApplicationDbContext _context = context;
-        public IRoomRepository Rooms => throw new NotImplementedException();
+        private readonly ApplicationDbContext _context;
 
-        public IBookingRepository Bookings => throw new NotImplementedException();
+        // Backing fields
+        private IRoomRepository? _rooms;
+        private IBookingRepository? _bookings;
+
+        public UnitOfWork(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public IRoomRepository Rooms => _rooms ??= new RoomRepository(_context);
+        public IBookingRepository Bookings => _bookings ??= new BookingRepository(_context);
 
         public async Task<int> SaveChangesAsync()
         {
-           var result = await _context.SaveChangesAsync();
-           return result;
+            return await _context.SaveChangesAsync();
         }
     }
 }

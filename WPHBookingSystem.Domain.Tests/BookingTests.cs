@@ -3,6 +3,7 @@ using NUnit.Framework;
 using WPHBookingSystem.Domain.Entities;
 using WPHBookingSystem.Domain.Enums;
 using WPHBookingSystem.Domain.Exceptions;
+using WPHBookingSystem.Domain.ValueObjects;
 
 namespace WPHBookingSystem.Domain.Tests
 {
@@ -13,6 +14,8 @@ namespace WPHBookingSystem.Domain.Tests
         private Guid _roomId;
         private DateTime _checkIn;
         private DateTime _checkOut;
+        private ContactInfo _contactInfo = new ContactInfo("1234567890","test address");
+        private string _email;
 
         [SetUp]
         public void Setup()
@@ -21,12 +24,13 @@ namespace WPHBookingSystem.Domain.Tests
             _roomId = Guid.NewGuid();
             _checkIn = DateTime.UtcNow.AddDays(1);
             _checkOut = DateTime.UtcNow.AddDays(3);
+            _email = "admin@test.com";
         }
 
         [Test]
         public void Create_Should_Initialize_With_Pending_Status()
         {
-            var booking = Booking.Create(_userId, _roomId, _checkIn, _checkOut, 2, 100m);
+            var booking = Booking.Create( _roomId, _checkIn, _checkOut, 2, 100m,_contactInfo,_email,"None");
 
             Assert.That(booking.Status, Is.EqualTo(BookingStatus.Pending));
             Assert.That(booking.CheckIn, Is.EqualTo(_checkIn));
@@ -36,7 +40,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Confirm_Should_Set_Status_To_Confirmed_When_Pending()
         {
-            var booking = Booking.Create(_userId, _roomId, _checkIn, _checkOut, 2, 100m);
+            var booking = Booking.Create(_roomId, _checkIn, _checkOut, 2, 100m, _contactInfo, _email, "None");
 
             booking.Confirm();
 
@@ -46,7 +50,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Confirm_Should_Throw_If_Not_Pending()
         {
-            var booking = Booking.Create(_userId, _roomId, _checkIn, _checkOut, 2, 100m);
+            var booking = Booking.Create(_roomId, _checkIn, _checkOut, 2, 100m, _contactInfo, _email, "None");
             booking.Confirm();
 
             Assert.Throws<DomainException>(() => booking.Confirm());
@@ -55,7 +59,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Cancel_Should_Set_Status_To_Cancelled_If_Not_Completed()
         {
-            var booking = Booking.Create(_userId, _roomId, _checkIn, _checkOut, 2, 100m);
+            var booking = Booking.Create(_roomId, _checkIn, _checkOut, 2, 100m, _contactInfo, _email, "None");
 
             booking.Cancel();
 
@@ -107,7 +111,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Complete_Should_Throw_If_CheckOut_Not_Passed()
         {
-            var booking = Booking.Create(_userId, _roomId, _checkIn, _checkOut, 2, 100m);
+            var booking = Booking.Create(_roomId, _checkIn, _checkOut, 2, 100m, _contactInfo, _email, "None");
             booking.Confirm();
 
             Assert.Throws<DomainException>(() => booking.Complete());
@@ -116,7 +120,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void UpdateBookingDates_Should_Update_When_Pending_And_Valid_Dates()
         {
-            var booking = Booking.Create(_userId, _roomId, _checkIn, _checkOut, 2, 100m);
+            var booking = Booking.Create(_roomId, _checkIn, _checkOut, 2, 100m, _contactInfo, _email, "None");
 
             var newCheckIn = DateTime.UtcNow.AddDays(5);
             var newCheckOut = DateTime.UtcNow.AddDays(6);
@@ -130,7 +134,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void UpdateBookingDates_Should_Throw_If_Not_Pending()
         {
-            var booking = Booking.Create(_userId, _roomId, _checkIn, _checkOut, 2, 100m);
+            var booking = Booking.Create(_roomId, _checkIn, _checkOut, 2, 100m, _contactInfo, _email, "None");
             booking.Confirm();
 
             var newCheckIn = DateTime.UtcNow.AddDays(5);
@@ -142,7 +146,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void UpdateBookingDates_Should_Throw_If_Invalid_Dates()
         {
-            var booking = Booking.Create(_userId, _roomId, _checkIn, _checkOut, 2, 100m);
+            var booking = Booking.Create(_roomId, _checkIn, _checkOut, 2, 100m, _contactInfo, _email, "None");
 
             var newCheckIn = DateTime.UtcNow.AddDays(6);
             var newCheckOut = DateTime.UtcNow.AddDays(5);
@@ -153,7 +157,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void IsDateValid_Should_Return_True_For_Valid_Dates()
         {
-            var booking = Booking.Create(_userId, _roomId, _checkIn, _checkOut, 2, 100m);
+            var booking = Booking.Create(_roomId, _checkIn, _checkOut, 2, 100m, _contactInfo, _email, "None");
 
             Assert.That(booking.IsDateValid(), Is.True);
         }
@@ -163,7 +167,7 @@ namespace WPHBookingSystem.Domain.Tests
         {
             // Test that Create method validates dates
             Assert.Throws<DomainException>(() =>
-                Booking.Create(_userId, _roomId, _checkOut, _checkIn, 2, 100m));
+                Booking.Create(_roomId, _checkIn, _checkOut, 2, 100m, _contactInfo, _email, "None"));
         }
 
         [Test]
@@ -173,13 +177,13 @@ namespace WPHBookingSystem.Domain.Tests
             var futureDate = DateTime.UtcNow.AddDays(1);
 
             Assert.Throws<DomainException>(() =>
-                Booking.Create(_userId, _roomId, pastDate, futureDate, 2, 100m));
+                Booking.Create(_roomId, _checkIn, _checkOut, 2, 100m, _contactInfo, _email, "None"));
         }
 
         [Test]
         public void UpdateBookingDates_Should_Throw_If_CheckIn_In_Past()
         {
-            var booking = Booking.Create(_userId, _roomId, _checkIn, _checkOut, 2, 100m);
+            var booking = Booking.Create(_roomId, _checkIn, _checkOut, 2, 100m, _contactInfo, _email, "None");
             var pastDate = DateTime.UtcNow.AddDays(-1);
             var futureDate = DateTime.UtcNow.AddDays(1);
 

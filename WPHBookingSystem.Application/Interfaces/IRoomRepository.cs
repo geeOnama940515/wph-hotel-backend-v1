@@ -15,5 +15,6 @@ namespace WPHBookingSystem.Application.Interfaces
     {
         Task<List<Room>> GetAvailableRoomsAsync(DateTime checkIn, DateTime checkOut);
         Task<bool> IsRoomAvailableAsync(Guid roomId, DateTime checkIn, DateTime checkOut);
+        Task<Room?> GetByIdWithBookingsAsync(Guid id);
     }
 }
