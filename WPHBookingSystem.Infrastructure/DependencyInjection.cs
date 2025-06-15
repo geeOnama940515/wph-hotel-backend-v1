@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using WPHBookingSystem.Application.Interfaces;
+using WPHBookingSystem.Infrastructure.Persistence.Data;
 using WPHBookingSystem.Infrastructure.Repositories;
 
 namespace WPHBookingSystem.Infrastructure
@@ -15,6 +16,12 @@ namespace WPHBookingSystem.Infrastructure
     {
         public static IServiceCollection InfrastructureInjection(this IServiceCollection services, IConfiguration configuration)
         {
+            //services.AddDbContext<ApplicationDbContext>(options =>
+            //{
+            //    options.UseSqlServer();
+            //});
+
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IRoomRepository,RoomRepository>();
             services.AddScoped<IBookingRepository,BookingRepository>();
