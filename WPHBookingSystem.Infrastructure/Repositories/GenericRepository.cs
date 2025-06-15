@@ -1,41 +1,56 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WPHBookingSystem.Application.Exceptions;
 using WPHBookingSystem.Application.Interfaces.Common;
+using WPHBookingSystem.Infrastructure.Persistence.Data;
 
 namespace WPHBookingSystem.Infrastructure.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        public GenericRepository()
+        private readonly ApplicationDbContext _context;
+        public GenericRepository(ApplicationDbContext context)
         {
-            
+            _context = context;
         }
-        public Task AddAsync(T entity)
+        public async Task AddAsync(T entity)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteAsync(Guid id)
-        {
-            throw new NotImplementedException();
+            await _context.Set<T>().AddAsync(entity);
         }
 
-        public Task<List<T>> GetAllAsync()
+        public async Task DeleteAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var result = await GetByIdAsync(id);
+            if (result != null)
+            {
+                throw new NotFoundException("No Result, Can't Delete!");
+            }
+             _context.Set<T>().Remove(result!);
         }
 
-        public Task<T?> GetByIdAsync(Guid id)
+        public async Task<List<T>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _context.Set<T>().ToListAsync();
+        }
+
+        public async Task<T?> GetByIdAsync(Guid id)
+        {
+            var result = await _context.Set<T>().FindAsync(id);
+
+            if(result == null)
+            {
+                throw new NotFoundException("No Result");
+            }
+            return result;
         }
 
         public Task UpdateAsync(T entity)
         {
-            throw new NotImplementedException();
+            return Task.Run(() => { _context.Set<T>().Update(entity); });
         }
     }
 }

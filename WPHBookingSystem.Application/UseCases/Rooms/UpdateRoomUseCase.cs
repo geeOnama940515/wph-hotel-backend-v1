@@ -26,7 +26,7 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
             if (room == null)
                 throw new NotFoundException("Room not found.");
 
-            room.UpdateDetails(dto.Name, dto.Description, dto.Price, dto.Capacity, dto.Image);
+            room.UpdateDetails(dto.Name, dto.Description, dto.Price, dto.Capacity, dto.Images);
 
             await _unitOfWork.SaveChangesAsync();
         }
