@@ -20,7 +20,7 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
 
         public async Task<Guid> ExecuteAsync(CreateRoomDto dto)
         {
-            var room = Room.Create(dto.Name, dto.Description, dto.Price, dto.Capacity, dto.Image);
+            var room = Room.Create(dto.Name, dto.Description, dto.Price, dto.Capacity, dto.Images);
             await _unitOfWork.Rooms.AddAsync(room);
             await _unitOfWork.SaveChangesAsync();
             return room.Id;

@@ -4,6 +4,7 @@ using System.Linq;
 using WPHBookingSystem.Domain.Entities.Common;
 using WPHBookingSystem.Domain.Enums;
 using WPHBookingSystem.Domain.Exceptions;
+using WPHBookingSystem.Domain.ValueObjects;
 
 namespace WPHBookingSystem.Domain.Entities
 {
@@ -14,12 +15,8 @@ namespace WPHBookingSystem.Domain.Entities
         public string Description { get; private set; } = string.Empty;
         public decimal Price { get; private set; }
         public int Capacity { get; private set; }
-        public string? Image { get; private set; } = string.Empty;
-        public string? Image2 { get; private set; } = string.Empty;
-        public string? Image3 { get; private set; } = string.Empty;
-        public string? Image4 { get; private set; } = string.Empty;
-        public string? Image5 { get; private set; } = string.Empty;
-        public string? Image6 { get; private set; } = string.Empty;
+
+        public List<GalleryImage> Images { get; private set; } = new();
         public RoomStatus Status { get; private set; } = RoomStatus.Available;
 
         private readonly List<Booking> _bookings = new();
@@ -29,7 +26,7 @@ namespace WPHBookingSystem.Domain.Entities
         private Room() { }
 
         // Static factory method
-        public static Room Create(string name, string description, decimal price, int capacity, string image = "")
+        public static Room Create(string name, string description, decimal price, int capacity, List<GalleryImage> images)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new DomainException("Room name is required.");
@@ -45,12 +42,12 @@ namespace WPHBookingSystem.Domain.Entities
                 Description = description?.Trim() ?? string.Empty,
                 Price = price,
                 Capacity = capacity,
-                Image = image?.Trim() ?? string.Empty,
+                Images = images,
                 Status = RoomStatus.Available
             };
         }
 
-        public void UpdateDetails(string name, string description, decimal price, int capacity, string image = "")
+        public void UpdateDetails(string name, string description, decimal price, int capacity, List<GalleryImage> images)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new DomainException("Room name is required.");
@@ -63,7 +60,7 @@ namespace WPHBookingSystem.Domain.Entities
             Description = description?.Trim() ?? string.Empty;
             Price = price;
             Capacity = capacity;
-            Image = image?.Trim() ?? string.Empty;
+            Images = images;
         }
 
         public void AddBooking(Booking booking)

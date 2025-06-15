@@ -33,7 +33,7 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
                 Description = room.Description,
                 Price = room.Price,
                 Capacity = room.Capacity,
-                Image = room.Image,
+                Images = room.Images,
                 Status = room.Status
             };
         }

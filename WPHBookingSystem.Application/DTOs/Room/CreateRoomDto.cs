@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using WPHBookingSystem.Domain.ValueObjects;
 
 namespace WPHBookingSystem.Application.DTOs.Room
 {
@@ -19,6 +20,6 @@ namespace WPHBookingSystem.Application.DTOs.Room
         public int Capacity { get; set; }
 
         [StringLength(500, ErrorMessage = "Image URL cannot exceed 500 characters.")]
-        public string Image { get; set; } = string.Empty;
+        public List<GalleryImage> Images { get; set; } = new();
     }
 }
