@@ -65,12 +65,12 @@ namespace WPHBookingSystem.Application.Services
         }
 
         // Booking operations
-        public async Task<BookingCreatedDto> CreateBooking(CreateBookingDto dto, Guid userId)
+        public async Task <Result<BookingCreatedDto>> CreateBooking(CreateBookingDto dto)
         {
-            var result = await _createBookingUseCase.ExecuteAsync(dto, userId);
+            var result = await _createBookingUseCase.ExecuteAsync(dto);
             if (!result.IsSuccess)
                 throw new ApplicationException(result.Message);
-            return result.Data;
+            return result;
         }
 
         public async Task<BookingDto> UpdateBooking(Guid bookingId, UpdateBookingDateDto dto)
@@ -86,9 +86,9 @@ namespace WPHBookingSystem.Application.Services
             return await _updateBookingStatusUseCase.ExecuteAsync(request);
         }
 
-        public async Task<Result<BookingDto>> CancelBooking(Guid bookingId,string emailAddress)
+        public async Task<Result<BookingDto>> CancelBooking(Guid bookingId)
         {
-            return await _cancelBookingUseCase.ExecuteAsync(bookingId, emailAddress);
+            return await _cancelBookingUseCase.ExecuteAsync(bookingId);
         }
 
         public async Task<Result<List<BookingDto>>> GetUserBookings(string emailAddress)

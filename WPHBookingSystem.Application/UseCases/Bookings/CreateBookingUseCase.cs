@@ -18,7 +18,7 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public async Task<Result<BookingCreatedDto>> ExecuteAsync(CreateBookingDto dto, Guid userId)
+        public async Task<Result<BookingCreatedDto>> ExecuteAsync(CreateBookingDto dto)
         {
             try
             {
@@ -42,6 +42,7 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                     dto.EmailAddress,
                     dto.SpecialRequests
                 );
+               // booking.BookingToken = Guid.NewGuid().ToString();
 
                 await _unitOfWork.Repository<Booking>().AddAsync(booking);
                 await _unitOfWork.CommitTransactionAsync();

@@ -22,7 +22,7 @@ namespace WPHBookingSystem.Infrastructure.Repositories
             // Get all rooms that don't have any overlapping bookings
             var availableRooms = await _context.Rooms
                 .Include(r => r.Bookings)
-                .Where(r => r.IsAvailable)
+                .Where(r => r.IsAvailable(checkIn,checkOut))
                 .Where(r => !r.Bookings.Any(b =>
                     (b.CheckIn <= checkOut && b.CheckOut >= checkIn) && // Overlapping booking
                     b.Status != Domain.Enums.BookingStatus.Cancelled)) // Not cancelled
@@ -56,7 +56,7 @@ namespace WPHBookingSystem.Infrastructure.Repositories
             if (room is null)
                 throw new NotFoundException("Room not found.");
 
-            if (!room.IsAvailable)
+            if (!room.IsAvailable(checkIn, checkOut))
                 return false;
 
             // Check if there are any overlapping bookings that aren't cancelled
