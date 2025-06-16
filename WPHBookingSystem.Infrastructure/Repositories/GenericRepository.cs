@@ -54,5 +54,10 @@ namespace WPHBookingSystem.Infrastructure.Repositories
             _context.Set<T>().Update(entity);
             return Task.CompletedTask;
         }
+
+        public async Task<T?> FindAsync(Func<T, bool> predicate)
+        {
+            return await Task.FromResult(_context.Set<T>().FirstOrDefault(predicate));
+        }
     }
 }

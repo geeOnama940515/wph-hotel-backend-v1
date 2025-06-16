@@ -13,6 +13,7 @@ namespace WPHBookingSystem.Application.Interfaces.Common
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(Guid id);
+        Task<T?> FindAsync(Func<T, bool> predicate);
     }
 
 }
