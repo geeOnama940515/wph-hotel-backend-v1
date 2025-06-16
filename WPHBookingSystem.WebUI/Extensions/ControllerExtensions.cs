@@ -9,7 +9,7 @@ namespace WPHBookingSystem.WebUI.Extensions
         {
             return controller.StatusCode(result.StatusCode, new
             {
-                success = result.Success,
+                success = result.IsSuccess,
                 message = result.Message,
                 data = result.Data,
                 errors = result.Errors
@@ -20,7 +20,7 @@ namespace WPHBookingSystem.WebUI.Extensions
         {
             return controller.StatusCode(result.StatusCode, new
             {
-                success = result.Success,
+                success = result.IsSuccess,
                 message = result.Message,
                 errors = result.Errors
             });

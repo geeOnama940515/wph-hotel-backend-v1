@@ -63,14 +63,14 @@ namespace WPHBookingSystem.Application.Services
         public async Task<BookingCreatedDto> CreateBooking(CreateBookingDto dto, Guid userId)
         {
             var result = await _createBookingUseCase.ExecuteAsync(dto, userId);
-            if (!result.Success)
+            if (!result.IsSuccess)
                 throw new ApplicationException(result.Message);
             return result.Data;
         }
 
-        public async Task<BookingDto> UpdateBooking(UpdateBookingDateDto dto)
+        public async Task<BookingDto> UpdateBooking(Guid bookingId, UpdateBookingDateDto dto)
         {
-            var result = await _updateBookingUseCase.ExecuteAsync(dto.BookingId, dto);
+            var result = await _updateBookingUseCase.ExecuteAsync(bookingId, dto);
             if (!result.IsSuccess)
                 throw new ApplicationException(result.Message);
             return result.Data;

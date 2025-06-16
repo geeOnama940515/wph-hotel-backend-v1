@@ -12,7 +12,7 @@ namespace WPHBookingSystem.Application.Interfaces.Services
     {
         // Booking operations
         Task<BookingCreatedDto> CreateBooking(CreateBookingDto dto, Guid userId);
-        Task<BookingDto> UpdateBooking(UpdateBookingDateDto dto);
+        Task<BookingDto> UpdateBooking(Guid bookingId, UpdateBookingDateDto dto);
         Task<BookingDto> UpdateBookingStatus(UpdateBookingStatusRequest request);
         Task<BookingDto> CancelBooking(Guid bookingId);
         Task<IEnumerable<BookingDto>> GetUserBookings(Guid userId);

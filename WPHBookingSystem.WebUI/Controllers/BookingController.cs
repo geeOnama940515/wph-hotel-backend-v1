@@ -36,7 +36,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPut("{bookingId}/dates")]
         public async Task<IActionResult> UpdateBookingDates(Guid bookingId, UpdateBookingDateDto dto)
         {
-            var result = await _facade.UpdateBooking(dto);
+            var result = await _facade.UpdateBooking(bookingId, dto);
             return this.CreateResponse(result);
         }
 
