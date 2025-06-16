@@ -75,12 +75,12 @@ namespace WPHBookingSystem.Application.Services
             return await _updateBookingStatusUseCase.ExecuteAsync(request);
         }
 
-        public async Task<BookingDto> CancelBooking(int bookingId)
+        public async Task<BookingDto> CancelBooking(Guid bookingId)
         {
             return await _cancelBookingUseCase.ExecuteAsync(bookingId);
         }
 
-        public async Task<IEnumerable<BookingDto>> GetUserBookings(int userId)
+        public async Task<IEnumerable<BookingDto>> GetUserBookings(Guid userId)
         {
             return await _getUserBookingsUseCase.ExecuteAsync(userId);
         }
@@ -96,12 +96,12 @@ namespace WPHBookingSystem.Application.Services
             return await _updateRoomUseCase.ExecuteAsync(dto);
         }
 
-        public async Task<RoomDto> UpdateRoomStatus(int roomId, bool isAvailable)
+        public async Task<RoomDto> UpdateRoomStatus(Guid roomId, bool isAvailable)
         {
             return await _updateRoomStatusUseCase.ExecuteAsync(roomId, isAvailable);
         }
 
-        public async Task<RoomDto> GetRoomById(int roomId)
+        public async Task<RoomDto> GetRoomById(Guid roomId)
         {
             return await _getRoomByIdUseCase.ExecuteAsync(roomId);
         }
@@ -111,22 +111,22 @@ namespace WPHBookingSystem.Application.Services
             return await _getAllRoomsUseCase.ExecuteAsync();
         }
 
-        public async Task<bool> DeleteRoom(int roomId)
+        public async Task<bool> DeleteRoom(Guid roomId)
         {
             return await _deleteRoomUseCase.ExecuteAsync(roomId);
         }
 
-        public async Task<bool> CheckRoomAvailability(int roomId, DateTime startDate, DateTime endDate)
+        public async Task<bool> CheckRoomAvailability(Guid roomId, DateTime startDate, DateTime endDate)
         {
             return await _checkRoomAvailabilityUseCase.ExecuteAsync(roomId, startDate, endDate);
         }
 
-        public async Task<decimal> GetRoomOccupancyRate(int roomId, DateTime startDate, DateTime endDate)
+        public async Task<decimal> GetRoomOccupancyRate(Guid roomId, DateTime startDate, DateTime endDate)
         {
             return await _getRoomOccupancyRateUseCase.ExecuteAsync(roomId, startDate, endDate);
         }
 
-        public async Task<decimal> GetRoomRevenue(int roomId, DateTime startDate, DateTime endDate)
+        public async Task<decimal> GetRoomRevenue(Guid roomId, DateTime startDate, DateTime endDate)
         {
             return await _getRoomRevenueUseCase.ExecuteAsync(roomId, startDate, endDate);
         }
