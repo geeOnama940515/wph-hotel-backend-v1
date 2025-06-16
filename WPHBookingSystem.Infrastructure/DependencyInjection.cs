@@ -24,8 +24,8 @@ namespace WPHBookingSystem.Infrastructure
 
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IRoomRepository,RoomRepository>();
-            services.AddScoped<IBookingRepository,BookingRepository>();
+            //services.AddScoped<IRoomRepository,RoomRepository>();
+            //services.AddScoped<IBookingRepository,BookingRepository>();
 
             return services;
         }
