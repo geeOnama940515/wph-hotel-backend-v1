@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Room;
-using WPHBookingSystem.Application.Exceptions;
 using WPHBookingSystem.Application.Interfaces;
-using WPHBookingSystem.Domain.Exceptions;
+using WPHBookingSystem.Domain.Entities;
 
 namespace WPHBookingSystem.Application.UseCases.Rooms
 {
@@ -19,23 +16,29 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<RoomDto> ExecuteAsync(Guid roomId)
+        public async Task<Result<RoomDto>> ExecuteAsync(Guid roomId)
         {
-            var room = await _unitOfWork.Rooms.GetByIdAsync(roomId);
-
-            if (room == null)
-                throw new NotFoundException("Room not found.");
-
-            return new RoomDto
+            try
             {
-                Id = room.Id,
-                Name = room.Name,
-                Description = room.Description,
-                Price = room.Price,
-                Capacity = room.Capacity,
-                Images = room.Images,
-                Status = room.Status
-            };
+                var room = await _unitOfWork.Repository<Room>().GetByIdAsync(roomId);
+                if (room == null)
+                    return Result<RoomDto>.Failure("Room not found.", 404);
+
+                return Result<RoomDto>.Success(new RoomDto
+                {
+                    Id = room.Id,
+                    Name = room.Name,
+                    Description = room.Description,
+                    Price = room.Price,
+                    Capacity = room.Capacity,
+                    Images = room.Images,
+                    Status = room.Status
+                }, "Room retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<RoomDto>.Failure($"Failed to retrieve room: {ex.Message}", 500);
+            }
         }
     }
 }

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using WPHBookingSystem.Application.Exceptions;
+using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.Interfaces;
+using WPHBookingSystem.Domain.Entities;
 
 namespace WPHBookingSystem.Application.UseCases.Rooms
 {
@@ -19,13 +17,21 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<GetRoomRevenueResponse> ExecuteAsync(GetRoomRevenueRequest request)
+        public async Task<Result<GetRoomRevenueResponse>> ExecuteAsync(GetRoomRevenueRequest request)
         {
-            var room = await _unitOfWork.Rooms.GetByIdAsync(request.RoomId)
-                        ?? throw new NotFoundException("Room not found.");
+            try
+            {
+                var room = await _unitOfWork.Repository<Room>().GetByIdAsync(request.RoomId);
+                if (room == null)
+                    return Result<GetRoomRevenueResponse>.Failure("Room not found.", 404);
 
-            var total = room.CalculateRevenue(request.StartDate, request.EndDate);
-            return new GetRoomRevenueResponse(total);
+                var total = room.CalculateRevenue(request.StartDate, request.EndDate);
+                return Result<GetRoomRevenueResponse>.Success(new GetRoomRevenueResponse(total), "Room revenue retrieved successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<GetRoomRevenueResponse>.Failure($"Failed to retrieve room revenue: {ex.Message}", 500);
+            }
         }
     }
 }

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using WPHBookingSystem.Application.Exceptions;
+using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.Interfaces;
+using WPHBookingSystem.Domain.Entities;
 
 namespace WPHBookingSystem.Application.UseCases.Rooms
 {
@@ -20,13 +18,21 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<CheckRoomAvailabilityResponse> ExecuteAsync(CheckRoomAvailabilityRequest request)
+        public async Task<Result<CheckRoomAvailabilityResponse>> ExecuteAsync(CheckRoomAvailabilityRequest request)
         {
-            var room = await _unitOfWork.Rooms.GetByIdWithBookingsAsync(request.RoomId)
-                            ?? throw new NotFoundException("Room not found.");
+            try
+            {
+                var room = await _unitOfWork.Repository<Room>().GetByIdAsync(request.RoomId);
+                if (room == null)
+                    return Result<CheckRoomAvailabilityResponse>.Failure("Room not found.", 404);
 
-            var isAvailable = room.IsAvailable(request.CheckIn, request.CheckOut);
-            return new CheckRoomAvailabilityResponse(isAvailable);
+                var isAvailable = room.IsAvailable(request.CheckIn, request.CheckOut);
+                return Result<CheckRoomAvailabilityResponse>.Success(new CheckRoomAvailabilityResponse(isAvailable), "Room availability checked successfully.");
+            }
+            catch (Exception ex)
+            {
+                return Result<CheckRoomAvailabilityResponse>.Failure($"Failed to check room availability: {ex.Message}", 500);
+            }
         }
     }
 }

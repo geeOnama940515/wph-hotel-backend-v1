@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using WPHBookingSystem.Domain.Entities;
+using WPHBookingSystem.Application.Interfaces.Common;
 
 namespace WPHBookingSystem.Application.Interfaces
 {
-    public interface IUnitOfWork 
+    public interface IUnitOfWork : IDisposable
     {
-        IRoomRepository Rooms { get; }
-        IBookingRepository Bookings { get; }
-
+        IGenericRepository<T> Repository<T>() where T : class;
         Task<int> SaveChangesAsync();
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
     }
 }

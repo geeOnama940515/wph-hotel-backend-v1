@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using WPHBookingSystem.Application.Common;
+using WPHBookingSystem.Application.DTOs.Booking;
 using WPHBookingSystem.Application.Interfaces;
+using WPHBookingSystem.Domain.Entities;
 using WPHBookingSystem.Domain.Exceptions;
 
 namespace WPHBookingSystem.Application.UseCases.Bookings
@@ -17,18 +17,41 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
             _unitOfWork = unitOfWork;
         }
 
-        public async Task ExecuteAsync(Guid bookingId, string emailAddress)
+        public async Task<Result<BookingDto>> ExecuteAsync(Guid bookingId, string emailAddress)
         {
-            var booking = await _unitOfWork.Bookings.GetByIdAsync(bookingId)
-                          ?? throw new DomainException("Booking not found.");
+            try
+            {
+                await _unitOfWork.BeginTransactionAsync();
 
-            if (booking.EmailAddress != emailAddress)
-                throw new DomainException("You are not authorized to cancel this booking.");
+                var booking = await _unitOfWork.Repository<Booking>().GetByIdAsync(bookingId);
+                if (booking == null)
+                    return Result<BookingDto>.Failure("Booking not found.", 404);
 
-            booking.Cancel();
+                if (booking.EmailAddress != emailAddress)
+                    return Result<BookingDto>.Failure("You are not authorized to cancel this booking.", 403);
 
-            await _unitOfWork.Bookings.UpdateAsync(booking);
-            await _unitOfWork.SaveChangesAsync();
+                booking.Cancel();
+                await _unitOfWork.Repository<Booking>().UpdateAsync(booking);
+                await _unitOfWork.CommitTransactionAsync();
+
+                return Result<BookingDto>.Success(new BookingDto
+                {
+                    Id = booking.Id,
+                    RoomId = booking.RoomId,
+                    CheckIn = booking.CheckIn,
+                    CheckOut = booking.CheckOut,
+                    Guests = booking.Guests,
+                    TotalAmount = booking.TotalAmount,
+                    Status = booking.Status,
+                    SpecialRequests = booking.SpecialRequests,
+                    RoomName = booking.Room?.Name ?? string.Empty
+                }, "Booking cancelled successfully.");
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return Result<BookingDto>.Failure($"Failed to cancel booking: {ex.Message}", 500);
+            }
         }
     }
 }
