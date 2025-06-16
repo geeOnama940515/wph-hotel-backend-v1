@@ -70,7 +70,10 @@ namespace WPHBookingSystem.Application.Services
 
         public async Task<BookingDto> UpdateBooking(UpdateBookingDateDto dto)
         {
-            return await _updateBookingUseCase.ExecuteAsync(dto);
+            var result = await _updateBookingUseCase.ExecuteAsync(dto.BookingId, dto);
+            if (!result.IsSuccess)
+                throw new ApplicationException(result.Message);
+            return result.Data;
         }
 
         public async Task<BookingDto> UpdateBookingStatus(UpdateBookingStatusRequest request)

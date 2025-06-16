@@ -36,10 +36,6 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPut("{bookingId}/dates")]
         public async Task<IActionResult> UpdateBookingDates(Guid bookingId, UpdateBookingDateDto dto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return this.CreateResponse(401, "User not authenticated");
-
             var result = await _facade.UpdateBooking(dto);
             return this.CreateResponse(result);
         }

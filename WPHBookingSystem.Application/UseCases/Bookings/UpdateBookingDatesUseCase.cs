@@ -17,7 +17,7 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Result<BookingDto>> ExecuteAsync(Guid bookingId, Guid userId, UpdateBookingDateDto dto)
+        public async Task<Result<BookingDto>> ExecuteAsync(Guid bookingId, UpdateBookingDateDto dto)
         {
             try
             {
@@ -26,9 +26,6 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                 var booking = await _unitOfWork.Repository<Booking>().GetByIdAsync(bookingId);
                 if (booking == null)
                     return Result<BookingDto>.Failure("Booking not found.", 404);
-
-                if (booking.UserId != userId)
-                    return Result<BookingDto>.Failure("You are not authorized to update this booking.", 403);
 
                 booking.UpdateBookingDates(dto.CheckIn, dto.CheckOut);
                 await _unitOfWork.Repository<Booking>().UpdateAsync(booking);
