@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Booking;
 using WPHBookingSystem.Application.DTOs.Room;
 using WPHBookingSystem.Application.Interfaces.Services;
 using WPHBookingSystem.Application.UseCases.Bookings;
 using WPHBookingSystem.Application.UseCases.Rooms;
+using static WPHBookingSystem.Application.UseCases.Rooms.CheckRoomAvailabilityUseCase;
 
 namespace WPHBookingSystem.Application.Services
 {
@@ -26,6 +28,7 @@ namespace WPHBookingSystem.Application.Services
         private readonly CheckRoomAvailabilityUseCase _checkRoomAvailabilityUseCase;
         private readonly GetRoomOccupancyRateUseCase _getRoomOccupancyRateUseCase;
         private readonly GetRoomRevenueUseCase _getRoomRevenueUseCase;
+        private readonly ViewBookingByTokenUseCase _viewBookingByTokenUseCase;
 
         public BookingSystemFacade(
             CreateBookingUseCase createBookingUseCase,
@@ -41,7 +44,8 @@ namespace WPHBookingSystem.Application.Services
             DeleteRoomUseCase deleteRoomUseCase,
             CheckRoomAvailabilityUseCase checkRoomAvailabilityUseCase,
             GetRoomOccupancyRateUseCase getRoomOccupancyRateUseCase,
-            GetRoomRevenueUseCase getRoomRevenueUseCase)
+            GetRoomRevenueUseCase getRoomRevenueUseCase,
+            ViewBookingByTokenUseCase viewBookingByTokenUseCase)
         {
             _createBookingUseCase = createBookingUseCase;
             _updateBookingUseCase = updateBookingUseCase;
@@ -57,6 +61,7 @@ namespace WPHBookingSystem.Application.Services
             _checkRoomAvailabilityUseCase = checkRoomAvailabilityUseCase;
             _getRoomOccupancyRateUseCase = getRoomOccupancyRateUseCase;
             _getRoomRevenueUseCase = getRoomRevenueUseCase;
+            _viewBookingByTokenUseCase = viewBookingByTokenUseCase;
         }
 
         // Booking operations
@@ -76,73 +81,74 @@ namespace WPHBookingSystem.Application.Services
             return result.Data;
         }
 
-        public async Task<BookingDto> UpdateBookingStatus(UpdateBookingStatusRequest request)
+        public async Task<Result<BookingDto>> UpdateBookingStatus(UpdateBookingStatusRequest request)
         {
             return await _updateBookingStatusUseCase.ExecuteAsync(request);
         }
 
-        public async Task<BookingDto> CancelBooking(Guid bookingId)
+        public async Task<Result<BookingDto>> CancelBooking(Guid bookingId,string emailAddress)
         {
-            return await _cancelBookingUseCase.ExecuteAsync(bookingId);
+            return await _cancelBookingUseCase.ExecuteAsync(bookingId, emailAddress);
         }
 
-        public async Task<IEnumerable<BookingDto>> GetUserBookings(Guid userId)
+        public async Task<Result<List<BookingDto>>> GetUserBookings(string emailAddress)
         {
-            return await _getUserBookingsUseCase.ExecuteAsync(userId);
+            return await _getUserBookingsUseCase.ExecuteAsync(emailAddress);
         }
 
         // Room operations
-        public async Task<Guid> CreateRoom(CreateRoomDto dto)
+        public async Task<Result<Guid>> CreateRoom(CreateRoomDto dto)
         {
             return await _createRoomUseCase.ExecuteAsync(dto);
         }
 
-        public async Task<RoomDto> UpdateRoom(UpdateRoomDto dto)
+        public async Task<Result<RoomDto>> UpdateRoom(Guid roomId,UpdateRoomDto dto)
         {
-            return await _updateRoomUseCase.ExecuteAsync(dto);
+            return await _updateRoomUseCase.ExecuteAsync(roomId,dto);
         }
 
-        public async Task<RoomDto> UpdateRoomStatus(Guid roomId, bool isAvailable)
+        public async Task<Result<RoomDto>> UpdateRoomStatus(UpdateRoomStatusRequest request) 
         {
-            return await _updateRoomStatusUseCase.ExecuteAsync(roomId, isAvailable);
+            return await _updateRoomStatusUseCase.ExecuteAsync(request);
         }
 
-        public async Task<RoomDto> GetRoomById(Guid roomId)
+        public async Task<Result<RoomDto>> GetRoomById(Guid roomId)
         {
             return await _getRoomByIdUseCase.ExecuteAsync(roomId);
         }
 
-        public async Task<IEnumerable<RoomDto>> GetAllRooms()
+        public async Task<Result<List<RoomDto>>> GetAllRooms()
         {
             return await _getAllRoomsUseCase.ExecuteAsync();
         }
 
-        public async Task<bool> DeleteRoom(Guid roomId)
+        public async Task<Result<bool>> DeleteRoom(Guid roomId)
         {
             return await _deleteRoomUseCase.ExecuteAsync(roomId);
         }
 
-        public async Task<bool> CheckRoomAvailability(Guid roomId, DateTime startDate, DateTime endDate)
+        public async Task<Result<CheckRoomAvailabilityResponse>> CheckRoomAvailability(CheckRoomAvailabilityRequest request)
         {
-            return await _checkRoomAvailabilityUseCase.ExecuteAsync(roomId, startDate, endDate);
+            return await _checkRoomAvailabilityUseCase.ExecuteAsync(request);
         }
 
-        public async Task<decimal> GetRoomOccupancyRate(Guid roomId, DateTime startDate, DateTime endDate)
+        public async Task<Result<GetRoomOccupancyRateResponse>> GetRoomOccupancyRate(GetRoomOccupancyRateRequest request)
         {
-            return await _getRoomOccupancyRateUseCase.ExecuteAsync(roomId, startDate, endDate);
+            return await _getRoomOccupancyRateUseCase.ExecuteAsync(request);
         }
 
-        public async Task<decimal> GetRoomRevenue(Guid roomId, DateTime startDate, DateTime endDate)
+        public async Task<Result<GetRoomRevenueResponse>> GetRoomRevenue(GetRoomRevenueRequest request)
         {
-            return await _getRoomRevenueUseCase.ExecuteAsync(roomId, startDate, endDate);
+            return await _getRoomRevenueUseCase.ExecuteAsync(request);
         }
 
         public async Task<BookingDto> ViewBookingByToken(Guid bookingToken)
         {
             var result = await _viewBookingByTokenUseCase.ExecuteAsync(bookingToken);
-            if (!result.Success)
+            if (!result.IsSuccess)
                 throw new ApplicationException(result.Message);
             return result.Data;
         }
+
     }
 } 
