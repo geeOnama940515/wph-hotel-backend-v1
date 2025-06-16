@@ -4,7 +4,7 @@ namespace WPHBookingSystem.Application.Common
 {
     public class Result<T>
     {
-        public bool Success { get; set; }
+        public bool IsSuccess { get; set; }
         public T? Data { get; set; }
         public string? Message { get; set; }
         public List<string>? Errors { get; set; }
@@ -14,7 +14,7 @@ namespace WPHBookingSystem.Application.Common
         {
             return new Result<T>
             {
-                Success = true,
+                IsSuccess = true,
                 Data = data,
                 Message = message,
                 StatusCode = statusCode
@@ -25,7 +25,7 @@ namespace WPHBookingSystem.Application.Common
         {
             return new Result<T>
             {
-                Success = false,
+                IsSuccess = false,
                 Message = message,
                 StatusCode = statusCode,
                 Errors = errors
@@ -35,7 +35,7 @@ namespace WPHBookingSystem.Application.Common
 
     public class Result
     {
-        public bool Success { get; set; }
+        public bool IsSuccess { get; set; }
         public string? Message { get; set; }
         public List<string>? Errors { get; set; }
         public int StatusCode { get; set; }
@@ -44,7 +44,7 @@ namespace WPHBookingSystem.Application.Common
         {
             return new Result
             {
-                Success = true,
+                IsSuccess = true,
                 Message = message,
                 StatusCode = statusCode
             };
@@ -54,7 +54,7 @@ namespace WPHBookingSystem.Application.Common
         {
             return new Result
             {
-                Success = false,
+                IsSuccess = false,
                 Message = message,
                 StatusCode = statusCode,
                 Errors = errors
