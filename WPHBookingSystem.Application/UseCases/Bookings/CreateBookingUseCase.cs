@@ -33,8 +33,8 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                 dto.Guests,
                 room.Price * (decimal)(dto.CheckOut - dto.CheckIn).TotalDays,
                 contactInfo,
-                dto.SpecialRequests,
-                dto.EmailAddress
+                dto.EmailAddress,
+                dto.SpecialRequests
             );
 
             await _unitOfWork.Bookings.AddAsync(booking);

@@ -6,7 +6,6 @@ namespace WPHBookingSystem.Infrastructure.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _context;
-
         // Backing fields
         private IRoomRepository? _rooms;
         private IBookingRepository? _bookings;

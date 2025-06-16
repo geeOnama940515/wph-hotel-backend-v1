@@ -11,6 +11,7 @@ namespace WPHBookingSystem.Application.Interfaces
     /// Interface for Room repository operations.
     /// TO DO: Add methods for room availability checks and other room-related operations.
     /// TO DO: Implement GENERIC repository pattern for better reusability.
+    /// </summary>
     public interface IRoomRepository : IGenericRepository<Room>
     {
         Task<List<Room>> GetAvailableRoomsAsync(DateTime checkIn, DateTime checkOut);

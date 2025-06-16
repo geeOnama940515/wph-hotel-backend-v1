@@ -17,9 +17,9 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<BookingDto>> ExecuteAsync(Guid userId)
+        public async Task<List<BookingDto>> ExecuteAsync(string emailAddress)
         {
-            var bookings = await _unitOfWork.Bookings.GetBookingsByUserIdAsync(userId);
+            var bookings = await _unitOfWork.Bookings.GetBookingsByEmailAsync(emailAddress);
 
             return bookings.Select(b => new BookingDto
             {

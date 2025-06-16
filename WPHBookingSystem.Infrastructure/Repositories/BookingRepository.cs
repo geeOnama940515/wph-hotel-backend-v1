@@ -17,7 +17,7 @@ namespace WPHBookingSystem.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<List<Booking>> GetBookingsByUserIdAsync(Guid userId)
+        public Task<List<Booking>> GetBookingsByEmailAsync(string emailAddress)
         {
             throw new NotImplementedException();
         }

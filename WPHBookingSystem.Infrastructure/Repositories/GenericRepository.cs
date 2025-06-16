@@ -20,16 +20,17 @@ namespace WPHBookingSystem.Infrastructure.Repositories
         public async Task AddAsync(T entity)
         {
             await _context.Set<T>().AddAsync(entity);
+           // return Task.CompletedTask;
         }
 
         public async Task DeleteAsync(Guid id)
         {
             var result = await GetByIdAsync(id);
-            if (result != null)
+            if (result == null)
             {
-                throw new NotFoundException("No Result, Can't Delete!");
+                throw new NotFoundException("Entity not found, can't delete!");
             }
-             _context.Set<T>().Remove(result!);
+            _context.Set<T>().Remove(result);
         }
 
         public async Task<List<T>> GetAllAsync()
@@ -50,7 +51,8 @@ namespace WPHBookingSystem.Infrastructure.Repositories
 
         public Task UpdateAsync(T entity)
         {
-            return Task.Run(() => { _context.Set<T>().Update(entity); });
+            _context.Set<T>().Update(entity);
+            return Task.CompletedTask;
         }
     }
 }
