@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using WPHBookingSystem.Application.DTOs.Room;
 using WPHBookingSystem.Application.Interfaces.Services;
+using WPHBookingSystem.Application.UseCases.Rooms;
+using static WPHBookingSystem.Application.UseCases.Rooms.CheckRoomAvailabilityUseCase;
 
 namespace WPHBookingSystem.WebUI.Controllers
 {
@@ -29,17 +31,17 @@ namespace WPHBookingSystem.WebUI.Controllers
 
         [HttpPut]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<RoomDto>> UpdateRoom(UpdateRoomDto dto)
+        public async Task<ActionResult<RoomDto>> UpdateRoom(Guid roomId,UpdateRoomDto dto)
         {
-            var room = await _bookingSystemFacade.UpdateRoom(dto);
+            var room = await _bookingSystemFacade.UpdateRoom(roomId,dto);
             return Ok(room);
         }
 
         [HttpPut("{roomId}/status")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<RoomDto>> UpdateRoomStatus(Guid roomId, [FromBody] bool isAvailable)
+        public async Task<ActionResult<RoomDto>> UpdateRoomStatus([FromBody] UpdateRoomStatusRequest request)
         {
-            var room = await _bookingSystemFacade.UpdateRoomStatus(roomId, isAvailable);
+            var room = await _bookingSystemFacade.UpdateRoomStatus(request);
             return Ok(room);
         }
 
@@ -65,35 +67,27 @@ namespace WPHBookingSystem.WebUI.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{roomId}/availability")]
-        public async Task<ActionResult<bool>> CheckRoomAvailability(
-            Guid roomId,
-            [FromQuery] DateTime startDate,
-            [FromQuery] DateTime endDate)
+        [HttpGet("room-availability")]
+        public async Task<ActionResult<bool>> CheckRoomAvailability([FromBody] CheckRoomAvailabilityRequest request)
         {
-            var isAvailable = await _bookingSystemFacade.CheckRoomAvailability(roomId, startDate, endDate);
+            //this.request.RoomId = roomId;
+            var isAvailable = await _bookingSystemFacade.CheckRoomAvailability(request);
             return Ok(isAvailable);
         }
 
-        [HttpGet("{roomId}/occupancy-rate")]
+        [HttpGet("room-occupancy-rate")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<decimal>> GetRoomOccupancyRate(
-            Guid roomId,
-            [FromQuery] DateTime startDate,
-            [FromQuery] DateTime endDate)
+        public async Task<ActionResult<decimal>> GetRoomOccupancyRate([FromBody] GetRoomOccupancyRateRequest request)
         {
-            var occupancyRate = await _bookingSystemFacade.GetRoomOccupancyRate(roomId, startDate, endDate);
+            var occupancyRate = await _bookingSystemFacade.GetRoomOccupancyRate(request);
             return Ok(occupancyRate);
         }
 
-        [HttpGet("{roomId}/revenue")]
+        [HttpGet("room-revenue")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<decimal>> GetRoomRevenue(
-            Guid roomId,
-            [FromQuery] DateTime startDate,
-            [FromQuery] DateTime endDate)
+        public async Task<ActionResult<decimal>> GetRoomRevenue([FromBody] GetRoomRevenueRequest request)
         {
-            var revenue = await _bookingSystemFacade.GetRoomRevenue(roomId, startDate, endDate);
+            var revenue = await _bookingSystemFacade.GetRoomRevenue(request);
             return Ok(revenue);
         }
     }

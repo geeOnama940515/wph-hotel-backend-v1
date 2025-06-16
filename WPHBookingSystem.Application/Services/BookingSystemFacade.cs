@@ -73,12 +73,12 @@ namespace WPHBookingSystem.Application.Services
             return result;
         }
 
-        public async Task<BookingDto> UpdateBooking(Guid bookingId, UpdateBookingDateDto dto)
+        public async Task<Result<BookingDto>> UpdateBooking(Guid bookingId, UpdateBookingDateDto dto)
         {
             var result = await _updateBookingUseCase.ExecuteAsync(bookingId, dto);
             if (!result.IsSuccess)
                 throw new ApplicationException(result.Message);
-            return result.Data;
+            return result;
         }
 
         public async Task<Result<BookingDto>> UpdateBookingStatus(UpdateBookingStatusRequest request)
@@ -142,12 +142,12 @@ namespace WPHBookingSystem.Application.Services
             return await _getRoomRevenueUseCase.ExecuteAsync(request);
         }
 
-        public async Task<BookingDto> ViewBookingByToken(Guid bookingToken)
+        public async Task<Result<BookingDto>> ViewBookingByToken(Guid bookingToken)
         {
             var result = await _viewBookingByTokenUseCase.ExecuteAsync(bookingToken);
             if (!result.IsSuccess)
                 throw new ApplicationException(result.Message);
-            return result.Data;
+            return result;
         }
 
     }

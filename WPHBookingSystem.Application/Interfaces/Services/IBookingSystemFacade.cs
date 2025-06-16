@@ -14,11 +14,11 @@ namespace WPHBookingSystem.Application.Interfaces.Services
     {
         // Booking operations
         Task<Result<BookingCreatedDto>> CreateBooking(CreateBookingDto dto);
-        Task<BookingDto> UpdateBooking(Guid bookingId, UpdateBookingDateDto dto);
+        Task<Result<BookingDto>> UpdateBooking(Guid bookingId, UpdateBookingDateDto dto);
         Task<Result<BookingDto>> UpdateBookingStatus(UpdateBookingStatusRequest request);
         Task<Result<BookingDto>> CancelBooking(Guid bookingId);
         Task<Result<List<BookingDto>>> GetUserBookings(string emailAddress);
-        Task<BookingDto> ViewBookingByToken(Guid bookingToken);
+        Task<Result<BookingDto>> ViewBookingByToken(Guid bookingToken);
 
         // Room operations
         Task<Result<Guid>> CreateRoom(CreateRoomDto dto);

@@ -4,6 +4,7 @@ using NUnit.Framework;
 using WPHBookingSystem.Domain.Entities;
 using WPHBookingSystem.Domain.Enums;
 using WPHBookingSystem.Domain.Exceptions;
+using WPHBookingSystem.Domain.ValueObjects;
 
 namespace WPHBookingSystem.Domain.Tests
 {
@@ -15,7 +16,9 @@ namespace WPHBookingSystem.Domain.Tests
         private string _roomDescription;
         private decimal _roomPrice;
         private int _roomCapacity;
-        private string _roomImage;
+        //private string _roomImage;
+
+        private List<GalleryImage> _roomImage;
 
         [SetUp]
         public void Setup()
@@ -25,7 +28,7 @@ namespace WPHBookingSystem.Domain.Tests
             _roomDescription = "Spacious room with ocean view";
             _roomPrice = 150.00m;
             _roomCapacity = 2;
-            _roomImage = "deluxe-suite.jpg";
+            _roomImage = new();
         }
 
         #region Create Tests
@@ -40,7 +43,7 @@ namespace WPHBookingSystem.Domain.Tests
             Assert.That(room.Description, Is.EqualTo(_roomDescription));
             Assert.That(room.Price, Is.EqualTo(_roomPrice));
             Assert.That(room.Capacity, Is.EqualTo(_roomCapacity));
-            Assert.That(room.Image, Is.EqualTo(_roomImage));
+            Assert.That(room.Images, Is.EqualTo(_roomImage));
             Assert.That(room.Status, Is.EqualTo(RoomStatus.Available));
             Assert.That(room.Bookings.Count, Is.EqualTo(0));
         }
@@ -52,7 +55,7 @@ namespace WPHBookingSystem.Domain.Tests
 
             Assert.That(room.Name, Is.EqualTo(_roomName));
             Assert.That(room.Description, Is.EqualTo(_roomDescription));
-            Assert.That(room.Image, Is.EqualTo(_roomImage));
+            Assert.That(room.Images, Is.EqualTo(_roomImage));
         }
 
         [Test]
