@@ -16,9 +16,7 @@ namespace WPHBookingSystem.Domain.Tests
         private string _roomDescription;
         private decimal _roomPrice;
         private int _roomCapacity;
-        //private string _roomImage;
-
-        private List<GalleryImage> _roomImage;
+        private List<GalleryImage> _roomImages;
 
         [SetUp]
         public void Setup()
@@ -28,7 +26,11 @@ namespace WPHBookingSystem.Domain.Tests
             _roomDescription = "Spacious room with ocean view";
             _roomPrice = 150.00m;
             _roomCapacity = 2;
-            _roomImage = new();
+            _roomImages = new List<GalleryImage>
+            {
+                new GalleryImage { FileName = "room1.jpg" },
+                new GalleryImage { FileName = "room2.jpg" }
+            };
         }
 
         #region Create Tests
@@ -36,14 +38,14 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Create_Should_Initialize_Room_With_Valid_Data()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImage);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
             Assert.That(room.Id, Is.Not.EqualTo(Guid.Empty));
             Assert.That(room.Name, Is.EqualTo(_roomName));
             Assert.That(room.Description, Is.EqualTo(_roomDescription));
             Assert.That(room.Price, Is.EqualTo(_roomPrice));
             Assert.That(room.Capacity, Is.EqualTo(_roomCapacity));
-            Assert.That(room.Images, Is.EqualTo(_roomImage));
+            Assert.That(room.Images, Is.EqualTo(_roomImages));
             Assert.That(room.Status, Is.EqualTo(RoomStatus.Available));
             Assert.That(room.Bookings.Count, Is.EqualTo(0));
         }
@@ -51,11 +53,11 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Create_Should_Trim_Whitespace_From_Strings()
         {
-            var room = Room.Create("  " + _roomName + "  ", "  " + _roomDescription + "  ", _roomPrice, _roomCapacity, "  " + _roomImage + "  ");
+            var room = Room.Create("  " + _roomName + "  ", "  " + _roomDescription + "  ", _roomPrice, _roomCapacity, _roomImages);
 
             Assert.That(room.Name, Is.EqualTo(_roomName));
             Assert.That(room.Description, Is.EqualTo(_roomDescription));
-            Assert.That(room.Images, Is.EqualTo(_roomImage));
+            Assert.That(room.Images, Is.EqualTo(_roomImages));
         }
 
         [Test]
@@ -63,7 +65,7 @@ namespace WPHBookingSystem.Domain.Tests
         {
             var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
 
-            Assert.That(room.Image, Is.EqualTo(string.Empty));
+            Assert.That(room.Images, Is.Empty);
         }
 
         [Test]
@@ -72,7 +74,7 @@ namespace WPHBookingSystem.Domain.Tests
             var room = Room.Create(_roomName, null, _roomPrice, _roomCapacity, null);
 
             Assert.That(room.Description, Is.EqualTo(string.Empty));
-            Assert.That(room.Image, Is.EqualTo(string.Empty));
+            Assert.That(room.Images, Is.Empty);
         }
 
         [Test]
@@ -104,47 +106,51 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void UpdateDetails_Should_Update_Room_Properties()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImage);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var newName = "Premium Suite";
             var newDescription = "Luxury room with balcony";
             var newPrice = 200.00m;
             var newCapacity = 4;
-            var newImage = "premium-suite.jpg";
+            var newImages = new List<GalleryImage>
+            {
+                new GalleryImage { FileName = "premium1.jpg" },
+                new GalleryImage { FileName = "premium2.jpg" }
+            };
 
-            room.UpdateDetails(newName, newDescription, newPrice, newCapacity, newImage);
+            room.UpdateDetails(newName, newDescription, newPrice, newCapacity, newImages);
 
             Assert.That(room.Name, Is.EqualTo(newName));
             Assert.That(room.Description, Is.EqualTo(newDescription));
             Assert.That(room.Price, Is.EqualTo(newPrice));
             Assert.That(room.Capacity, Is.EqualTo(newCapacity));
-            Assert.That(room.Image, Is.EqualTo(newImage));
+            Assert.That(room.Images, Is.EqualTo(newImages));
         }
 
         [Test]
         public void UpdateDetails_Should_Throw_If_Name_Is_Invalid()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
-            Assert.Throws<DomainException>(() => room.UpdateDetails("", _roomDescription, _roomPrice, _roomCapacity));
-            Assert.Throws<DomainException>(() => room.UpdateDetails(null, _roomDescription, _roomPrice, _roomCapacity));
+            Assert.Throws<DomainException>(() => room.UpdateDetails("", _roomDescription, _roomPrice, _roomCapacity, _roomImages));
+            Assert.Throws<DomainException>(() => room.UpdateDetails(null, _roomDescription, _roomPrice, _roomCapacity, _roomImages));
         }
 
         [Test]
         public void UpdateDetails_Should_Throw_If_Price_Is_Invalid()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
-            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, 0, _roomCapacity));
-            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, -100, _roomCapacity));
+            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, 0, _roomCapacity, _roomImages));
+            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, -100, _roomCapacity, _roomImages));
         }
 
         [Test]
         public void UpdateDetails_Should_Throw_If_Capacity_Is_Invalid()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
-            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, _roomPrice, 0));
-            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, _roomPrice, -1));
+            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, _roomPrice, 0, _roomImages));
+            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, _roomPrice, -1, _roomImages));
         }
 
         #endregion
