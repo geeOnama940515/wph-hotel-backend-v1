@@ -2,10 +2,10 @@ using System;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using WPHBookingSystem.Application.Interfaces;
 using WPHBookingSystem.Application.UseCases.Bookings;
 using WPHBookingSystem.Domain.Entities;
 using WPHBookingSystem.Domain.Enums;
-using WPHBookingSystem.Domain.Interfaces;
 using WPHBookingSystem.Domain.ValueObjects;
 
 namespace WPHBookingSystem.Application.Tests.BookingTests
@@ -51,7 +51,6 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
             // Act
             var result = await _createBookingUseCase.ExecuteAsync(
                 _roomId,
-                _userId,
                 checkIn,
                 checkOut,
                 guests,
