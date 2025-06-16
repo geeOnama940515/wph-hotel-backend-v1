@@ -12,7 +12,7 @@ namespace WPHBookingSystem.Application.Services
     public class BookingSystemFacade : IBookingSystemFacade
     {
         private readonly CreateBookingUseCase _createBookingUseCase;
-        private readonly UpdateBookingUseCase _updateBookingUseCase;
+        private readonly UpdateBookingDatesUseCase _updateBookingUseCase;
         private readonly UpdateBookingStatusUseCase _updateBookingStatusUseCase;
         private readonly CancelBookingUseCase _cancelBookingUseCase;
         private readonly GetUserBookingsUseCase _getUserBookingsUseCase;
@@ -29,7 +29,7 @@ namespace WPHBookingSystem.Application.Services
 
         public BookingSystemFacade(
             CreateBookingUseCase createBookingUseCase,
-            UpdateBookingUseCase updateBookingUseCase,
+            UpdateBookingDatesUseCase updateBookingUseCase,
             UpdateBookingStatusUseCase updateBookingStatusUseCase,
             CancelBookingUseCase cancelBookingUseCase,
             GetUserBookingsUseCase getUserBookingsUseCase,
