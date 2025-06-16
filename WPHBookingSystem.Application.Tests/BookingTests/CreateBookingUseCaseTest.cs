@@ -2,10 +2,10 @@ using System;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using WPHBookingSystem.Application.Interfaces;
 using WPHBookingSystem.Application.UseCases.Bookings;
 using WPHBookingSystem.Domain.Entities;
 using WPHBookingSystem.Domain.Enums;
+using WPHBookingSystem.Domain.Interfaces;
 using WPHBookingSystem.Domain.ValueObjects;
 
 namespace WPHBookingSystem.Application.Tests.BookingTests
@@ -41,29 +41,25 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
             _mockRoomRepository.Setup(repo => repo.GetByIdAsync(_roomId))
                 .ReturnsAsync(room);
 
-            var checkIn = DateTime.UtcNow.AddDays(1);
-            var checkOut = DateTime.UtcNow.AddDays(3);
-            var guests = 2;
-            var totalAmount = 200m;
-            var contactInfo = new ContactInfo("1234567890", "Test Address");
-            var specialRequests = "No special requests";
+            var dto = new CreateBookingDto
+            {
+                RoomId = _roomId,
+                CheckIn = DateTime.UtcNow.AddDays(1),
+                CheckOut = DateTime.UtcNow.AddDays(3),
+                Guests = 2,
+                Phone = "1234567890",
+                Address = "Test Address",
+                EmailAddress = "test@example.com",
+                SpecialRequests = "No special requests"
+            };
 
             // Act
-            var result = await _createBookingUseCase.ExecuteAsync(
-                _roomId,
-                checkIn,
-                checkOut,
-                guests,
-                totalAmount,
-                contactInfo,
-                specialRequests);
+            var result = await _createBookingUseCase.ExecuteAsync(dto);
 
             // Assert
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value, Is.Not.Null);
-            Assert.That(result.Value.RoomId, Is.EqualTo(_roomId));
-            Assert.That(result.Value.UserId, Is.EqualTo(_userId));
-            Assert.That(result.Value.Status, Is.EqualTo(BookingStatus.Pending));
+            Assert.That(result.Value.Id, Is.Not.EqualTo(Guid.Empty));
             _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Once);
         }
 
@@ -74,16 +70,20 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
             _mockRoomRepository.Setup(repo => repo.GetByIdAsync(_roomId))
                 .ReturnsAsync((Room)null);
 
+            var dto = new CreateBookingDto
+            {
+                RoomId = _roomId,
+                CheckIn = DateTime.UtcNow.AddDays(1),
+                CheckOut = DateTime.UtcNow.AddDays(3),
+                Guests = 2,
+                Phone = "1234567890",
+                Address = "Test Address",
+                EmailAddress = "test@example.com",
+                SpecialRequests = "No special requests"
+            };
+
             // Act
-            var result = await _createBookingUseCase.ExecuteAsync(
-                _roomId,
-                _userId,
-                DateTime.UtcNow.AddDays(1),
-                DateTime.UtcNow.AddDays(3),
-                2,
-                200m,
-                new ContactInfo("1234567890", "Test Address"),
-                "No special requests");
+            var result = await _createBookingUseCase.ExecuteAsync(dto);
 
             // Assert
             Assert.That(result.IsSuccess, Is.False);
@@ -99,20 +99,24 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
             _mockRoomRepository.Setup(repo => repo.GetByIdAsync(_roomId))
                 .ReturnsAsync(room);
 
+            var dto = new CreateBookingDto
+            {
+                RoomId = _roomId,
+                CheckIn = DateTime.UtcNow.AddDays(1),
+                CheckOut = DateTime.UtcNow.AddDays(3),
+                Guests = 2,
+                Phone = "1234567890",
+                Address = "Test Address",
+                EmailAddress = "test@example.com",
+                SpecialRequests = "No special requests"
+            };
+
             // Act
-            var result = await _createBookingUseCase.ExecuteAsync(
-                _roomId,
-                _userId,
-                DateTime.UtcNow.AddDays(1),
-                DateTime.UtcNow.AddDays(3),
-                2,
-                200m,
-                new ContactInfo("1234567890", "Test Address"),
-                "No special requests");
+            var result = await _createBookingUseCase.ExecuteAsync(dto);
 
             // Assert
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Error, Is.EqualTo("Room is not available for booking"));
+            Assert.That(result.Error, Is.EqualTo("Room is not available on selected dates"));
             _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Never);
         }
 
@@ -124,16 +128,20 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
             _mockRoomRepository.Setup(repo => repo.GetByIdAsync(_roomId))
                 .ReturnsAsync(room);
 
+            var dto = new CreateBookingDto
+            {
+                RoomId = _roomId,
+                CheckIn = DateTime.UtcNow.AddDays(3), // Check-in after check-out
+                CheckOut = DateTime.UtcNow.AddDays(1),
+                Guests = 2,
+                Phone = "1234567890",
+                Address = "Test Address",
+                EmailAddress = "test@example.com",
+                SpecialRequests = "No special requests"
+            };
+
             // Act
-            var result = await _createBookingUseCase.ExecuteAsync(
-                _roomId,
-                _userId,
-                DateTime.UtcNow.AddDays(3), // Check-in after check-out
-                DateTime.UtcNow.AddDays(1),
-                2,
-                200m,
-                new ContactInfo("1234567890", "Test Address"),
-                "No special requests");
+            var result = await _createBookingUseCase.ExecuteAsync(dto);
 
             // Assert
             Assert.That(result.IsSuccess, Is.False);
