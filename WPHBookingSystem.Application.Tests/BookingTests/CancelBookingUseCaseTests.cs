@@ -2,10 +2,10 @@
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using WPHBookingSystem.Application.Interfaces;
 using WPHBookingSystem.Application.UseCases.Bookings;
 using WPHBookingSystem.Domain.Entities;
 using WPHBookingSystem.Domain.Enums;
-using WPHBookingSystem.Domain.Interfaces;
 using WPHBookingSystem.Domain.ValueObjects;
 
 namespace WPHBookingSystem.Application.Tests.BookingTests
@@ -39,7 +39,7 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
                 .ReturnsAsync(booking);
 
             // Act
-            var result = await _cancelBookingUseCase.ExecuteAsync(_bookingId, _userId);
+            var result = await _cancelBookingUseCase.ExecuteAsync(_bookingId);
 
             // Assert
             Assert.That(result.IsSuccess, Is.True);
@@ -55,11 +55,11 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
                 .ReturnsAsync((Booking)null);
 
             // Act
-            var result = await _cancelBookingUseCase.ExecuteAsync(_bookingId, _userId);
+            var result = await _cancelBookingUseCase.ExecuteAsync(_bookingId);
 
             // Assert
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Error, Is.EqualTo("Booking not found"));
+            Assert.That(result.Message, Is.EqualTo("Booking not found"));
             _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Never);
         }
 
@@ -72,11 +72,11 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
                 .ReturnsAsync(booking);
 
             // Act
-            var result = await _cancelBookingUseCase.ExecuteAsync(_bookingId, _userId);
+            var result = await _cancelBookingUseCase.ExecuteAsync(_bookingId);
 
             // Assert
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Error, Is.EqualTo("Booking is already cancelled"));
+            Assert.That(result.Message, Is.EqualTo("Booking is already cancelled"));
             _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Never);
         }
 
@@ -89,11 +89,11 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
                 .ReturnsAsync(booking);
 
             // Act
-            var result = await _cancelBookingUseCase.ExecuteAsync(_bookingId, _userId);
+            var result = await _cancelBookingUseCase.ExecuteAsync(_bookingId);
 
             // Assert
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Error, Is.EqualTo("Cannot cancel a completed booking"));
+            Assert.That(result.Message, Is.EqualTo("Cannot cancel a completed booking"));
             _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Never);
         }
 
@@ -106,11 +106,11 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
                 .ReturnsAsync(booking);
 
             // Act
-            var result = await _cancelBookingUseCase.ExecuteAsync(_bookingId, _userId);
+            var result = await _cancelBookingUseCase.ExecuteAsync(_bookingId);
 
             // Assert
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Error, Is.EqualTo("User is not authorized to cancel this booking"));
+            Assert.That(result.Message, Is.EqualTo("User is not authorized to cancel this booking"));
             _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Never);
         }
 
