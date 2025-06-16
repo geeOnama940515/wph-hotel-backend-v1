@@ -2,10 +2,11 @@ using System;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using WPHBookingSystem.Application.DTOs.Booking;
+using WPHBookingSystem.Application.Interfaces;
 using WPHBookingSystem.Application.UseCases.Bookings;
 using WPHBookingSystem.Domain.Entities;
 using WPHBookingSystem.Domain.Enums;
-using WPHBookingSystem.Domain.Interfaces;
 using WPHBookingSystem.Domain.ValueObjects;
 
 namespace WPHBookingSystem.Application.Tests.BookingTests
@@ -58,8 +59,8 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
 
             // Assert
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value, Is.Not.Null);
-            Assert.That(result.Value.Id, Is.Not.EqualTo(Guid.Empty));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data.Id, Is.Not.EqualTo(Guid.Empty));
             _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Once);
         }
 
@@ -87,7 +88,7 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
 
             // Assert
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Error, Is.EqualTo("Room not found"));
+            Assert.That(result.Message, Is.EqualTo("Room not found"));
             _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Never);
         }
 
@@ -116,7 +117,7 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
 
             // Assert
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Error, Is.EqualTo("Room is not available on selected dates"));
+            Assert.That(result.Message, Is.EqualTo("Room is not available on selected dates"));
             _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Never);
         }
 
@@ -145,7 +146,7 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
 
             // Assert
             Assert.That(result.IsSuccess, Is.False);
-            Assert.That(result.Error, Is.EqualTo("Check-in date must be before check-out date"));
+            Assert.That(result.Message, Is.EqualTo("Check-in date must be before check-out date"));
             _mockUnitOfWork.Verify(uow => uow.SaveChangesAsync(), Times.Never);
         }
 
