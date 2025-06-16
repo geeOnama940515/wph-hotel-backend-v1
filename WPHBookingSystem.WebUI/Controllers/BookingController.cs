@@ -1,60 +1,79 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Booking;
 using WPHBookingSystem.Application.Interfaces.Services;
+using WPHBookingSystem.WebUI.Extensions;
 
 namespace WPHBookingSystem.WebUI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class BookingController : ControllerBase
     {
-        private readonly IBookingSystemFacade _bookingSystemFacade;
+        private readonly IBookingSystemFacade _facade;
 
-        public BookingController(IBookingSystemFacade bookingSystemFacade)
+        public BookingController(IBookingSystemFacade facade)
         {
-            _bookingSystemFacade = bookingSystemFacade;
+            _facade = facade;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Guid>> CreateBooking(CreateBookingDto dto)
+        public async Task<IActionResult> CreateBooking(CreateBookingDto dto)
         {
-            var userId = Guid.Parse(User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
-            var bookingId = await _bookingSystemFacade.CreateBooking(dto, userId);
-            return Ok(bookingId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return this.CreateResponse(401, "User not authenticated");
+
+            var result = await _facade.CreateBooking(dto, Guid.Parse(userId));
+            return this.CreateResponse(result);
         }
 
-        [HttpPut("update-dates")]
-        public async Task<ActionResult<BookingDto>> UpdateBookingDates(UpdateBookingDateDto dto)
+        [HttpPut("{bookingId}/dates")]
+        public async Task<IActionResult> UpdateBookingDates(Guid bookingId, UpdateBookingDateDto dto)
         {
-            var booking = await _bookingSystemFacade.UpdateBooking(dto);
-            return Ok(booking);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return this.CreateResponse(401, "User not authenticated");
+
+            var result = await _facade.UpdateBooking(dto);
+            return this.CreateResponse(result);
         }
 
-        [HttpPut("update-status")]
-        public async Task<ActionResult<BookingDto>> UpdateBookingStatus(UpdateBookingStatusRequest request)
+        [HttpPut("{bookingId}/status")]
+        public async Task<IActionResult> UpdateBookingStatus(Guid bookingId, UpdateBookingStatusRequest request)
         {
-            var booking = await _bookingSystemFacade.UpdateBookingStatus(request);
-            return Ok(booking);
+            var result = await _facade.UpdateBookingStatus(request);
+            return this.CreateResponse(result);
         }
 
         [HttpPut("{bookingId}/cancel")]
-        public async Task<ActionResult<BookingDto>> CancelBooking(Guid bookingId)
+        public async Task<IActionResult> CancelBooking(Guid bookingId)
         {
-            var booking = await _bookingSystemFacade.CancelBooking(bookingId);
-            return Ok(booking);
+            var result = await _facade.CancelBooking(bookingId);
+            return this.CreateResponse(result);
         }
 
         [HttpGet("user")]
-        public async Task<ActionResult<IEnumerable<BookingDto>>> GetUserBookings()
+        public async Task<IActionResult> GetUserBookings()
         {
-            var userId = Guid.Parse(User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
-            var bookings = await _bookingSystemFacade.GetUserBookings(userId);
-            return Ok(bookings);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return this.CreateResponse(401, "User not authenticated");
+
+            var result = await _facade.GetUserBookings(Guid.Parse(userId));
+            return this.CreateResponse(result);
+        }
+
+        [HttpGet("view/{bookingToken}")]
+        public async Task<IActionResult> ViewBookingByToken(Guid bookingToken)
+        {
+            var result = await _facade.ViewBookingByToken(bookingToken);
+            return this.CreateResponse(result);
         }
     }
 } 

@@ -11,11 +11,12 @@ namespace WPHBookingSystem.Application.Interfaces.Services
     public interface IBookingSystemFacade
     {
         // Booking operations
-        Task<Guid> CreateBooking(CreateBookingDto dto, Guid userId);
+        Task<BookingCreatedDto> CreateBooking(CreateBookingDto dto, Guid userId);
         Task<BookingDto> UpdateBooking(UpdateBookingDateDto dto);
         Task<BookingDto> UpdateBookingStatus(UpdateBookingStatusRequest request);
         Task<BookingDto> CancelBooking(Guid bookingId);
         Task<IEnumerable<BookingDto>> GetUserBookings(Guid userId);
+        Task<BookingDto> ViewBookingByToken(Guid bookingToken);
 
         // Room operations
         Task<Guid> CreateRoom(CreateRoomDto dto);

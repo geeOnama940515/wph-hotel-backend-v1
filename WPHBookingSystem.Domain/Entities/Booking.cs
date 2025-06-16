@@ -19,7 +19,7 @@ namespace WPHBookingSystem.Domain.Entities
         public decimal TotalAmount { get; private set; }
         public BookingStatus Status { get; private set; } = BookingStatus.Pending;
         public string SpecialRequests { get; private set; } = string.Empty;
-        public string CancellationToken { get; private set; }
+        public Guid BookingToken { get; private set; }
         public virtual Room? Room { get; set; }
 
         private Booking() { }
@@ -52,7 +52,7 @@ namespace WPHBookingSystem.Domain.Entities
                 EmailAddress = emailAddress,
                 SpecialRequests = specialRequests,
                 Status = BookingStatus.Pending,
-                CancellationToken = Guid.NewGuid().ToString("N")
+                BookingToken = Guid.NewGuid()
             };
         }
 
