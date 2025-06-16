@@ -13,6 +13,8 @@ namespace WPHBookingSystem.Infrastructure.Repositories
         private readonly ApplicationDbContext _context;
         private readonly Dictionary<Type, object> _repositories;
         private IDbContextTransaction? _transaction;
+        private IBookingRepository? _bookingRepository;
+        private IRoomRepository? _roomRepository;
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -28,6 +30,24 @@ namespace WPHBookingSystem.Infrastructure.Repositories
             var repository = new GenericRepository<T>(_context);
             _repositories.Add(typeof(T), repository);
             return repository;
+        }
+
+        public IBookingRepository BookingRepository
+        {
+            get
+            {
+                _bookingRepository ??= new BookingRepository(_context);
+                return _bookingRepository;
+            }
+        }
+
+        public IRoomRepository RoomRepository
+        {
+            get
+            {
+                _roomRepository ??= new RoomRepository(_context);
+                return _roomRepository;
+            }
         }
 
         public async Task<int> SaveChangesAsync()

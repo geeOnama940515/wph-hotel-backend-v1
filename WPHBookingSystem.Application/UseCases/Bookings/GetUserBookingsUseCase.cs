@@ -22,8 +22,7 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
         {
             try
             {
-                var bookings = await _unitOfWork.Repository<Booking>()
-                    .FindAsync(b => b.EmailAddress == emailAddress);
+                var bookings = await _unitOfWork.BookingRepository.GetBookingsByEmailAsync(emailAddress);
 
                 var bookingDtos = bookings.Select(b => new BookingDto
                 {
