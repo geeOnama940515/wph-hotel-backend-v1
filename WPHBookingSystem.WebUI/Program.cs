@@ -1,8 +1,11 @@
+using WPHBookingSystem.Application;
+using WPHBookingSystem.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 //ConfigurationManager configuration = builder.Configuration;
 // Add services to the container.
-builder.Services.AddApplicationDependencyInjection();
-builder.Services.AddInfrastructureDependencyInjection(builder.Configuration);
+builder.Services.ApplicationDependencyiInjection();
+builder.Services.AddInfrastructureInjection(builder.Configuration);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

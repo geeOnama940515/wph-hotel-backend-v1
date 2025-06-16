@@ -18,7 +18,7 @@ namespace WPHBookingSystem.Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection InfrastructureInjection(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructureInjection(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
             {
