@@ -17,7 +17,7 @@ namespace WPHBookingSystem.Application
         {
             // Register Use Cases
             services.AddScoped<CreateBookingUseCase>();
-            services.AddScoped<UpdateBookingUseCase>();
+            services.AddScoped<UpdateBookingDatesUseCase>();
             services.AddScoped<UpdateBookingStatusUseCase>();
             services.AddScoped<CancelBookingUseCase>();
             services.AddScoped<GetUserBookingsUseCase>();
