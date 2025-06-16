@@ -17,7 +17,7 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Result<BookingDto>> ExecuteAsync(Guid bookingId, string emailAddress)
+        public async Task<Result<BookingDto>> ExecuteAsync(Guid bookingId)
         {
             try
             {
@@ -27,8 +27,8 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                 if (booking == null)
                     return Result<BookingDto>.Failure("Booking not found.", 404);
 
-                if (booking.EmailAddress != emailAddress)
-                    return Result<BookingDto>.Failure("You are not authorized to cancel this booking.", 403);
+                //if (booking.EmailAddress != emailAddress)
+                //    return Result<BookingDto>.Failure("You are not authorized to cancel this booking.", 403);
 
                 booking.Cancel();
                 await _unitOfWork.Repository<Booking>().UpdateAsync(booking);

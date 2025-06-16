@@ -25,11 +25,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBooking(CreateBookingDto dto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return this.CreateResponse(401, "User not authenticated");
-
-            var result = await _facade.CreateBooking(dto, Guid.Parse(userId));
+            var result = await _facade.CreateBooking(dto);
             return this.CreateResponse(result);
         }
 
@@ -54,14 +50,14 @@ namespace WPHBookingSystem.WebUI.Controllers
             return this.CreateResponse(result);
         }
 
-        [HttpGet("user")]
-        public async Task<IActionResult> GetUserBookings()
+        [HttpGet("{emailAddres}/get-bookings")]
+        public async Task<IActionResult> GetUserBookings(string emailAddres)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
                 return this.CreateResponse(401, "User not authenticated");
 
-            var result = await _facade.GetUserBookings(Guid.Parse(userId));
+            var result = await _facade.GetUserBookings(emailAddres);
             return this.CreateResponse(result);
         }
 

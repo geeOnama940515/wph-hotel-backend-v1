@@ -64,7 +64,7 @@ namespace WPHBookingSystem.Infrastructure.Repositories
             if (end.HasValue)
                 query = query.Where(b => b.CheckOut <= end.Value);
 
-            return await query.SumAsync(b => b.TotalPrice);
+            return await query.SumAsync(b => b.TotalAmount);
         }
     }
 }
