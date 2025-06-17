@@ -13,6 +13,7 @@ using WPHBookingSystem.Application.Interfaces.Services;
 using WPHBookingSystem.Infrastructure.Identity;
 using WPHBookingSystem.Infrastructure.Persistence.Data;
 using WPHBookingSystem.Infrastructure.Repositories;
+using WPHBookingSystem.Infrastructure.Services;
 
 namespace WPHBookingSystem.Infrastructure
 {
@@ -42,7 +43,7 @@ namespace WPHBookingSystem.Infrastructure
             // Register Entity Framework Core DbContext
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
             });
 
             // Register ASP.NET Core Identity
@@ -80,6 +81,7 @@ namespace WPHBookingSystem.Infrastructure
 
             // Register Services
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IImageService, ImageService>();
 
             return services;
         }

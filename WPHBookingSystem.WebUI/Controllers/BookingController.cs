@@ -143,6 +143,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <returns>Standardized response with booking details</returns>
         /// <response code="200">Booking details retrieved successfully</response>
         /// <response code="404">Booking not found or invalid token</response>
+        [AllowAnonymous]
         [HttpGet("view/{bookingToken}")]
         public async Task<IActionResult> ViewBookingByToken(Guid bookingToken)
         {

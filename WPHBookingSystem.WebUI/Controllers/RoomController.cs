@@ -7,6 +7,8 @@ using WPHBookingSystem.Application.DTOs.Room;
 using WPHBookingSystem.Application.Interfaces.Services;
 using WPHBookingSystem.Application.UseCases.Rooms;
 using static WPHBookingSystem.Application.UseCases.Rooms.CheckRoomAvailabilityUseCase;
+using Microsoft.AspNetCore.Http;
+using WPHBookingSystem.WebUI.Extensions;
 
 namespace WPHBookingSystem.WebUI.Controllers
 {
@@ -201,6 +203,49 @@ namespace WPHBookingSystem.WebUI.Controllers
         {
             var revenue = await _bookingSystemFacade.GetRoomRevenue(request);
             return Ok(revenue);
+        }
+
+        /// <summary>
+        /// Uploads multiple images to a room.
+        /// 
+        /// Admin-only endpoint that allows uploading multiple image files to a room.
+        /// Supports various image formats and includes validation for file size and type.
+        /// </summary>
+        /// <param name="roomId">The ID of the room to upload images for</param>
+        /// <param name="files">Collection of image files to upload</param>
+        /// <returns>Upload results with file information and any errors</returns>
+        /// <response code="200">Images uploaded successfully</response>
+        /// <response code="400">Invalid files or room not found</response>
+        /// <response code="401">User not authenticated</response>
+        /// <response code="403">User not authorized (admin role required)</response>
+        [HttpPost("{roomId}/images")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UploadRoomImages(Guid roomId, IFormFileCollection files)
+        {
+            var result = await _bookingSystemFacade.UploadRoomImages(roomId, files);
+            return this.CreateResponse(result);
+        }
+
+        /// <summary>
+        /// Uploads a single image to a room.
+        /// 
+        /// Admin-only endpoint that allows uploading a single image file to a room.
+        /// Supports various image formats and includes validation for file size and type.
+        /// </summary>
+        /// <param name="roomId">The ID of the room to upload the image for</param>
+        /// <param name="file">The image file to upload</param>
+        /// <returns>Upload result with file information</returns>
+        /// <response code="200">Image uploaded successfully</response>
+        /// <response code="400">Invalid file or room not found</response>
+        /// <response code="401">User not authenticated</response>
+        /// <response code="403">User not authorized (admin role required)</response>
+        [HttpPost("{roomId}/image")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UploadRoomImage(Guid roomId, IFormFile file)
+        {
+            var files = new FormFileCollection { file };
+            var result = await _bookingSystemFacade.UploadRoomImages(roomId, files);
+            return this.CreateResponse(result);
         }
     }
 } 
