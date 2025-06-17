@@ -9,6 +9,10 @@ using WPHBookingSystem.Domain.Entities;
 
 namespace WPHBookingSystem.Application.UseCases.Bookings
 {
+    /// <summary>
+    /// Use case responsible for retrieving all bookings for a specific user.
+    /// Provides user-centric view of booking history and current reservations.
+    /// </summary>
     public class GetUserBookingsUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -18,6 +22,12 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Retrieves all bookings associated with the specified email address.
+        /// Maps domain entities to DTOs for API response.
+        /// </summary>
+        /// <param name="emailAddress">The email address of the user whose bookings to retrieve.</param>
+        /// <returns>A result containing the list of user bookings or error details.</returns>
         public async Task<Result<List<BookingDto>>> ExecuteAsync(string emailAddress)
         {
             try

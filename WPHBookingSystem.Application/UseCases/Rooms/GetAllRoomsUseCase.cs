@@ -9,6 +9,10 @@ using WPHBookingSystem.Domain.Entities;
 
 namespace WPHBookingSystem.Application.UseCases.Rooms
 {
+    /// <summary>
+    /// Use case responsible for retrieving all rooms in the system.
+    /// Provides comprehensive view of all available rooms for browsing and selection.
+    /// </summary>
     public class GetAllRoomsUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -18,6 +22,10 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Retrieves all rooms and maps them to DTOs for API response.
+        /// </summary>
+        /// <returns>A result containing the list of all rooms or error details.</returns>
         public async Task<Result<List<RoomDto>>> ExecuteAsync()
         {
             try

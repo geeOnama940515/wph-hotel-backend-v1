@@ -7,6 +7,10 @@ using WPHBookingSystem.Domain.Entities;
 
 namespace WPHBookingSystem.Application.UseCases.Rooms
 {
+    /// <summary>
+    /// Use case responsible for deleting rooms from the system.
+    /// Handles room deletion business logic and validation of deletion constraints.
+    /// </summary>
     public class DeleteRoomUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -16,6 +20,12 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Deletes a room after validating that it has no future bookings.
+        /// Ensures data integrity by preventing deletion of rooms with active reservations.
+        /// </summary>
+        /// <param name="roomId">The unique identifier of the room to delete.</param>
+        /// <returns>A result indicating success or failure of the deletion operation.</returns>
         public async Task<Result<bool>> ExecuteAsync(Guid roomId)
         {
             try

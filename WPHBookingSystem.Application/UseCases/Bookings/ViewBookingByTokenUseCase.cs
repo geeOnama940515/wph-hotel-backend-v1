@@ -7,6 +7,10 @@ using WPHBookingSystem.Domain.Entities;
 
 namespace WPHBookingSystem.Application.UseCases.Bookings
 {
+    /// <summary>
+    /// Use case responsible for retrieving booking information using a booking token.
+    /// Allows guests to view booking details without authentication.
+    /// </summary>
     public class ViewBookingByTokenUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -16,6 +20,12 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
+        /// <summary>
+        /// Retrieves booking information using the provided booking token.
+        /// Maps domain entity to DTO for API response.
+        /// </summary>
+        /// <param name="bookingToken">The unique booking token for the reservation.</param>
+        /// <returns>A result containing the booking information or error details.</returns>
         public async Task<Result<BookingDto>> ExecuteAsync(Guid bookingToken)
         {
             try
