@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Booking;
 using WPHBookingSystem.Application.DTOs.Room;
-using WPHBookingSystem.Application.UseCases.Bookings;
 using WPHBookingSystem.Application.UseCases.Rooms;
 using static WPHBookingSystem.Application.UseCases.Rooms.CheckRoomAvailabilityUseCase;
-using Microsoft.AspNetCore.Http;
 
 namespace WPHBookingSystem.Application.Interfaces.Services
 {

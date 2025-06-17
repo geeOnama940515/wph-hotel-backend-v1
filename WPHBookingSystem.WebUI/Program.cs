@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Scalar.AspNetCore;
 using WPHBookingSystem.Application;
 using WPHBookingSystem.Infrastructure;
-
+//using Microsoft.AspNetCore.Mvc;
 /// <summary>
 /// Main entry point for the WPH Hotel Booking System Web API.
 /// Configures the application, registers services, and sets up the HTTP request pipeline.
@@ -25,12 +25,8 @@ builder.Services.ApplicationDependencyiInjection();
 builder.Services.AddInfrastructureInjection(builder.Configuration);
 
 // Add MVC controllers for API endpoints with proper validation
-builder.Services.AddControllers(options =>
-{
-    // Configure model validation to return 400 Bad Request for validation errors
-    options.SuppressModelStateInvalidFilter = false;
-});
-
+builder.Services.AddControllers();
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 // Configure API behavior for consistent error responses
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
