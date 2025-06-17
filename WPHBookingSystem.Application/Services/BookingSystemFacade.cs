@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -44,6 +45,7 @@ namespace WPHBookingSystem.Application.Services
         private readonly CheckRoomAvailabilityUseCase _checkRoomAvailabilityUseCase;
         private readonly GetRoomOccupancyRateUseCase _getRoomOccupancyRateUseCase;
         private readonly GetRoomRevenueUseCase _getRoomRevenueUseCase;
+        private readonly UploadRoomImagesUseCase _uploadRoomImagesUseCase;
 
         #endregion
 
@@ -66,6 +68,7 @@ namespace WPHBookingSystem.Application.Services
         /// <param name="getRoomOccupancyRateUseCase">Use case for calculating room occupancy rate.</param>
         /// <param name="getRoomRevenueUseCase">Use case for calculating room revenue.</param>
         /// <param name="viewBookingByTokenUseCase">Use case for viewing booking by token.</param>
+        /// <param name="uploadRoomImagesUseCase">Use case for uploading room images.</param>
         public BookingSystemFacade(
             CreateBookingUseCase createBookingUseCase,
             UpdateBookingDatesUseCase updateBookingUseCase,
@@ -81,7 +84,8 @@ namespace WPHBookingSystem.Application.Services
             CheckRoomAvailabilityUseCase checkRoomAvailabilityUseCase,
             GetRoomOccupancyRateUseCase getRoomOccupancyRateUseCase,
             GetRoomRevenueUseCase getRoomRevenueUseCase,
-            ViewBookingByTokenUseCase viewBookingByTokenUseCase)
+            ViewBookingByTokenUseCase viewBookingByTokenUseCase,
+            UploadRoomImagesUseCase uploadRoomImagesUseCase)
         {
             _createBookingUseCase = createBookingUseCase;
             _updateBookingUseCase = updateBookingUseCase;
@@ -98,6 +102,7 @@ namespace WPHBookingSystem.Application.Services
             _getRoomOccupancyRateUseCase = getRoomOccupancyRateUseCase;
             _getRoomRevenueUseCase = getRoomRevenueUseCase;
             _viewBookingByTokenUseCase = viewBookingByTokenUseCase;
+            _uploadRoomImagesUseCase = uploadRoomImagesUseCase;
         }
 
         #region Booking Operations
@@ -270,6 +275,17 @@ namespace WPHBookingSystem.Application.Services
             if (!result.IsSuccess)
                 throw new ApplicationException(result.Message);
             return result;
+        }
+
+        /// <summary>
+        /// Uploads multiple images to a room by delegating to the UploadRoomImagesUseCase.
+        /// </summary>
+        /// <param name="roomId">The unique identifier of the room to upload images for.</param>
+        /// <param name="files">Collection of image files to upload.</param>
+        /// <returns>A result containing upload information and any errors.</returns>
+        public async Task<Result<ImageUploadResponseDto>> UploadRoomImages(Guid roomId, IFormFileCollection files)
+        {
+            return await _uploadRoomImagesUseCase.ExecuteAsync(roomId, files);
         }
 
         #endregion

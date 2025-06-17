@@ -24,13 +24,15 @@ namespace WPHBookingSystem.WebUI.Extensions
         /// <returns>An IActionResult with standardized response format</returns>
         public static IActionResult CreateResponse<T>(this ControllerBase controller, Result<T> result)
         {
-            return controller.StatusCode(result.StatusCode, new
+            var response = new
             {
                 success = result.IsSuccess,
                 message = result.Message,
-                data = result.Data,
+                data = result.IsSuccess ? result.Data : (object?)null,
                 errors = result.Errors
-            });
+            };
+
+            return controller.StatusCode(result.StatusCode, response);
         }
 
         /// <summary>
@@ -43,12 +45,14 @@ namespace WPHBookingSystem.WebUI.Extensions
         /// <returns>An IActionResult with standardized response format</returns>
         public static IActionResult CreateResponse(this ControllerBase controller, Result result)
         {
-            return controller.StatusCode(result.StatusCode, new
+            var response = new
             {
                 success = result.IsSuccess,
                 message = result.Message,
                 errors = result.Errors
-            });
+            };
+
+            return controller.StatusCode(result.StatusCode, response);
         }
 
         /// <summary>
@@ -64,12 +68,15 @@ namespace WPHBookingSystem.WebUI.Extensions
         /// <returns>An IActionResult with standardized response format</returns>
         public static IActionResult CreateResponse<T>(this ControllerBase controller, int statusCode, string message, T data)
         {
-            return controller.StatusCode(statusCode, new
+            var response = new
             {
                 success = statusCode >= 200 && statusCode < 300,
                 message,
-                data
-            });
+                data,
+                errors = (object)null
+            };
+
+            return controller.StatusCode(statusCode, response);
         }
 
         /// <summary>
@@ -83,11 +90,14 @@ namespace WPHBookingSystem.WebUI.Extensions
         /// <returns>An IActionResult with standardized response format</returns>
         public static IActionResult CreateResponse(this ControllerBase controller, int statusCode, string message)
         {
-            return controller.StatusCode(statusCode, new
+            var response = new
             {
                 success = statusCode >= 200 && statusCode < 300,
-                message
-            });
+                message,
+                errors = (object)null
+            };
+
+            return controller.StatusCode(statusCode, response);
         }
     }
 } 

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using WPHBookingSystem.Application.DTOs.Identity;
@@ -15,6 +16,7 @@ namespace WPHBookingSystem.WebUI.Controllers
     /// All endpoints are publicly accessible (no authentication required) as they handle
     /// the authentication process itself.
     /// </summary>
+    [AllowAnonymous]
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase

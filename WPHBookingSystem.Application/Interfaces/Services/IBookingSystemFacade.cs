@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Booking;
 using WPHBookingSystem.Application.DTOs.Room;
-using WPHBookingSystem.Application.UseCases.Bookings;
 using WPHBookingSystem.Application.UseCases.Rooms;
 using static WPHBookingSystem.Application.UseCases.Rooms.CheckRoomAvailabilityUseCase;
 
@@ -147,6 +144,15 @@ namespace WPHBookingSystem.Application.Interfaces.Services
         /// <param name="request">The request containing room ID and date range for calculation.</param>
         /// <returns>A result containing the revenue amount or error details.</returns>
         Task<Result<GetRoomRevenueResponse>> GetRoomRevenue(GetRoomRevenueRequest request);
+
+        /// <summary>
+        /// Uploads multiple images to a room.
+        /// This operation handles file validation, storage, and updates the room's image collection.
+        /// </summary>
+        /// <param name="roomId">The unique identifier of the room to upload images for.</param>
+        /// <param name="files">Collection of image files to upload.</param>
+        /// <returns>A result containing upload information and any errors.</returns>
+        Task<Result<ImageUploadResponseDto>> UploadRoomImages(Guid roomId, IFormFileCollection files);
 
         #endregion
     }

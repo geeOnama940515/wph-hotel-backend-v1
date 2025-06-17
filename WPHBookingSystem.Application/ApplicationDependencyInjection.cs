@@ -52,6 +52,8 @@ namespace WPHBookingSystem.Application
             services.AddScoped<CheckRoomAvailabilityUseCase>();
             services.AddScoped<GetRoomOccupancyRateUseCase>();
             services.AddScoped<GetRoomRevenueUseCase>();
+            services.AddScoped<UploadRoomImagesUseCase>();
+            services.AddScoped<ViewBookingByTokenUseCase>();
 
             // Register Facade Service
             // The BookingSystemFacade acts as a unified entry point for all booking system operations

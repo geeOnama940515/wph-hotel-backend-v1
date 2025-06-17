@@ -3,11 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using WPHBookingSystem.Application.Interfaces.Common;
 using WPHBookingSystem.Domain.Entities;
 using WPHBookingSystem.Infrastructure.Identity;
+using WPHBookingSystem.Infrastructure.Persistence.Seeders;
 
 namespace WPHBookingSystem.Infrastructure.Persistence.Data
 {
@@ -41,5 +43,27 @@ namespace WPHBookingSystem.Infrastructure.Persistence.Data
         /// Provides access to booking data for CRUD operations and queries.
         /// </summary>
         public DbSet<Booking> Bookings => Set<Booking>();
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Booking>(b =>
+            {
+                b.OwnsOne(b => b.ContactInfo);
+            });
+
+            builder.Entity<Room>(room =>
+            {
+                room.OwnsMany(r => r.Images, image =>
+                {
+                    image.WithOwner().HasForeignKey("RoomId");
+                    image.Property(i => i.FileName).HasColumnName("FileName");
+                    image.HasKey("RoomId", "FileName");
+                });
+            });
+
+            BookingSeeder.Seed(builder);
+        }
+
     }
 }

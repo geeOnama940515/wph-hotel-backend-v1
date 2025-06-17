@@ -20,6 +20,7 @@
         /// <returns>The service collection for method chaining</returns>
         public static IServiceCollection WebUIServices(this IServiceCollection services)
         {
+            services.AddControllers();
             // Web UI specific services can be registered here
             // Currently empty as most services are handled by Application and Infrastructure layers
             return services;
