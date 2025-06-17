@@ -231,9 +231,24 @@ namespace WPHBookingSystem.Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[] { "11111111-1111-1111-1111-111111111111", "1", "Administrator", "ADMINISTRATOR" });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "Firstname", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                values: new object[] { "22222222-2222-2222-2222-222222222222", 0, "1", "admin@wphhotel.com", true, "Administrator", "Administrator", false, null, "ADMIN@WPHHOTEL.COM", "ADMIN@WPHHOTEL.COM", "AQAAAAIAAYagAAAAEEURhob03jhq0fPvh4RXUr+lTBQ4x5Hyptyk5uRIDYKspR8eYQLb7Fffg25dghmJBA==", "09158902395", true, "1", false, "admin@wphhotel.com" });
+
+            migrationBuilder.InsertData(
                 table: "Rooms",
                 columns: new[] { "Id", "Capacity", "CreatedAt", "CreatedBy", "Description", "Name", "Price", "Status", "UpdatedAt", "UpdatedBy" },
                 values: new object[] { new Guid("11111111-1111-1111-1111-111111111111"), 2, new DateTimeOffset(new DateTime(2025, 6, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), "Seeder", "A luxurious room with sea view, air conditioning, and mini-bar.", "Deluxe Room 101", 2500m, 0, null, null });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUserRoles",
+                columns: new[] { "RoleId", "UserId" },
+                values: new object[] { "11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222" });
 
             migrationBuilder.InsertData(
                 table: "Bookings",

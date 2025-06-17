@@ -22,8 +22,8 @@ namespace WPHBookingSystem.Infrastructure.Persistence.Seeders
             });
 
             // Seed Administrator User
-            var hasher = new PasswordHasher<ApplicationUser>();
-            var passwordHash = hasher.HashPassword(null, "Admin123!");
+            //var hasher = new PasswordHasher<ApplicationUser>();
+            //var passwordHash = hasher.HashPassword(null, "Admin123!");
 
             modelBuilder.Entity<ApplicationUser>().HasData(new
             {
@@ -33,7 +33,7 @@ namespace WPHBookingSystem.Infrastructure.Persistence.Seeders
                 Email = "admin@wphhotel.com",
                 NormalizedEmail = "ADMIN@WPHHOTEL.COM",
                 EmailConfirmed = true,
-                PasswordHash = passwordHash,
+                PasswordHash = "AQAAAAIAAYagAAAAEEURhob03jhq0fPvh4RXUr+lTBQ4x5Hyptyk5uRIDYKspR8eYQLb7Fffg25dghmJBA==",
                 SecurityStamp = "1",
                 ConcurrencyStamp = "1",
                 PhoneNumber = "09158902395",

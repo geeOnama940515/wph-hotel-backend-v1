@@ -46,6 +46,15 @@ namespace WPHBookingSystem.Infrastructure.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "11111111-1111-1111-1111-111111111111",
+                            ConcurrencyStamp = "1",
+                            Name = "Administrator",
+                            NormalizedName = "ADMINISTRATOR"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -133,6 +142,13 @@ namespace WPHBookingSystem.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = "22222222-2222-2222-2222-222222222222",
+                            RoleId = "11111111-1111-1111-1111-111111111111"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -354,6 +370,27 @@ namespace WPHBookingSystem.Infrastructure.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "22222222-2222-2222-2222-222222222222",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "1",
+                            Email = "admin@wphhotel.com",
+                            EmailConfirmed = true,
+                            Firstname = "Administrator",
+                            LastName = "Administrator",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@WPHHOTEL.COM",
+                            NormalizedUserName = "ADMIN@WPHHOTEL.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAEEURhob03jhq0fPvh4RXUr+lTBQ4x5Hyptyk5uRIDYKspR8eYQLb7Fffg25dghmJBA==",
+                            PhoneNumber = "09158902395",
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = "1",
+                            TwoFactorEnabled = false,
+                            UserName = "admin@wphhotel.com"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
