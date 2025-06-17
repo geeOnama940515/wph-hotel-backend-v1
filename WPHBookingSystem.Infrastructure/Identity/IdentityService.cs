@@ -12,11 +12,23 @@ using WPHBookingSystem.Application.Interfaces.Services;
 
 namespace WPHBookingSystem.Infrastructure.Identity
 {
+    /// <summary>
+    /// Service responsible for user authentication and authorization using ASP.NET Core Identity.
+    /// Handles user registration, login, JWT token generation, and role management.
+    /// 
+    /// This service provides secure authentication mechanisms including password validation,
+    /// JWT token generation with claims, and refresh token support for enhanced security.
+    /// </summary>
     public class IdentityService : IIdentityService
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
 
+        /// <summary>
+        /// Initializes a new instance of the IdentityService with required dependencies.
+        /// </summary>
+        /// <param name="userManager">The ASP.NET Core Identity user manager for user operations.</param>
+        /// <param name="configuration">The configuration containing JWT settings.</param>
         public IdentityService(
             UserManager<ApplicationUser> userManager,
             IConfiguration configuration)
@@ -25,6 +37,12 @@ namespace WPHBookingSystem.Infrastructure.Identity
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// Authenticates a user with email and password, returning JWT token on success.
+        /// Validates user credentials and generates authentication response with tokens.
+        /// </summary>
+        /// <param name="request">The login request containing email and password.</param>
+        /// <returns>Authentication response with success status and tokens or error message.</returns>
         public async Task<AuthResponse> LoginAsync(LoginRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
@@ -50,6 +68,12 @@ namespace WPHBookingSystem.Infrastructure.Identity
             return await GenerateAuthResponse(user);
         }
 
+        /// <summary>
+        /// Registers a new user with the provided information and assigns default role.
+        /// Creates user account and generates authentication response with tokens.
+        /// </summary>
+        /// <param name="request">The registration request containing user information.</param>
+        /// <returns>Authentication response with success status and tokens or error message.</returns>
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
         {
             var existingUser = await _userManager.FindByEmailAsync(request.Email);
@@ -87,18 +111,38 @@ namespace WPHBookingSystem.Infrastructure.Identity
             return await GenerateAuthResponse(user);
         }
 
+        /// <summary>
+        /// Refreshes an authentication token using a refresh token.
+        /// Not yet implemented - placeholder for future enhancement.
+        /// </summary>
+        /// <param name="refreshToken">The refresh token to use for generating a new access token.</param>
+        /// <returns>Authentication response with new tokens.</returns>
+        /// <exception cref="NotImplementedException">Thrown as this feature is not yet implemented.</exception>
         public async Task<AuthResponse> RefreshTokenAsync(string refreshToken)
         {
             // Implement refresh token logic here
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Revokes a refresh token to invalidate it.
+        /// Not yet implemented - placeholder for future enhancement.
+        /// </summary>
+        /// <param name="refreshToken">The refresh token to revoke.</param>
+        /// <returns>True if token was successfully revoked, false otherwise.</returns>
+        /// <exception cref="NotImplementedException">Thrown as this feature is not yet implemented.</exception>
         public async Task<bool> RevokeTokenAsync(string refreshToken)
         {
             // Implement token revocation logic here
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Generates authentication response with JWT token and user information.
+        /// Creates JWT token with user claims and generates refresh token.
+        /// </summary>
+        /// <param name="user">The authenticated user.</param>
+        /// <returns>Complete authentication response with tokens and user details.</returns>
         private async Task<AuthResponse> GenerateAuthResponse(ApplicationUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);
@@ -122,6 +166,13 @@ namespace WPHBookingSystem.Infrastructure.Identity
             };
         }
 
+        /// <summary>
+        /// Generates a JWT token for the specified user with role-based claims.
+        /// Creates secure token with user identity and role information.
+        /// </summary>
+        /// <param name="user">The user for whom to generate the token.</param>
+        /// <param name="role">The user's role to include in the token claims.</param>
+        /// <returns>JWT token string.</returns>
         private string GenerateJwtToken(ApplicationUser user, string role)
         {
             var claims = new List<Claim>
@@ -148,6 +199,11 @@ namespace WPHBookingSystem.Infrastructure.Identity
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        /// <summary>
+        /// Generates a refresh token for token renewal functionality.
+        /// Creates a unique identifier that can be used to refresh access tokens.
+        /// </summary>
+        /// <returns>Refresh token string.</returns>
         private string GenerateRefreshToken()
         {
             return Guid.NewGuid().ToString();
