@@ -16,20 +16,41 @@ using WPHBookingSystem.Infrastructure.Repositories;
 
 namespace WPHBookingSystem.Infrastructure
 {
+    /// <summary>
+    /// Static class responsible for configuring and registering all infrastructure layer services
+    /// with the dependency injection container. This class follows the extension method pattern
+    /// to provide a clean and organized way to register infrastructure services.
+    /// 
+    /// The infrastructure layer handles external concerns including:
+    /// - Database persistence with Entity Framework Core
+    /// - User authentication and authorization with ASP.NET Core Identity
+    /// - Repository implementations for data access
+    /// - JWT token generation and validation
+    /// </summary>
     public static class DependencyInjection
     {
+        /// <summary>
+        /// Registers all infrastructure layer services with the dependency injection container.
+        /// This extension method should be called during application startup to configure
+        /// database, identity, and repository services.
+        /// </summary>
+        /// <param name="services">The service collection to register services with.</param>
+        /// <param name="configuration">The configuration containing connection strings and settings.</param>
+        /// <returns>The service collection for method chaining.</returns>
         public static IServiceCollection AddInfrastructureInjection(this IServiceCollection services, IConfiguration configuration)
         {
+            // Register Entity Framework Core DbContext
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
 
-            // Register Identity
+            // Register ASP.NET Core Identity
             services.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
+            // Configure Identity options for security and validation
             services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.
