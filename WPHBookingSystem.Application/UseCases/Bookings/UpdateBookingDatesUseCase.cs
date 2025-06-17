@@ -9,25 +9,26 @@ using WPHBookingSystem.Domain.Exceptions;
 namespace WPHBookingSystem.Application.UseCases.Bookings
 {
     /// <summary>
-    /// Use case responsible for cancelling existing bookings.
-    /// Handles booking cancellation business logic and status updates.
+    /// Use case responsible for updating booking check-in and check-out dates.
+    /// Handles date validation and booking modification business logic.
     /// </summary>
-    public class CancelBookingUseCase
+    public class UpdateBookingDatesUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public CancelBookingUseCase(IUnitOfWork unitOfWork)
+        public UpdateBookingDatesUseCase(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
         /// <summary>
-        /// Cancels a booking by updating its status and persisting the changes.
-        /// Validates booking existence and enforces business rules for cancellation.
+        /// Updates the check-in and check-out dates for an existing booking.
+        /// Validates booking existence and enforces domain business rules for date changes.
         /// </summary>
-        /// <param name="bookingId">The unique identifier of the booking to cancel.</param>
-        /// <returns>A result containing the cancelled booking information or error details.</returns>
-        public async Task<Result<BookingDto>> ExecuteAsync(Guid bookingId)
+        /// <param name="bookingId">The unique identifier of the booking to update.</param>
+        /// <param name="dto">The data transfer object containing new check-in and check-out dates.</param>
+        /// <returns>A result containing the updated booking information or error details.</returns>
+        public async Task<Result<BookingDto>> ExecuteAsync(Guid bookingId, UpdateBookingDateDto dto)
         {
             try
             {
@@ -37,10 +38,7 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                 if (booking == null)
                     return Result<BookingDto>.Failure("Booking not found.", 404);
 
-                //if (booking.EmailAddress != emailAddress)
-                //    return Result<BookingDto>.Failure("You are not authorized to cancel this booking.", 403);
-
-                booking.Cancel();
+                booking.UpdateBookingDates(dto.CheckIn, dto.CheckOut);
                 await _unitOfWork.Repository<Booking>().UpdateAsync(booking);
                 await _unitOfWork.CommitTransactionAsync();
 
@@ -55,12 +53,12 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                     Status = booking.Status,
                     SpecialRequests = booking.SpecialRequests,
                     RoomName = booking.Room?.Name ?? string.Empty
-                }, "Booking cancelled successfully.");
+                }, "Booking dates updated successfully.");
             }
             catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                return Result<BookingDto>.Failure($"Failed to cancel booking: {ex.Message}", 500);
+                return Result<BookingDto>.Failure($"Failed to update booking dates: {ex.Message}", 500);
             }
         }
     }

@@ -23,8 +23,8 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockBookingRepository = new Mock<IBookingRepository>();
             _mockRoomRepository = new Mock<IRoomRepository>();
-            _mockUnitOfWork.Setup(x => x.Bookings).Returns(_mockBookingRepository.Object);
-            _mockUnitOfWork.Setup(x => x.Rooms).Returns(_mockRoomRepository.Object);
+            _mockUnitOfWork.Setup(x => x.BookingRepository).Returns(_mockBookingRepository.Object);
+            _mockUnitOfWork.Setup(x => x.RoomRepository).Returns(_mockRoomRepository.Object);
             _useCase = new CreateBookingUseCase(_mockUnitOfWork.Object);
             _userId = Guid.NewGuid();
             _roomId = Guid.NewGuid();
@@ -69,7 +69,7 @@ namespace WPHBookingSystem.Application.Tests.BookingTests
 
             // Act & Assert
             var exception =  Assert.ThrowsAsync<DomainException>(
-                () => _useCase.ExecuteAsync(dto, _userId));
+                () => _useCase.ExecuteAsync(dto));
 
             Assert.That(exception.Message, Is.EqualTo("Room not found."));
         }

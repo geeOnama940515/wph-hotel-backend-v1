@@ -4,6 +4,7 @@ using NUnit.Framework;
 using WPHBookingSystem.Domain.Entities;
 using WPHBookingSystem.Domain.Enums;
 using WPHBookingSystem.Domain.Exceptions;
+using WPHBookingSystem.Domain.ValueObjects;
 
 namespace WPHBookingSystem.Domain.Tests
 {
@@ -15,7 +16,7 @@ namespace WPHBookingSystem.Domain.Tests
         private string _roomDescription;
         private decimal _roomPrice;
         private int _roomCapacity;
-        private string _roomImage;
+        private List<GalleryImage> _roomImages;
 
         [SetUp]
         public void Setup()
@@ -25,7 +26,11 @@ namespace WPHBookingSystem.Domain.Tests
             _roomDescription = "Spacious room with ocean view";
             _roomPrice = 150.00m;
             _roomCapacity = 2;
-            _roomImage = "deluxe-suite.jpg";
+            _roomImages = new List<GalleryImage>
+            {
+                new GalleryImage { FileName = "room1.jpg" },
+                new GalleryImage { FileName = "room2.jpg" }
+            };
         }
 
         #region Create Tests
@@ -33,14 +38,14 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Create_Should_Initialize_Room_With_Valid_Data()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImage);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
             Assert.That(room.Id, Is.Not.EqualTo(Guid.Empty));
             Assert.That(room.Name, Is.EqualTo(_roomName));
             Assert.That(room.Description, Is.EqualTo(_roomDescription));
             Assert.That(room.Price, Is.EqualTo(_roomPrice));
             Assert.That(room.Capacity, Is.EqualTo(_roomCapacity));
-            Assert.That(room.Image, Is.EqualTo(_roomImage));
+            Assert.That(room.Images, Is.EqualTo(_roomImages));
             Assert.That(room.Status, Is.EqualTo(RoomStatus.Available));
             Assert.That(room.Bookings.Count, Is.EqualTo(0));
         }
@@ -48,19 +53,19 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Create_Should_Trim_Whitespace_From_Strings()
         {
-            var room = Room.Create("  " + _roomName + "  ", "  " + _roomDescription + "  ", _roomPrice, _roomCapacity, "  " + _roomImage + "  ");
+            var room = Room.Create("  " + _roomName + "  ", "  " + _roomDescription + "  ", _roomPrice, _roomCapacity, _roomImages);
 
             Assert.That(room.Name, Is.EqualTo(_roomName));
             Assert.That(room.Description, Is.EqualTo(_roomDescription));
-            Assert.That(room.Image, Is.EqualTo(_roomImage));
+            Assert.That(room.Images, Is.EqualTo(_roomImages));
         }
 
         [Test]
         public void Create_Should_Handle_Optional_Parameters()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, new List<GalleryImage>());
 
-            Assert.That(room.Image, Is.EqualTo(string.Empty));
+            Assert.That(room.Images, Is.Empty);
         }
 
         [Test]
@@ -69,29 +74,29 @@ namespace WPHBookingSystem.Domain.Tests
             var room = Room.Create(_roomName, null, _roomPrice, _roomCapacity, null);
 
             Assert.That(room.Description, Is.EqualTo(string.Empty));
-            Assert.That(room.Image, Is.EqualTo(string.Empty));
+            Assert.That(room.Images, Is.Empty);
         }
 
         [Test]
         public void Create_Should_Throw_If_Name_Is_Null_Or_Empty()
         {
-            Assert.Throws<DomainException>(() => Room.Create(null, _roomDescription, _roomPrice, _roomCapacity));
-            Assert.Throws<DomainException>(() => Room.Create("", _roomDescription, _roomPrice, _roomCapacity));
-            Assert.Throws<DomainException>(() => Room.Create("   ", _roomDescription, _roomPrice, _roomCapacity));
+            Assert.Throws<DomainException>(() => Room.Create(null, _roomDescription, _roomPrice, _roomCapacity, _roomImages));
+            Assert.Throws<DomainException>(() => Room.Create("", _roomDescription, _roomPrice, _roomCapacity, _roomImages));
+            Assert.Throws<DomainException>(() => Room.Create("   ", _roomDescription, _roomPrice, _roomCapacity, _roomImages));
         }
 
         [Test]
         public void Create_Should_Throw_If_Price_Is_Zero_Or_Negative()
         {
-            Assert.Throws<DomainException>(() => Room.Create(_roomName, _roomDescription, 0, _roomCapacity));
-            Assert.Throws<DomainException>(() => Room.Create(_roomName, _roomDescription, -50, _roomCapacity));
+            Assert.Throws<DomainException>(() => Room.Create(_roomName, _roomDescription, 0, _roomCapacity, _roomImages));
+            Assert.Throws<DomainException>(() => Room.Create(_roomName, _roomDescription, -50, _roomCapacity, _roomImages));
         }
 
         [Test]
         public void Create_Should_Throw_If_Capacity_Is_Zero_Or_Negative()
         {
-            Assert.Throws<DomainException>(() => Room.Create(_roomName, _roomDescription, _roomPrice, 0));
-            Assert.Throws<DomainException>(() => Room.Create(_roomName, _roomDescription, _roomPrice, -1));
+            Assert.Throws<DomainException>(() => Room.Create(_roomName, _roomDescription, _roomPrice, 0, _roomImages));
+            Assert.Throws<DomainException>(() => Room.Create(_roomName, _roomDescription, _roomPrice, -1, _roomImages));
         }
 
         #endregion
@@ -101,47 +106,51 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void UpdateDetails_Should_Update_Room_Properties()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImage);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var newName = "Premium Suite";
             var newDescription = "Luxury room with balcony";
             var newPrice = 200.00m;
             var newCapacity = 4;
-            var newImage = "premium-suite.jpg";
+            var newImages = new List<GalleryImage>
+            {
+                new GalleryImage { FileName = "premium1.jpg" },
+                new GalleryImage { FileName = "premium2.jpg" }
+            };
 
-            room.UpdateDetails(newName, newDescription, newPrice, newCapacity, newImage);
+            room.UpdateDetails(newName, newDescription, newPrice, newCapacity, newImages);
 
             Assert.That(room.Name, Is.EqualTo(newName));
             Assert.That(room.Description, Is.EqualTo(newDescription));
             Assert.That(room.Price, Is.EqualTo(newPrice));
             Assert.That(room.Capacity, Is.EqualTo(newCapacity));
-            Assert.That(room.Image, Is.EqualTo(newImage));
+            Assert.That(room.Images, Is.EqualTo(newImages));
         }
 
         [Test]
         public void UpdateDetails_Should_Throw_If_Name_Is_Invalid()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
-            Assert.Throws<DomainException>(() => room.UpdateDetails("", _roomDescription, _roomPrice, _roomCapacity));
-            Assert.Throws<DomainException>(() => room.UpdateDetails(null, _roomDescription, _roomPrice, _roomCapacity));
+            Assert.Throws<DomainException>(() => room.UpdateDetails("", _roomDescription, _roomPrice, _roomCapacity, _roomImages));
+            Assert.Throws<DomainException>(() => room.UpdateDetails(null, _roomDescription, _roomPrice, _roomCapacity, _roomImages));
         }
 
         [Test]
         public void UpdateDetails_Should_Throw_If_Price_Is_Invalid()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
-            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, 0, _roomCapacity));
-            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, -100, _roomCapacity));
+            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, 0, _roomCapacity, _roomImages));
+            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, -100, _roomCapacity, _roomImages));
         }
 
         [Test]
         public void UpdateDetails_Should_Throw_If_Capacity_Is_Invalid()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
-            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, _roomPrice, 0));
-            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, _roomPrice, -1));
+            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, _roomPrice, 0, _roomImages));
+            Assert.Throws<DomainException>(() => room.UpdateDetails(_roomName, _roomDescription, _roomPrice, -1, _roomImages));
         }
 
         #endregion
@@ -151,7 +160,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void IsAvailable_Should_Return_True_For_Available_Room_With_No_Bookings()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var checkIn = DateTime.UtcNow.AddDays(1);
             var checkOut = DateTime.UtcNow.AddDays(3);
 
@@ -163,7 +172,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void IsAvailable_Should_Return_False_For_Inactive_Room()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             room.Deactivate();
             var checkIn = DateTime.UtcNow.AddDays(1);
             var checkOut = DateTime.UtcNow.AddDays(3);
@@ -176,7 +185,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void IsAvailable_Should_Return_False_For_Maintenance_Room()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             room.SetMaintenance();
             var checkIn = DateTime.UtcNow.AddDays(1);
             var checkOut = DateTime.UtcNow.AddDays(3);
@@ -189,7 +198,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void IsAvailable_Should_Return_False_For_Overlapping_Confirmed_Booking()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var existingCheckIn = DateTime.UtcNow.AddDays(2);
             var existingCheckOut = DateTime.UtcNow.AddDays(4);
             var existingBooking = CreateBookingWithStatus(_userId, room.Id, existingCheckIn, existingCheckOut, BookingStatus.Confirmed);
@@ -207,7 +216,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void IsAvailable_Should_Return_True_For_Non_Overlapping_Dates()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var existingCheckIn = DateTime.UtcNow.AddDays(2);
             var existingCheckOut = DateTime.UtcNow.AddDays(4);
             var existingBooking = CreateBookingWithStatus(_userId, room.Id, existingCheckIn, existingCheckOut, BookingStatus.Confirmed);
@@ -225,7 +234,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void IsAvailable_Should_Return_True_For_Cancelled_Booking_Dates()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var existingCheckIn = DateTime.UtcNow.AddDays(2);
             var existingCheckOut = DateTime.UtcNow.AddDays(4);
             var cancelledBooking = CreateBookingWithStatus(_userId, room.Id, existingCheckIn, existingCheckOut, BookingStatus.Cancelled);
@@ -243,7 +252,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void IsAvailable_Should_Throw_If_Start_Date_After_End_Date()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var checkIn = DateTime.UtcNow.AddDays(5);
             var checkOut = DateTime.UtcNow.AddDays(3);
 
@@ -257,7 +266,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void AddBooking_Should_Add_Booking_When_Room_Is_Available()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var checkIn = DateTime.UtcNow.AddDays(1);
             var checkOut = DateTime.UtcNow.AddDays(3);
             var booking = CreateBookingWithStatus(_userId, room.Id, checkIn, checkOut, BookingStatus.Pending);
@@ -271,7 +280,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void AddBooking_Should_Throw_If_Booking_Is_Null()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
             Assert.Throws<DomainException>(() => room.AddBooking(null));
         }
@@ -279,7 +288,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void AddBooking_Should_Throw_If_Booking_RoomId_Mismatch()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var differentRoomId = Guid.NewGuid();
             var checkIn = DateTime.UtcNow.AddDays(1);
             var checkOut = DateTime.UtcNow.AddDays(3);
@@ -291,7 +300,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void AddBooking_Should_Throw_If_Room_Not_Available()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var checkIn = DateTime.UtcNow.AddDays(1);
             var checkOut = DateTime.UtcNow.AddDays(3);
 
@@ -312,7 +321,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Activate_Should_Set_Status_To_Available()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             room.Deactivate();
 
             room.Activate();
@@ -323,7 +332,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Activate_Should_Throw_If_Already_Active()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
             Assert.Throws<DomainException>(() => room.Activate());
         }
@@ -331,7 +340,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Deactivate_Should_Set_Status_To_Inactive()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
             room.Deactivate();
 
@@ -341,7 +350,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Deactivate_Should_Throw_If_Already_Inactive()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             room.Deactivate();
 
             Assert.Throws<DomainException>(() => room.Deactivate());
@@ -350,7 +359,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void Deactivate_Should_Throw_If_Has_Future_Bookings()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var futureCheckIn = DateTime.UtcNow.AddDays(5);
             var futureCheckOut = DateTime.UtcNow.AddDays(7);
             var futureBooking = CreateBookingWithStatus(_userId, room.Id, futureCheckIn, futureCheckOut, BookingStatus.Confirmed);
@@ -362,7 +371,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void SetMaintenance_Should_Set_Status_To_Maintenance()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
             room.SetMaintenance();
 
@@ -372,7 +381,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void SetMaintenance_Should_Throw_If_Already_In_Maintenance()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             room.SetMaintenance();
 
             Assert.Throws<DomainException>(() => room.SetMaintenance());
@@ -381,7 +390,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void SetMaintenance_Should_Throw_If_Has_Future_Bookings()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var futureCheckIn = DateTime.UtcNow.AddDays(5);
             var futureCheckOut = DateTime.UtcNow.AddDays(7);
             var futureBooking = CreateBookingWithStatus(_userId, room.Id, futureCheckIn, futureCheckOut, BookingStatus.Confirmed);
@@ -397,7 +406,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void CalculateRevenue_Should_Return_Zero_For_No_Completed_Bookings()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
             var revenue = room.CalculateRevenue();
 
@@ -407,7 +416,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void CalculateRevenue_Should_Sum_Completed_Bookings()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var booking1 = CreateBookingWithStatus(_userId, room.Id, DateTime.UtcNow.AddDays(-10), DateTime.UtcNow.AddDays(-8), BookingStatus.Completed, 100m);
             var booking2 = CreateBookingWithStatus(_userId, room.Id, DateTime.UtcNow.AddDays(-6), DateTime.UtcNow.AddDays(-4), BookingStatus.Completed, 150m);
             var booking3 = CreateBookingWithStatus(_userId, room.Id, DateTime.UtcNow.AddDays(-2), DateTime.UtcNow.AddDays(1), BookingStatus.Confirmed, 200m); // Not completed
@@ -423,7 +432,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void CalculateRevenue_Should_Filter_By_Date_Range()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var booking1 = CreateBookingWithStatus(_userId, room.Id, DateTime.UtcNow.AddDays(-20), DateTime.UtcNow.AddDays(-18), BookingStatus.Completed, 100m);
             var booking2 = CreateBookingWithStatus(_userId, room.Id, DateTime.UtcNow.AddDays(-10), DateTime.UtcNow.AddDays(-8), BookingStatus.Completed, 150m);
             room.AddBooking(booking1);
@@ -441,7 +450,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void GetOccupancyRate_Should_Return_Zero_For_No_Completed_Bookings()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var startDate = DateTime.UtcNow.AddDays(-30);
             var endDate = DateTime.UtcNow;
 
@@ -453,7 +462,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void GetOccupancyRate_Should_Calculate_Correct_Percentage()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
             var startDate = DateTime.UtcNow.AddDays(-10);
             var endDate = DateTime.UtcNow;
 
@@ -469,7 +478,7 @@ namespace WPHBookingSystem.Domain.Tests
         [Test]
         public void GetOccupancyRate_Should_Throw_If_Start_Date_After_End_Date()
         {
-            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity);
+            var room = Room.Create(_roomName, _roomDescription, _roomPrice, _roomCapacity, _roomImages);
 
             Assert.Throws<DomainException>(() => room.GetOccupancyRate(DateTime.UtcNow, DateTime.UtcNow.AddDays(-1)));
         }
