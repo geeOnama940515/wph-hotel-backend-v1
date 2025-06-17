@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Scalar.AspNetCore;
 using WPHBookingSystem.Application;
 using WPHBookingSystem.Infrastructure;
@@ -23,8 +24,36 @@ builder.Services.ApplicationDependencyiInjection();
 // Register infrastructure layer services (database, identity, repositories)
 builder.Services.AddInfrastructureInjection(builder.Configuration);
 
-// Add MVC controllers for API endpoints
-builder.Services.AddControllers();
+// Add MVC controllers for API endpoints with proper validation
+builder.Services.AddControllers(options =>
+{
+    // Configure model validation to return 400 Bad Request for validation errors
+    options.SuppressModelStateInvalidFilter = false;
+});
+
+// Configure API behavior for consistent error responses
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = false;
+    options.InvalidModelStateResponseFactory = actionContext =>
+    {
+        var errors = actionContext.ModelState
+            .Where(e => e.Value.Errors.Count > 0)
+            .ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+            );
+
+        return new BadRequestObjectResult(new
+        {
+            success = false,
+            message = "One or more validation errors occurred.",
+            status = 400,
+            errors = errors,
+            traceId = actionContext.HttpContext.TraceIdentifier
+        });
+    };
+});
 
 // Configure OpenAPI/Swagger documentation
 builder.Services.AddOpenApi();
@@ -41,6 +70,9 @@ if (app.Environment.IsDevelopment())
 
 // Redirect HTTP requests to HTTPS for security
 app.UseHttpsRedirection();
+
+// Enable authentication middleware (must come before authorization)
+app.UseAuthentication();
 
 // Enable authorization middleware for protected endpoints
 app.UseAuthorization();

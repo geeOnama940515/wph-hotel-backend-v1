@@ -88,11 +88,11 @@ WPHBookingSystem/
 ### Web Framework
 - **ASP.NET Core**: Cross-platform web framework
 - **Web API**: RESTful API development
-- **OpenAPI/Swagger**: API documentation and testing
+- **Scalar**: Modern API documentation and testing interface
 
 ### Database & ORM
 - **Entity Framework Core 9**: Modern ORM with code-first approach
-- **SQL Server**: Primary database (configurable via connection string)
+- **Neon PostgreSQL**: Serverless PostgreSQL database
 - **Code-First Migrations**: Database schema management
 
 ### Authentication & Authorization
@@ -110,7 +110,7 @@ WPHBookingSystem/
 Before running the application, ensure you have the following installed:
 
 - **.NET 9 SDK**: [Download here](https://dotnet.microsoft.com/download/dotnet/9.0)
-- **SQL Server**: Local instance or Azure SQL Database
+- **Neon PostgreSQL Database**: [Sign up here](https://neon.tech)
 - **Docker** (optional): For containerized deployment
 - **Visual Studio 2022** or **VS Code**: IDE with C# support
 
@@ -124,20 +124,31 @@ cd wph-hotel-backend-v1
 
 ### 2. **Database Setup**
 
-#### Option A: Local SQL Server
-1. Install SQL Server (Express, Developer, or LocalDB)
-2. Update connection string in `WPHBookingSystem.WebUI/appsettings.json`:
+#### Neon PostgreSQL Setup
+1. **Create a Neon Account**: Sign up at [neon.tech](https://neon.tech)
+2. **Create a New Project**: Follow the Neon dashboard to create a new PostgreSQL project
+3. **Get Connection String**: Copy the connection string from your Neon dashboard
+4. **Update Configuration**: Add the connection string to your configuration
+
+#### Configuration Options
+
+**Option A: appsettings.json (Development)**
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=WPHHotelDB;Trusted_Connection=true;TrustServerCertificate=true;"
+    "DefaultConnection": "Host=your-neon-host;Database=your-database;Username=your-username;Password=your-password;"
   }
 }
 ```
 
-#### Option B: Docker SQL Server
+**Option B: User Secrets (Recommended for Development)**
 ```bash
-docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrongPassword123!" -p 1433:1433 --name sqlserver -d mcr.microsoft.com/mssql/server:2022-latest
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=your-neon-host;Database=your-database;Username=your-username;Password=your-password;"
+```
+
+**Option C: Environment Variables (Production)**
+```bash
+export ConnectionStrings__DefaultConnection="Host=your-neon-host;Database=your-database;Username=your-username;Password=your-password;"
 ```
 
 ### 3. **Database Migrations**
@@ -168,8 +179,9 @@ dotnet run
 ```
 
 The API will be available at:
-- **Swagger UI**: https://localhost:7001/swagger
-- **API Base URL**: https://localhost:7001/api
+- **Scalar UI (HTTP)**: http://localhost:5187/scalar
+- **Scalar UI (HTTPS)**: https://localhost:7153/scalar
+- **API Base URL**: https://localhost:7153/api
 
 ### 5. **Docker Deployment** (Optional)
 ```bash
@@ -305,7 +317,7 @@ dotnet test WPHBookingSystem.Application.Tests
 
 ### User Secrets (Development)
 ```bash
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "your-connection-string"
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=your-neon-host;Database=your-database;Username=your-username;Password=your-password;"
 dotnet user-secrets set "JwtSettings:SecretKey" "your-secret-key"
 ```
 
