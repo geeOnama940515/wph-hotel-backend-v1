@@ -8,8 +8,17 @@ using WPHBookingSystem.Domain.Enums;
 
 namespace WPHBookingSystem.Application.UseCases.Rooms
 {
+    /// <summary>
+    /// Request record for updating room status operations.
+    /// </summary>
+    /// <param name="RoomId">The unique identifier of the room to update.</param>
+    /// <param name="NewStatus">The new status to assign to the room.</param>
     public record UpdateRoomStatusRequest(Guid RoomId, RoomStatus NewStatus);
     
+    /// <summary>
+    /// Use case responsible for updating room operational status.
+    /// Handles status transition business logic and validation.
+    /// </summary>
     public class UpdateRoomStatusUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -19,6 +28,12 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Updates room status based on the requested status transition.
+        /// Validates room existence and enforces domain business rules for status changes.
+        /// </summary>
+        /// <param name="request">The request containing room ID and new status.</param>
+        /// <returns>A result containing the updated room information or error details.</returns>
         public async Task<Result<RoomDto>> ExecuteAsync(UpdateRoomStatusRequest request)
         {
             try

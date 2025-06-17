@@ -7,6 +7,10 @@ using WPHBookingSystem.Domain.Entities;
 
 namespace WPHBookingSystem.Application.UseCases.Rooms
 {
+    /// <summary>
+    /// Use case responsible for retrieving a specific room by its unique identifier.
+    /// Provides detailed room information for individual room views.
+    /// </summary>
     public class GetRoomByIdUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -16,6 +20,11 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Retrieves a room by its ID and maps it to a DTO for API response.
+        /// </summary>
+        /// <param name="roomId">The unique identifier of the room to retrieve.</param>
+        /// <returns>A result containing the room information or error details.</returns>
         public async Task<Result<RoomDto>> ExecuteAsync(Guid roomId)
         {
             try

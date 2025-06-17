@@ -9,6 +9,10 @@ using WPHBookingSystem.Domain.Exceptions;
 
 namespace WPHBookingSystem.Application.UseCases.Bookings
 {
+    /// <summary>
+    /// Use case responsible for updating booking status transitions.
+    /// Handles status change business logic and enforces valid state transitions.
+    /// </summary>
     public class UpdateBookingStatusUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -18,6 +22,12 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Updates the status of a booking based on the requested status transition.
+        /// Validates booking existence and enforces domain business rules for status changes.
+        /// </summary>
+        /// <param name="request">The request containing booking ID and new status.</param>
+        /// <returns>A result containing the updated booking information or error details.</returns>
         public async Task<Result<BookingDto>> ExecuteAsync(UpdateBookingStatusRequest request)
         {
             try

@@ -8,6 +8,10 @@ using WPHBookingSystem.Domain.Exceptions;
 
 namespace WPHBookingSystem.Application.UseCases.Bookings
 {
+    /// <summary>
+    /// Use case responsible for updating booking check-in and check-out dates.
+    /// Handles date validation and booking modification business logic.
+    /// </summary>
     public class UpdateBookingDatesUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -17,6 +21,13 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Updates the check-in and check-out dates for an existing booking.
+        /// Validates booking existence and enforces domain business rules for date changes.
+        /// </summary>
+        /// <param name="bookingId">The unique identifier of the booking to update.</param>
+        /// <param name="dto">The data transfer object containing new check-in and check-out dates.</param>
+        /// <returns>A result containing the updated booking information or error details.</returns>
         public async Task<Result<BookingDto>> ExecuteAsync(Guid bookingId, UpdateBookingDateDto dto)
         {
             try

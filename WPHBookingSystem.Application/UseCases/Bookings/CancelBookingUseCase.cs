@@ -8,6 +8,10 @@ using WPHBookingSystem.Domain.Exceptions;
 
 namespace WPHBookingSystem.Application.UseCases.Bookings
 {
+    /// <summary>
+    /// Use case responsible for cancelling existing bookings.
+    /// Handles booking cancellation business logic and status updates.
+    /// </summary>
     public class CancelBookingUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -17,6 +21,12 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Cancels a booking by updating its status and persisting the changes.
+        /// Validates booking existence and enforces business rules for cancellation.
+        /// </summary>
+        /// <param name="bookingId">The unique identifier of the booking to cancel.</param>
+        /// <returns>A result containing the cancelled booking information or error details.</returns>
         public async Task<Result<BookingDto>> ExecuteAsync(Guid bookingId)
         {
             try

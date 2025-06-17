@@ -7,6 +7,10 @@ using WPHBookingSystem.Domain.Entities;
 
 namespace WPHBookingSystem.Application.UseCases.Rooms
 {
+    /// <summary>
+    /// Use case responsible for updating room details and information.
+    /// Handles room modification business logic and validation.
+    /// </summary>
     public class UpdateRoomUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -16,6 +20,13 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Updates room details with new information and persists the changes.
+        /// Validates room existence and enforces domain business rules for updates.
+        /// </summary>
+        /// <param name="roomId">The unique identifier of the room to update.</param>
+        /// <param name="dto">The data transfer object containing updated room information.</param>
+        /// <returns>A result containing the updated room information or error details.</returns>
         public async Task<Result<RoomDto>> ExecuteAsync(Guid roomId, UpdateRoomDto dto)
         {
             try
