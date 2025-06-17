@@ -8,6 +8,7 @@ using WPHBookingSystem.Application.Interfaces.Services;
 using WPHBookingSystem.Application.UseCases.Rooms;
 using static WPHBookingSystem.Application.UseCases.Rooms.CheckRoomAvailabilityUseCase;
 using Microsoft.AspNetCore.Http;
+using WPHBookingSystem.WebUI.Extensions;
 
 namespace WPHBookingSystem.WebUI.Controllers
 {
@@ -219,7 +220,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpPost("{roomId}/images")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ImageUploadResponseDto>> UploadRoomImages(Guid roomId, IFormFileCollection files)
+        public async Task<IActionResult> UploadRoomImages(Guid roomId, IFormFileCollection files)
         {
             var result = await _bookingSystemFacade.UploadRoomImages(roomId, files);
             return this.CreateResponse(result);
@@ -240,7 +241,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpPost("{roomId}/image")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ImageUploadResponseDto>> UploadRoomImage(Guid roomId, IFormFile file)
+        public async Task<IActionResult> UploadRoomImage(Guid roomId, IFormFile file)
         {
             var files = new FormFileCollection { file };
             var result = await _bookingSystemFacade.UploadRoomImages(roomId, files);

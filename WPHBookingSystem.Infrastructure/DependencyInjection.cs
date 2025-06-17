@@ -13,6 +13,7 @@ using WPHBookingSystem.Application.Interfaces.Services;
 using WPHBookingSystem.Infrastructure.Identity;
 using WPHBookingSystem.Infrastructure.Persistence.Data;
 using WPHBookingSystem.Infrastructure.Repositories;
+using WPHBookingSystem.Infrastructure.Services;
 
 namespace WPHBookingSystem.Infrastructure
 {

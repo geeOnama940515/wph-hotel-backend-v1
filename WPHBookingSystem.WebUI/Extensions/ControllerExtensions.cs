@@ -28,7 +28,7 @@ namespace WPHBookingSystem.WebUI.Extensions
             {
                 success = result.IsSuccess,
                 message = result.Message,
-                data = result.IsSuccess ? result.Data : null,
+                data = result.IsSuccess ? result.Data : (object?)null,
                 errors = result.Errors
             };
 

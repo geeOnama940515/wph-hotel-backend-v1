@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Room;
+using WPHBookingSystem.Application.Interfaces;
 using WPHBookingSystem.Application.Interfaces.Services;
 using WPHBookingSystem.Domain.Entities;
 using WPHBookingSystem.Domain.Exceptions;
@@ -20,16 +21,14 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
     /// </summary>
     public class UploadRoomImagesUseCase
     {
-        private readonly IRoomRepository _roomRepository;
+        //private readonly IRoomRepository _roomRepository;
         private readonly IImageService _imageService;
         private readonly IUnitOfWork _unitOfWork;
 
         public UploadRoomImagesUseCase(
-            IRoomRepository roomRepository,
             IImageService imageService,
             IUnitOfWork unitOfWork)
         {
-            _roomRepository = roomRepository;
             _imageService = imageService;
             _unitOfWork = unitOfWork;
         }
@@ -47,14 +46,14 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
                 // Validate input
                 if (files == null || files.Count == 0)
                 {
-                    return Result<ImageUploadResponseDto>.Failure(400, "No image files provided");
+                    return Result<ImageUploadResponseDto>.Failure("No image files provided",400);
                 }
 
                 // Check if room exists
-                var room = await _roomRepository.GetByIdAsync(roomId);
+                var room = await _unitOfWork.RoomRepository.GetByIdAsync(roomId);
                 if (room == null)
                 {
-                    return Result<ImageUploadResponseDto>.Failure(404, "Room not found");
+                    return Result<ImageUploadResponseDto>.Failure("Room not found",404);
                 }
 
                 // Upload images
@@ -84,7 +83,7 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
                         updatedImages
                     );
 
-                    await _roomRepository.UpdateAsync(room);
+                    await _unitOfWork.RoomRepository.UpdateAsync(room);
                     await _unitOfWork.SaveChangesAsync();
                 }
 
@@ -108,15 +107,15 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
                 };
 
                 var statusCode = successfulUploads.Any() ? 200 : 400;
-                return Result<ImageUploadResponseDto>.Success(response, statusCode);
+                return Result<ImageUploadResponseDto>.Success(response,"Uploaded",statusCode);
             }
             catch (DomainException ex)
             {
-                return Result<ImageUploadResponseDto>.Failure(400, ex.Message);
+                return Result<ImageUploadResponseDto>.Failure( ex.Message,400);
             }
             catch (Exception ex)
             {
-                return Result<ImageUploadResponseDto>.Failure(500, "An error occurred while uploading images");
+                return Result<ImageUploadResponseDto>.Failure( "An error occurred while uploading images",500);
             }
         }
     }
