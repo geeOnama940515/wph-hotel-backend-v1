@@ -20,7 +20,7 @@ namespace WPHBookingSystem.WebUI.Controllers
     /// All endpoints (except view by token) require valid JWT authentication and
     /// use standardized response formats through the ControllerExtensions.
     /// </summary>
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class BookingController : ControllerBase

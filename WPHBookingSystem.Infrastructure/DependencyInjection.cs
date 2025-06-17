@@ -42,7 +42,7 @@ namespace WPHBookingSystem.Infrastructure
             // Register Entity Framework Core DbContext
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
             });
 
             // Register ASP.NET Core Identity

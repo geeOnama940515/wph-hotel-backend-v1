@@ -1,3 +1,4 @@
+using Scalar.AspNetCore;
 using WPHBookingSystem.Application;
 using WPHBookingSystem.Infrastructure;
 
@@ -35,6 +36,7 @@ if (app.Environment.IsDevelopment())
 {
     // Enable Swagger UI in development environment
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 // Redirect HTTP requests to HTTPS for security
