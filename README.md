@@ -243,6 +243,8 @@ Authorization: Bearer <your-jwt-token>
 | GET | `/api/room/room-availability` | Check room availability | None |
 | GET | `/api/room/room-occupancy-rate` | Get room occupancy rate | Admin |
 | GET | `/api/room/room-revenue` | Get room revenue | Admin |
+| POST | `/api/room/{roomId}/images` | Upload multiple images to room | Admin |
+| POST | `/api/room/{roomId}/image` | Upload single image to room | Admin |
 
 ### Booking Management Endpoints
 | Method | Endpoint | Description | Authorization |
@@ -379,7 +381,8 @@ For support and questions:
 - **v1.0.0**: Initial release with basic booking functionality
 - **v1.1.0**: Added comprehensive documentation and improved architecture
 - **v1.2.0**: Enhanced security and performance optimizations
+- **v1.3.0**: Added image upload functionality for rooms
 
 ---
 
-**Note**: This is a comprehensive hotel booking system designed for scalability and maintainability. The architecture follows industry best practices and is suitable for production deployment. 
+**Note**: This is a comprehensive hotel booking system designed for scalability and maintainability. The architecture follows industry best practices and is suitable for production deployment.

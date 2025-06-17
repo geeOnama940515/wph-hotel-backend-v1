@@ -71,6 +71,9 @@ if (app.Environment.IsDevelopment())
 // Redirect HTTP requests to HTTPS for security
 app.UseHttpsRedirection();
 
+// Enable static file serving for uploaded images
+app.UseStaticFiles();
+
 // Enable authentication middleware (must come before authorization)
 app.UseAuthentication();
 

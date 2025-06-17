@@ -80,6 +80,7 @@ namespace WPHBookingSystem.Infrastructure
 
             // Register Services
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IImageService, ImageService>();
 
             return services;
         }
