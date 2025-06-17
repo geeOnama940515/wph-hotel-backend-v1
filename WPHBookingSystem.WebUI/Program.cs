@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Scalar.AspNetCore;
 using WPHBookingSystem.Application;
 using WPHBookingSystem.Infrastructure;
+using WPHBookingSystem.Infrastructure.Identity;
 //using Microsoft.AspNetCore.Mvc;
 /// <summary>
 /// Main entry point for the WPH Hotel Booking System Web API.
@@ -14,6 +16,7 @@ using WPHBookingSystem.Infrastructure;
 /// - Authentication and authorization middleware
 /// - HTTPS redirection and security headers
 /// </summary>
+
 
 var builder = WebApplication.CreateBuilder(args);
 //ConfigurationManager configuration = builder.Configuration;
