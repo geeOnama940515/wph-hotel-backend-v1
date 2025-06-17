@@ -106,7 +106,7 @@ namespace WPHBookingSystem.Infrastructure.Identity
             }
 
             // Assign default role
-            await _userManager.AddToRoleAsync(user, "User");
+            await _userManager.AddToRoleAsync(user, "Administrator");
 
             return await GenerateAuthResponse(user);
         }
@@ -146,7 +146,7 @@ namespace WPHBookingSystem.Infrastructure.Identity
         private async Task<AuthResponse> GenerateAuthResponse(ApplicationUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            var role = roles.FirstOrDefault() ?? "User";
+            var role = roles.FirstOrDefault() ?? "Administrator";
 
             var token = GenerateJwtToken(user, role);
             var refreshToken = GenerateRefreshToken();
