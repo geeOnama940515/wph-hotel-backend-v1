@@ -183,6 +183,17 @@ namespace WPHBookingSystem.Application.Services
         }
 
         /// <summary>
+        /// Creates a new room with images by delegating to the CreateRoomUseCase.
+        /// </summary>
+        /// <param name="dto">The data transfer object containing room creation information.</param>
+        /// <param name="images">Optional collection of image files to upload with the room.</param>
+        /// <returns>A result containing the ID of the created room or error details.</returns>
+        public async Task<Result<Guid>> CreateRoom(CreateRoomDto dto, IFormFileCollection? images = null)
+        {
+            return await _createRoomUseCase.ExecuteAsync(dto, images);
+        }
+
+        /// <summary>
         /// Updates room details by delegating to the UpdateRoomUseCase.
         /// </summary>
         /// <param name="roomId">The unique identifier of the room to update.</param>

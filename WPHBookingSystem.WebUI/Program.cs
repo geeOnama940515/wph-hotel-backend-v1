@@ -35,7 +35,6 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 // Swagger (Swashbuckle)
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 // Request limits (upload)
 builder.Services.Configure<IISServerOptions>(options =>
