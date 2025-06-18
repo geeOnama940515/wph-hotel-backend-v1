@@ -43,5 +43,8 @@ namespace WPHBookingSystem.Application.DTOs.Room
 
         // Optional new images to add
         public List<Microsoft.AspNetCore.Http.IFormFile>? NewImages { get; set; } = new();
+
+        // Whether to replace existing images or add to them
+        public bool ReplaceExistingImages { get; set; } = false;
     }
 }
