@@ -91,8 +91,15 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPut("{bookingId}/dates")]
         public async Task<IActionResult> UpdateBookingDates(Guid bookingId, UpdateBookingDateDto dto)
         {
-            var result = await _facade.UpdateBooking(bookingId, dto);
-            return this.CreateResponse(result);
+            try
+            {
+                var result = await _facade.UpdateBooking(bookingId, dto);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                return this.CreateResponse(500, $"An error occurred while updating booking dates: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -109,8 +116,15 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPut("{bookingId}/status")]
         public async Task<IActionResult> UpdateBookingStatus(Guid bookingId, UpdateBookingStatusRequest request)
         {
-            var result = await _facade.UpdateBookingStatus(request);
-            return this.CreateResponse(result);
+            try
+            {
+                var result = await _facade.UpdateBookingStatus(request);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                return this.CreateResponse(500, $"An error occurred while updating booking status: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -127,8 +141,15 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPut("{bookingId}/cancel")]
         public async Task<IActionResult> CancelBooking(Guid bookingId)
         {
-            var result = await _facade.CancelBooking(bookingId);
-            return this.CreateResponse(result);
+            try
+            {
+                var result = await _facade.CancelBooking(bookingId);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                return this.CreateResponse(500, $"An error occurred while cancelling the booking: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -149,12 +170,19 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpGet("{emailAddres}/get-bookings")]
         public async Task<IActionResult> GetUserBookings(string emailAddres)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return this.CreateResponse(401, "User not authenticated");
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                    return this.CreateResponse(401, "User not authenticated");
 
-            var result = await _facade.GetUserBookings(emailAddres);
-            return this.CreateResponse(result);
+                var result = await _facade.GetUserBookings(emailAddres);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                return this.CreateResponse(500, $"An error occurred while retrieving user bookings: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -172,8 +200,15 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpGet("view/{bookingToken}")]
         public async Task<IActionResult> ViewBookingByToken(Guid bookingToken)
         {
-            var result = await _facade.ViewBookingByToken(bookingToken);
-            return this.CreateResponse(result);
+            try
+            {
+                var result = await _facade.ViewBookingByToken(bookingToken);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                return this.CreateResponse(500, $"An error occurred while retrieving booking details: {ex.Message}");
+            }
         }
 
         /// <summary>

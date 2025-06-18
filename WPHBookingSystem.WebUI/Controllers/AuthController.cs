@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Identity;
@@ -47,11 +48,18 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
-            var response = await _identityService.LoginAsync(request);
-            if (!response.Success)
-                return this.CreateResponse(400, response.Message);
+            try
+            {
+                var response = await _identityService.LoginAsync(request);
+                if (!response.Success)
+                    return this.CreateResponse(400, response.Message);
 
-            return this.CreateResponse(200, "Login successful", response);
+                return this.CreateResponse(200, "Login successful", response);
+            }
+            catch (Exception ex)
+            {
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -67,11 +75,18 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
-            var response = await _identityService.RegisterAsync(request);
-            if (!response.Success)
-                return this.CreateResponse(400, response.Message);
+            try
+            {
+                var response = await _identityService.RegisterAsync(request);
+                if (!response.Success)
+                    return this.CreateResponse(400, response.Message);
 
-            return this.CreateResponse(200, "Registration successful", response);
+                return this.CreateResponse(200, "Registration successful", response);
+            }
+            catch (Exception ex)
+            {
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -87,11 +102,18 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
         {
-            var response = await _identityService.RefreshTokenAsync(refreshToken);
-            if (!response.Success)
-                return this.CreateResponse(400, response.Message);
+            try
+            {
+                var response = await _identityService.RefreshTokenAsync(refreshToken);
+                if (!response.Success)
+                    return this.CreateResponse(400, response.Message);
 
-            return this.CreateResponse(200, "Token refreshed successfully", response);
+                return this.CreateResponse(200, "Token refreshed successfully", response);
+            }
+            catch (Exception ex)
+            {
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -107,8 +129,15 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPost("revoke-token")]
         public async Task<IActionResult> RevokeToken([FromBody] string refreshToken)
         {
-            var result = await _identityService.RevokeTokenAsync(refreshToken);
-            return this.CreateResponse(200, "Token revoked successfully", result);
+            try
+            {
+                var result = await _identityService.RevokeTokenAsync(refreshToken);
+                return this.CreateResponse(200, "Token revoked successfully", result);
+            }
+            catch (Exception ex)
+            {
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
         }
     }
 } 
