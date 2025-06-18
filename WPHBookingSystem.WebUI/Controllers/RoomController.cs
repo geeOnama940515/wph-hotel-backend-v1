@@ -1,16 +1,17 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using WPHBookingSystem.Application.DTOs;
 using WPHBookingSystem.Application.DTOs.Room;
 using WPHBookingSystem.Application.Interfaces.Services;
 using WPHBookingSystem.Application.UseCases.Rooms;
-using static WPHBookingSystem.Application.UseCases.Rooms.CheckRoomAvailabilityUseCase;
-using Microsoft.AspNetCore.Http;
 using WPHBookingSystem.WebUI.Extensions;
-using System.Linq;
-using Microsoft.Extensions.Logging;
+using static WPHBookingSystem.Application.UseCases.Rooms.CheckRoomAvailabilityUseCase;
 
 namespace WPHBookingSystem.WebUI.Controllers
 {
@@ -213,25 +214,25 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <summary>
         /// Test endpoint for file upload debugging.
         /// </summary>
-        [HttpPost("test-upload")]
-        [AllowAnonymous]
-        [Consumes("multipart/form-data")]
-        public async Task<IActionResult> TestUpload([FromForm] IFormFile file)
-        {
-            if (file == null)
-            {
-                return this.CreateResponse(400, "No file provided");
-            }
+        //[HttpPost("test-upload")]
+        //[AllowAnonymous]
+        //[Consumes("multipart/form-data")]
+        //public async Task<IActionResult> TestUpload([FromForm] FileUploadDto file)
+        //{
+        //    if (file == null)
+        //    {
+        //        return this.CreateResponse(400, "No file provided");
+        //    }
 
-            var result = new
-            {
-                fileName = file.FileName,
-                contentType = file.ContentType,
-                fileSize = file.Length
-            };
+        //    var result = new
+        //    {
+        //        fileName = file.FileName,
+        //        contentType = file.ContentType,
+        //        fileSize = file.Length
+        //    };
 
-            return this.CreateResponse(200, "File received successfully", result);
-        }
+        //    return this.CreateResponse(200, "File received successfully", result);
+        //}
 
         /// <summary>
         /// Uploads multiple images to a room.
@@ -249,19 +250,19 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPost("upload-images/{roomId}")]
         [AllowAnonymous] // Temporarily allow anonymous for debugging
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadRoomImages(Guid roomId, [FromForm] List<IFormFile> files)
+        public async Task<IActionResult> UploadRoomImages(Guid roomId, [FromForm] RoomImageUploadDto files)
         {
             _logger.LogInformation("=== UPLOAD ENDPOINT HIT ===");
-            _logger.LogInformation("UploadRoomImages called for room {RoomId} with {FileCount} files", roomId, files?.Count ?? 0);
+            _logger.LogInformation("UploadRoomImages called for room {RoomId} with {FileCount} files", roomId, files.Files?.Count ?? 0);
 
-            if (files == null || files.Count == 0)
+            if (files == null || files.Files.Count == 0)
             {
                 _logger.LogWarning("No files provided for room {RoomId}", roomId);
                 return this.CreateResponse(400, "No files provided");
             }
 
             // Filter out null or empty files
-            var validFiles = files.Where(f => f != null && f.Length > 0).ToList();
+            var validFiles = files.Files.Where(f => f != null && f.Length > 0).ToList();
 
             if (validFiles.Count == 0)
             {
@@ -293,8 +294,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPost("{roomId}/image")]
         [Authorize(Roles = "Admin")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadRoomImage(Guid roomId, [FromForm] IFormFile file)
+        public async Task<IActionResult> UploadRoomImage(Guid roomId, [FromForm] RoomImageDto dto)
         {
+            var file = dto.File;
+
             if (file == null || file.Length == 0)
             {
                 return this.CreateResponse(400, "No file provided");
@@ -304,6 +307,7 @@ namespace WPHBookingSystem.WebUI.Controllers
             var result = await _bookingSystemFacade.UploadRoomImages(roomId, fileCollection);
             return this.CreateResponse(result);
         }
+
 
         /// <summary>
         /// Test endpoint to verify controller is working.
