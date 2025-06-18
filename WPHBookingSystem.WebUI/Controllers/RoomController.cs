@@ -218,11 +218,19 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="400">Invalid files or room not found</response>
         /// <response code="401">User not authenticated</response>
         /// <response code="403">User not authorized (admin role required)</response>
+        /// 
+
+        [AllowAnonymous]
         [HttpPost("{roomId}/images")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UploadRoomImages(Guid roomId, IFormFileCollection files)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadRoomImages(Guid roomId, [FromForm] List<IFormFile> files)
         {
-            var result = await _bookingSystemFacade.UploadRoomImages(roomId, files);
+            // If your business logic expects IFormFileCollection, convert:
+            var fileCollection = new FormFileCollection();
+            foreach (var file in files)
+                fileCollection.Add(file);
+
+            var result = await _bookingSystemFacade.UploadRoomImages(roomId, fileCollection);
             return this.CreateResponse(result);
         }
 
