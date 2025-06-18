@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.IIS;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -23,42 +23,37 @@ using WPHBookingSystem.WebUI;
 
 
 var builder = WebApplication.CreateBuilder(args);
-//ConfigurationManager configuration = builder.Configuration;
 
-// Register application layer services (use cases, facades, DTOs)
+// App + Infrastructure layers
 builder.Services.ApplicationDependencyiInjection();
-
-// Register infrastructure layer services (database, identity, repositories)
 builder.Services.AddInfrastructureInjection(builder.Configuration);
-
 builder.Services.WebUIServices();
 
-// Add MVC controllers for API endpoints with proper validation
+// Controllers + Routing
 builder.Services.AddControllers();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-// Add health checks
+// Swagger (Swashbuckle)
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-
-// Configure request size limits for file uploads
+// Request limits (upload)
 builder.Services.Configure<IISServerOptions>(options =>
 {
-    options.MaxRequestBodySize = 52428800; // 50MB
+    options.MaxRequestBodySize = 52428800;
 });
-
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
-    options.Limits.MaxRequestBodySize = 52428800; // 50MB
+    options.Limits.MaxRequestBodySize = 52428800;
 });
-
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 52428800; // 50MB
+    options.MultipartBodyLengthLimit = 52428800;
     options.ValueLengthLimit = int.MaxValue;
     options.MultipartHeadersLengthLimit = int.MaxValue;
 });
 
-// Configure API behavior for consistent error responses
+// API Behavior
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.SuppressModelStateInvalidFilter = false;
@@ -82,55 +77,43 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
-// Configure OpenAPI/Swagger documentation
-builder.Services.AddOpenApi();
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
-{
-    // Enable Swagger UI in development environment
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
-app.MapOpenApi();
+// === HTTP Pipeline ===
+
+// Enable Swagger for all environments
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "WPH Hotel Booking API v1");
-    c.RoutePrefix = "swagger"; // Serve at /swagger
+    c.RoutePrefix = "swagger";
 });
 
-// Redirect HTTP requests to HTTPS for security
+// Redirect HTTP → HTTPS (optional)
 app.UseHttpsRedirection();
 
-// Enable static file serving for uploaded images
+// Serve images, static files
 app.UseStaticFiles();
 
-// Add request logging middleware for debugging
+// Log requests (for debugging)
 app.Use(async (context, next) =>
 {
     var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-    logger.LogInformation("Request: {Method} {Path} {ContentType}", 
-        context.Request.Method, 
-        context.Request.Path, 
+    logger.LogInformation("Request: {Method} {Path} {ContentType}",
+        context.Request.Method,
+        context.Request.Path,
         context.Request.ContentType);
-    
     await next();
-    
     logger.LogInformation("Response: {StatusCode}", context.Response.StatusCode);
 });
 
-// Enable authentication middleware (must come before authorization)
+// Auth & CORS
 app.UseCors("AllowDevOrigin");
 app.UseAuthentication();
-
-// Enable authorization middleware for protected endpoints
 app.UseAuthorization();
 
-// Map API controllers to routes
+// Map routes
 app.MapControllers();
 
-// Start the application
+// Run app
 app.Run();
