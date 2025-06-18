@@ -55,20 +55,20 @@ The application uses the following configuration:
 
 ### Ports
 
-- **6000**: API endpoint
+- **5069**: API endpoint
 
 ## API Endpoints
 
 Once deployed, the following endpoints will be available:
 
-- **Health Check**: `http://localhost:6000/health`
-- **API Base**: `http://localhost:6000/api`
-- **Swagger UI**: `http://localhost:6000/swagger`
+- **Health Check**: `http://localhost:5069/health`
+- **API Base**: `http://localhost:5069/api`
+- **Swagger UI**: `http://localhost:5069/swagger`
 
 ## File Uploads
 
 Uploaded images are stored in a Docker volume (`wph-hotel-images`) and are accessible at:
-- `http://localhost:6000/images/rooms/{filename}`
+- `http://localhost:5069/images/rooms/{filename}`
 
 ## Management Commands
 
@@ -116,7 +116,7 @@ The application includes health check endpoints:
 1. Check if Docker is running
 2. Check logs: `docker-compose logs wph-hotel-api`
 3. Verify database connection string
-4. Check if port 6000 is available
+4. Check if port 5069 is available
 
 ### Database Connection Issues
 
