@@ -53,13 +53,13 @@ print_status "Waiting for application to start..."
 sleep 10
 
 # Check if the application is running
-if curl -f http://localhost:6000/health > /dev/null 2>&1; then
+if curl -f http://localhost:5069/health > /dev/null 2>&1; then
     print_status "✅ Application is running successfully!"
     echo ""
     echo "🌐 API Endpoints:"
-    echo "   - Health Check: http://localhost:6000/health"
-    echo "   - API Base: http://localhost:6000/api"
-    echo "   - Swagger UI: http://localhost:6000/swagger"
+    echo "   - Health Check: http://localhost:5069/health"
+    echo "   - API Base: http://localhost:5069/api"
+    echo "   - Swagger UI: http://localhost:5069/swagger"
     echo ""
     echo "📊 Container Status:"
     docker-compose ps

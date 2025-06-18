@@ -8,10 +8,10 @@ services:
       dockerfile: WPHBookingSystem.WebUI/Dockerfile
     container_name: wph-hotel-api
     ports:
-      - "6000:6000"
+      - "5069:5069"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:6000
+      - ASPNETCORE_URLS=http://+:5069
       - ConnectionStrings__DefaultConnection=Host=ep-rough-brook-a15a4fjt-pooler.ap-southeast-1.aws.neon.tech;Database=wph-hotel;Username=neondb_owner;Password=npg_uKp9a4Wdvegn;Ssl Mode=Require;Trust Server Certificate=true
       - JwtSettings__Key=your-super-secret-key-with-at-least-256-bits-32-characters-long
       - JwtSettings__Issuer=WPHHotelAPI
