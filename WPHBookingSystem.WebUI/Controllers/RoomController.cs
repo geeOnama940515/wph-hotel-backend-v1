@@ -292,7 +292,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="401">User not authenticated</response>
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpPost("{roomId}/image")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Administrator")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadRoomImage(Guid roomId, [FromForm] RoomImageDto dto)
         {
