@@ -61,8 +61,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> CreateRoom(CreateRoomDto dto)
         {
-            var roomId = await _bookingSystemFacade.CreateRoom(dto);
-            return this.CreateResponse(200, "Room created successfully", roomId);
+            try
+            {
+                var roomId = await _bookingSystemFacade.CreateRoom(dto);
+                return this.CreateResponse(200, "Room created successfully", roomId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating room");
+                return this.CreateResponse(500, "An error occurred while creating the room");
+            }
         }
 
         /// <summary>
@@ -82,8 +90,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> UpdateRoom(Guid roomId, UpdateRoomDto dto)
         {
-            var room = await _bookingSystemFacade.UpdateRoom(roomId, dto);
-            return this.CreateResponse(200, "Room updated successfully", room);
+            try
+            {
+                var room = await _bookingSystemFacade.UpdateRoom(roomId, dto);
+                return this.CreateResponse(200, "Room updated successfully", room);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating room {RoomId}", roomId);
+                return this.CreateResponse(500, "An error occurred while updating the room");
+            }
         }
 
         /// <summary>
@@ -101,8 +117,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> UpdateRoomStatus([FromBody] UpdateRoomStatusRequest request)
         {
-            var room = await _bookingSystemFacade.UpdateRoomStatus(request);
-            return this.CreateResponse(200, "Room status updated successfully", room);
+            try
+            {
+                var room = await _bookingSystemFacade.UpdateRoomStatus(request);
+                return this.CreateResponse(200, "Room status updated successfully", room);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating room status");
+                return this.CreateResponse(500, "An error occurred while updating the room status");
+            }
         }
 
         /// <summary>
@@ -118,8 +142,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpGet("{roomId}")]
         public async Task<IActionResult> GetRoomById(Guid roomId)
         {
-            var room = await _bookingSystemFacade.GetRoomById(roomId);
-            return this.CreateResponse(200, "Room details retrieved successfully", room);
+            try
+            {
+                var room = await _bookingSystemFacade.GetRoomById(roomId);
+                return this.CreateResponse(200, "Room details retrieved successfully", room);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving room {RoomId}", roomId);
+                return this.CreateResponse(500, "An error occurred while retrieving the room details");
+            }
         }
 
         /// <summary>
@@ -133,8 +165,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllRooms()
         {
-            var rooms = await _bookingSystemFacade.GetAllRooms();
-            return this.CreateResponse(200, "Rooms retrieved successfully", rooms);
+            try
+            {
+                var rooms = await _bookingSystemFacade.GetAllRooms();
+                return this.CreateResponse(200, "Rooms retrieved successfully", rooms);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all rooms");
+                return this.CreateResponse(500, "An error occurred while retrieving the rooms");
+            }
         }
 
         /// <summary>
@@ -152,8 +192,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteRoom(Guid roomId)
         {
-            var result = await _bookingSystemFacade.DeleteRoom(roomId);
-            return this.CreateResponse(200, "Room deleted successfully", result);
+            try
+            {
+                var result = await _bookingSystemFacade.DeleteRoom(roomId);
+                return this.CreateResponse(200, "Room deleted successfully", result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting room {RoomId}", roomId);
+                return this.CreateResponse(500, "An error occurred while deleting the room");
+            }
         }
 
         /// <summary>
@@ -169,8 +217,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpGet("room-availability")]
         public async Task<IActionResult> CheckRoomAvailability([FromBody] CheckRoomAvailabilityRequest request)
         {
-            var isAvailable = await _bookingSystemFacade.CheckRoomAvailability(request);
-            return this.CreateResponse(200, "Availability check completed", isAvailable);
+            try
+            {
+                var isAvailable = await _bookingSystemFacade.CheckRoomAvailability(request);
+                return this.CreateResponse(200, "Availability check completed", isAvailable);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking room availability");
+                return this.CreateResponse(500, "An error occurred while checking room availability");
+            }
         }
 
         /// <summary>
@@ -188,8 +244,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetRoomOccupancyRate([FromBody] GetRoomOccupancyRateRequest request)
         {
-            var occupancyRate = await _bookingSystemFacade.GetRoomOccupancyRate(request);
-            return this.CreateResponse(200, "Occupancy rate calculated successfully", occupancyRate);
+            try
+            {
+                var occupancyRate = await _bookingSystemFacade.GetRoomOccupancyRate(request);
+                return this.CreateResponse(200, "Occupancy rate calculated successfully", occupancyRate);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calculating room occupancy rate");
+                return this.CreateResponse(500, "An error occurred while calculating room occupancy rate");
+            }
         }
 
         /// <summary>
@@ -207,8 +271,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetRoomRevenue([FromBody] GetRoomRevenueRequest request)
         {
-            var revenue = await _bookingSystemFacade.GetRoomRevenue(request);
-            return this.CreateResponse(200, "Revenue calculated successfully", revenue);
+            try
+            {
+                var revenue = await _bookingSystemFacade.GetRoomRevenue(request);
+                return this.CreateResponse(200, "Revenue calculated successfully", revenue);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calculating room revenue");
+                return this.CreateResponse(500, "An error occurred while calculating room revenue");
+            }
         }
 
         /// <summary>
@@ -252,30 +324,38 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadRoomImages(Guid roomId, [FromForm] RoomImageUploadDto files)
         {
-            _logger.LogInformation("=== UPLOAD ENDPOINT HIT ===");
-            _logger.LogInformation("UploadRoomImages called for room {RoomId} with {FileCount} files", roomId, files.Files?.Count ?? 0);
-
-            if (files == null || files.Files.Count == 0)
+            try
             {
-                _logger.LogWarning("No files provided for room {RoomId}", roomId);
-                return this.CreateResponse(400, "No files provided");
+                _logger.LogInformation("=== UPLOAD ENDPOINT HIT ===");
+                _logger.LogInformation("UploadRoomImages called for room {RoomId} with {FileCount} files", roomId, files.Files?.Count ?? 0);
+
+                if (files == null || files.Files.Count == 0)
+                {
+                    _logger.LogWarning("No files provided for room {RoomId}", roomId);
+                    return this.CreateResponse(400, "No files provided");
+                }
+
+                // Filter out null or empty files
+                var validFiles = files.Files.Where(f => f != null && f.Length > 0).ToList();
+
+                if (validFiles.Count == 0)
+                {
+                    _logger.LogWarning("No valid files provided for room {RoomId}", roomId);
+                    return this.CreateResponse(400, "No valid files provided");
+                }
+
+                _logger.LogInformation("Processing {ValidFileCount} valid files for room {RoomId}", validFiles.Count, roomId);
+
+                // Create a custom IFormFileCollection implementation
+                var fileCollection = new CustomFormFileCollection(validFiles);
+                var result = await _bookingSystemFacade.UploadRoomImages(roomId, fileCollection);
+                return this.CreateResponse(result);
             }
-
-            // Filter out null or empty files
-            var validFiles = files.Files.Where(f => f != null && f.Length > 0).ToList();
-
-            if (validFiles.Count == 0)
+            catch (Exception ex)
             {
-                _logger.LogWarning("No valid files provided for room {RoomId}", roomId);
-                return this.CreateResponse(400, "No valid files provided");
+                _logger.LogError(ex, "Error uploading room images for room {RoomId}", roomId);
+                return this.CreateResponse(500, "An error occurred while uploading room images");
             }
-
-            _logger.LogInformation("Processing {ValidFileCount} valid files for room {RoomId}", validFiles.Count, roomId);
-
-            // Create a custom IFormFileCollection implementation
-            var fileCollection = new CustomFormFileCollection(validFiles);
-            var result = await _bookingSystemFacade.UploadRoomImages(roomId, fileCollection);
-            return this.CreateResponse(result);
         }
 
         /// <summary>
@@ -296,16 +376,24 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadRoomImage(Guid roomId, [FromForm] RoomImageDto dto)
         {
-            var file = dto.File;
-
-            if (file == null || file.Length == 0)
+            try
             {
-                return this.CreateResponse(400, "No file provided");
-            }
+                var file = dto.File;
 
-            var fileCollection = new CustomFormFileCollection(new List<IFormFile> { file });
-            var result = await _bookingSystemFacade.UploadRoomImages(roomId, fileCollection);
-            return this.CreateResponse(result);
+                if (file == null || file.Length == 0)
+                {
+                    return this.CreateResponse(400, "No file provided");
+                }
+
+                var fileCollection = new CustomFormFileCollection(new List<IFormFile> { file });
+                var result = await _bookingSystemFacade.UploadRoomImages(roomId, fileCollection);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading room image for room {RoomId}", roomId);
+                return this.CreateResponse(500, "An error occurred while uploading room image");
+            }
         }
 
         /// <summary>
@@ -325,30 +413,38 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> CreateRoomWithImages([FromForm] CreateRoomWithImagesDto dto)
         {
-            _logger.LogInformation("Creating room with {ImageCount} images", dto.Images?.Count ?? 0);
-
-            // Convert to original DTO
-            var createRoomDto = new CreateRoomDto
+            try
             {
-                Name = dto.Name,
-                Description = dto.Description,
-                Price = dto.Price,
-                Capacity = dto.Capacity
-            };
+                _logger.LogInformation("Creating room with {ImageCount} images", dto.Images?.Count ?? 0);
 
-            // Convert images to IFormFileCollection
-            IFormFileCollection? imageCollection = null;
-            if (dto.Images?.Any() == true)
-            {
-                var validImages = dto.Images.Where(f => f != null && f.Length > 0).ToList();
-                if (validImages.Any())
+                // Convert to original DTO
+                var createRoomDto = new CreateRoomDto
                 {
-                    imageCollection = new CustomFormFileCollection(validImages);
-                }
-            }
+                    Name = dto.Name,
+                    Description = dto.Description,
+                    Price = dto.Price,
+                    Capacity = dto.Capacity
+                };
 
-            var roomId = await _bookingSystemFacade.CreateRoom(createRoomDto, imageCollection);
-            return this.CreateResponse(200, "Room created successfully with images", roomId);
+                // Convert images to IFormFileCollection
+                IFormFileCollection? imageCollection = null;
+                if (dto.Images?.Any() == true)
+                {
+                    var validImages = dto.Images.Where(f => f != null && f.Length > 0).ToList();
+                    if (validImages.Any())
+                    {
+                        imageCollection = new CustomFormFileCollection(validImages);
+                    }
+                }
+
+                var roomId = await _bookingSystemFacade.CreateRoom(createRoomDto, imageCollection);
+                return this.CreateResponse(200, "Room created successfully with images", roomId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating room with images");
+                return this.CreateResponse(500, "An error occurred while creating room with images");
+            }
         }
 
         /// <summary>
@@ -438,8 +534,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UpdateRoomWithImages(Guid roomId, [FromForm] UpdateRoomWithImagesDto dto)
         {
-            var room = await _bookingSystemFacade.UpdateRoomWithImages(roomId, dto);
-            return this.CreateResponse(200, "Room updated successfully with new images", room);
+            try
+            {
+                var room = await _bookingSystemFacade.UpdateRoomWithImages(roomId, dto);
+                return this.CreateResponse(200, "Room updated successfully with new images", room);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating room with images for room {RoomId}", roomId);
+                return this.CreateResponse(500, "An error occurred while updating room with images");
+            }
         }
     }
 
