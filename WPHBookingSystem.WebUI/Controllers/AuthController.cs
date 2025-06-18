@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Identity;
@@ -24,14 +26,17 @@ namespace WPHBookingSystem.WebUI.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IIdentityService _identityService;
+        private readonly ILogger<AuthController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the AuthController with the identity service.
         /// </summary>
         /// <param name="identityService">Service for handling user authentication and identity operations</param>
-        public AuthController(IIdentityService identityService)
+        /// <param name="logger">Logger for authentication operations</param>
+        public AuthController(IIdentityService identityService, ILogger<AuthController> logger)
         {
             _identityService = identityService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -47,11 +52,31 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
-            var response = await _identityService.LoginAsync(request);
-            if (!response.Success)
-                return this.CreateResponse(400, response.Message);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for login request");
+                return this.CreateResponse(400, "Invalid request data");
+            }
 
-            return this.CreateResponse(200, "Login successful", response);
+            _logger.LogInformation("Login attempt for user {Email}", request.Email);
+            
+            try
+            {
+                var response = await _identityService.LoginAsync(request);
+                if (!response.Success)
+                {
+                    _logger.LogWarning("Login failed for user {Email}", request.Email);
+                    return this.CreateResponse(400, response.Message);
+                }
+
+                _logger.LogInformation("Login successful for user {Email}", request.Email);
+                return this.CreateResponse(200, "Login successful", response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during login for user {Email}", request.Email);
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -67,11 +92,31 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
-            var response = await _identityService.RegisterAsync(request);
-            if (!response.Success)
-                return this.CreateResponse(400, response.Message);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for registration request");
+                return this.CreateResponse(400, "Invalid request data");
+            }
 
-            return this.CreateResponse(200, "Registration successful", response);
+            _logger.LogInformation("Registration attempt for user {Email}", request.Email);
+            
+            try
+            {
+                var response = await _identityService.RegisterAsync(request);
+                if (!response.Success)
+                {
+                    _logger.LogWarning("Registration failed for user {Email}", request.Email);
+                    return this.CreateResponse(400, response.Message);
+                }
+
+                _logger.LogInformation("Registration successful for user {Email}", request.Email);
+                return this.CreateResponse(200, "Registration successful", response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during registration for user {Email}", request.Email);
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -87,11 +132,31 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
         {
-            var response = await _identityService.RefreshTokenAsync(refreshToken);
-            if (!response.Success)
-                return this.CreateResponse(400, response.Message);
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                _logger.LogWarning("Refresh token request with empty token");
+                return this.CreateResponse(400, "Refresh token is required");
+            }
 
-            return this.CreateResponse(200, "Token refreshed successfully", response);
+            _logger.LogInformation("Token refresh attempt");
+            
+            try
+            {
+                var response = await _identityService.RefreshTokenAsync(refreshToken);
+                if (!response.Success)
+                {
+                    _logger.LogWarning("Token refresh failed");
+                    return this.CreateResponse(400, response.Message);
+                }
+
+                _logger.LogInformation("Token refresh successful");
+                return this.CreateResponse(200, "Token refreshed successfully", response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during token refresh");
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -107,8 +172,25 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPost("revoke-token")]
         public async Task<IActionResult> RevokeToken([FromBody] string refreshToken)
         {
-            var result = await _identityService.RevokeTokenAsync(refreshToken);
-            return this.CreateResponse(200, "Token revoked successfully", result);
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                _logger.LogWarning("Token revocation request with empty token");
+                return this.CreateResponse(400, "Refresh token is required");
+            }
+
+            _logger.LogInformation("Token revocation attempt");
+            
+            try
+            {
+                var result = await _identityService.RevokeTokenAsync(refreshToken);
+                _logger.LogInformation("Token revocation successful");
+                return this.CreateResponse(200, "Token revoked successfully", result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during token revocation");
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
         }
     }
 } 
