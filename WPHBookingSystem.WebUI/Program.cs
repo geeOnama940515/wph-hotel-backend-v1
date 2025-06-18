@@ -1,7 +1,13 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.IIS;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Http.Features;
 using Scalar.AspNetCore;
 using WPHBookingSystem.Application;
 using WPHBookingSystem.Infrastructure;
+using WPHBookingSystem.Infrastructure.Identity;
+using WPHBookingSystem.WebUI;
 //using Microsoft.AspNetCore.Mvc;
 /// <summary>
 /// Main entry point for the WPH Hotel Booking System Web API.
@@ -15,6 +21,7 @@ using WPHBookingSystem.Infrastructure;
 /// - HTTPS redirection and security headers
 /// </summary>
 
+
 var builder = WebApplication.CreateBuilder(args);
 //ConfigurationManager configuration = builder.Configuration;
 
@@ -24,9 +31,35 @@ builder.Services.ApplicationDependencyiInjection();
 // Register infrastructure layer services (database, identity, repositories)
 builder.Services.AddInfrastructureInjection(builder.Configuration);
 
+builder.Services.WebUIServices();
+
 // Add MVC controllers for API endpoints with proper validation
 builder.Services.AddControllers();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy())
+    .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!, name: "database");
+
+// Configure request size limits for file uploads
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 52428800; // 50MB
+});
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 52428800; // 50MB
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 52428800; // 50MB
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartHeadersLengthLimit = int.MaxValue;
+});
+
 // Configure API behavior for consistent error responses
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -64,13 +97,29 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+
 // Redirect HTTP requests to HTTPS for security
 app.UseHttpsRedirection();
 
 // Enable static file serving for uploaded images
 app.UseStaticFiles();
 
+// Add request logging middleware for debugging
+app.Use(async (context, next) =>
+{
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Request: {Method} {Path} {ContentType}", 
+        context.Request.Method, 
+        context.Request.Path, 
+        context.Request.ContentType);
+    
+    await next();
+    
+    logger.LogInformation("Response: {StatusCode}", context.Response.StatusCode);
+});
+
 // Enable authentication middleware (must come before authorization)
+app.UseCors("AllowDevOrigin");
 app.UseAuthentication();
 
 // Enable authorization middleware for protected endpoints

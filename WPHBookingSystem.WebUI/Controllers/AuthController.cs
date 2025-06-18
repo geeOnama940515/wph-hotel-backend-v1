@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Identity;
 using WPHBookingSystem.Application.Interfaces.Services;
+using WPHBookingSystem.WebUI.Extensions;
 
 namespace WPHBookingSystem.WebUI.Controllers
 {
@@ -11,7 +13,7 @@ namespace WPHBookingSystem.WebUI.Controllers
     /// 
     /// This controller handles user registration, login, token refresh, and token revocation.
     /// It uses the IIdentityService to perform authentication operations and returns
-    /// standardized AuthResponse objects with JWT tokens and user information.
+    /// standardized responses using the ControllerExtensions for consistency.
     /// 
     /// All endpoints are publicly accessible (no authentication required) as they handle
     /// the authentication process itself.
@@ -43,13 +45,13 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="200">Login successful, returns tokens and user info</response>
         /// <response code="400">Invalid credentials or authentication failed</response>
         [HttpPost("login")]
-        public async Task<ActionResult<AuthResponse>> Login(LoginRequest request)
+        public async Task<IActionResult> Login(LoginRequest request)
         {
             var response = await _identityService.LoginAsync(request);
             if (!response.Success)
-                return BadRequest(response);
+                return this.CreateResponse(400, response.Message);
 
-            return Ok(response);
+            return this.CreateResponse(200, "Login successful", response);
         }
 
         /// <summary>
@@ -63,13 +65,13 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="200">Registration successful, returns tokens and user info</response>
         /// <response code="400">Invalid registration data or user already exists</response>
         [HttpPost("register")]
-        public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request)
+        public async Task<IActionResult> Register(RegisterRequest request)
         {
             var response = await _identityService.RegisterAsync(request);
             if (!response.Success)
-                return BadRequest(response);
+                return this.CreateResponse(400, response.Message);
 
-            return Ok(response);
+            return this.CreateResponse(200, "Registration successful", response);
         }
 
         /// <summary>
@@ -83,13 +85,13 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="200">Token refresh successful</response>
         /// <response code="400">Invalid or expired refresh token</response>
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] string refreshToken)
+        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
         {
             var response = await _identityService.RefreshTokenAsync(refreshToken);
             if (!response.Success)
-                return BadRequest(response);
+                return this.CreateResponse(400, response.Message);
 
-            return Ok(response);
+            return this.CreateResponse(200, "Token refreshed successfully", response);
         }
 
         /// <summary>
@@ -103,10 +105,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <returns>Boolean indicating whether the token was successfully revoked</returns>
         /// <response code="200">Token revocation successful</response>
         [HttpPost("revoke-token")]
-        public async Task<ActionResult<bool>> RevokeToken([FromBody] string refreshToken)
+        public async Task<IActionResult> RevokeToken([FromBody] string refreshToken)
         {
             var result = await _identityService.RevokeTokenAsync(refreshToken);
-            return Ok(result);
+            return this.CreateResponse(200, "Token revoked successfully", result);
         }
     }
 } 

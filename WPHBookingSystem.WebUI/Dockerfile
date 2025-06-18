@@ -1,4 +1,4 @@
-# WPH Hotel Booking System - Docker Configuration
+# WPH Hotel Booking System - Production Docker Configuration
 # 
 # This Dockerfile creates a containerized version of the WPH Hotel Booking System Web API.
 # It uses a multi-stage build process to optimize the final image size and security.
@@ -13,42 +13,58 @@
 # and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 # Base stage - Runtime environment for the application
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-USER $APP_UID
 WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 6000
+
+# Set environment variables for production
+ENV ASPNETCORE_URLS=http://+:6000
+ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Build stage - SDK environment for compiling the application
-# This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copy project file and restore dependencies
+# Copy solution and project files first for better layer caching
+COPY ["wph-hotel-backend-v1.sln", "./"]
 COPY ["WPHBookingSystem.WebUI/WPHBookingSystem.WebUI.csproj", "WPHBookingSystem.WebUI/"]
-RUN dotnet restore "./WPHBookingSystem.WebUI/WPHBookingSystem.WebUI.csproj"
+COPY ["WPHBookingSystem.Application/WPHBookingSystem.Application.csproj", "WPHBookingSystem.Application/"]
+COPY ["WPHBookingSystem.Domain/WPHBookingSystem.Domain.csproj", "WPHBookingSystem.Domain/"]
+COPY ["WPHBookingSystem.Infrastructure/WPHBookingSystem.Infrastructure.csproj", "WPHBookingSystem.Infrastructure/"]
 
-# Copy all source code and build the application
+# Restore dependencies
+RUN dotnet restore "WPHBookingSystem.WebUI/WPHBookingSystem.WebUI.csproj"
+
+# Copy all source code
 COPY . .
+
+# Build the application
 WORKDIR "/src/WPHBookingSystem.WebUI"
-RUN dotnet build "./WPHBookingSystem.WebUI.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "WPHBookingSystem.WebUI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Publish stage - Intermediate stage for publishing the application
-# This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./WPHBookingSystem.WebUI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "WPHBookingSystem.WebUI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Final stage - Production-ready image
-# This stage is used in production or when running from VS in regular mode 
-# (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 
+# Create non-root user for security
+RUN adduser --disabled-password --gecos "" appuser && chown -R appuser /app
+USER appuser
+
 # Copy published application from publish stage
 COPY --from=publish /app/publish .
+
+# Create directory for uploaded images
+RUN mkdir -p /app/wwwroot/images/rooms && chown -R appuser /app/wwwroot
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:6000/health || exit 1
 
 # Set the entry point to run the application
 ENTRYPOINT ["dotnet", "WPHBookingSystem.WebUI.dll"]

@@ -32,7 +32,7 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var room = Room.Create(dto.Name, dto.Description, dto.Price, dto.Capacity, dto.Images);
+                var room = Room.Create(dto.Name, dto.Description, dto.Price, dto.Capacity);
                 await _unitOfWork.Repository<Room>().AddAsync(room);
                 await _unitOfWork.CommitTransactionAsync();
 
