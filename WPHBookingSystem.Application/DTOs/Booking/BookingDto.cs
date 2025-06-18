@@ -8,8 +8,8 @@ namespace WPHBookingSystem.Application.DTOs.Booking
     {
         public Guid Id { get; set; }
 
-        [Required(ErrorMessage = "User ID is required.")]
-        public Guid UserId { get; set; }
+        [Required(ErrorMessage = "Guest Name is required.")]
+        public string GuestName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Room ID is required.")]
         public Guid RoomId { get; set; }

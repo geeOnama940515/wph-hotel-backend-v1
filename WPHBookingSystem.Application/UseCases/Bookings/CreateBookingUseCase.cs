@@ -73,7 +73,8 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                     totalAmount,
                     contactInfo,
                     dto.EmailAddress,
-                    dto.SpecialRequests
+                    dto.SpecialRequests,
+                    dto.GuestName
                 );
 
                 // Persist the booking to the database
@@ -86,7 +87,7 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                 var bookingDto = new BookingDto
                 {
                     Id = booking.Id,
-                    UserId = booking.UserId,
+                    GuestName = booking.GuestName,
                     RoomId = booking.RoomId,
                     CheckIn = booking.CheckIn,
                     CheckOut = booking.CheckOut,
