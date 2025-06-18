@@ -35,5 +35,10 @@ namespace WPHBookingSystem.Application.DTOs.Booking
         [Required(ErrorMessage = "Email address is required.")]
         [EmailAddress(ErrorMessage = "Invalid email format.")]
         public string EmailAddress { get; set; } = string.Empty;
+
+
+        [Required(ErrorMessage = "Gueest Name is required.")]
+        [StringLength(50, ErrorMessage = "Guest Name cannot exceed 50 characters.")]
+        public string GuestName { get; set; } = string.Empty;
     }
 }
