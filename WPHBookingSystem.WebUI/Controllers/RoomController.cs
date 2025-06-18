@@ -9,6 +9,8 @@ using WPHBookingSystem.Application.UseCases.Rooms;
 using static WPHBookingSystem.Application.UseCases.Rooms.CheckRoomAvailabilityUseCase;
 using Microsoft.AspNetCore.Http;
 using WPHBookingSystem.WebUI.Extensions;
+using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace WPHBookingSystem.WebUI.Controllers
 {
@@ -28,14 +30,18 @@ namespace WPHBookingSystem.WebUI.Controllers
     public class RoomController : ControllerBase
     {
         private readonly IBookingSystemFacade _bookingSystemFacade;
+        private readonly ILogger<RoomController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the RoomController with the booking system facade.
         /// </summary>
         /// <param name="bookingSystemFacade">Service facade for coordinating room operations</param>
-        public RoomController(IBookingSystemFacade bookingSystemFacade)
+        /// <param name="logger">Logger for logging room-related operations</param>
+        public RoomController(IBookingSystemFacade bookingSystemFacade, ILogger<RoomController> logger)
         {
             _bookingSystemFacade = bookingSystemFacade;
+            _logger = logger;
+            _logger.LogInformation("RoomController initialized");
         }
 
         /// <summary>
@@ -52,10 +58,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Guid>> CreateRoom(CreateRoomDto dto)
+        public async Task<IActionResult> CreateRoom(CreateRoomDto dto)
         {
             var roomId = await _bookingSystemFacade.CreateRoom(dto);
-            return Ok(roomId);
+            return this.CreateResponse(200, "Room created successfully", roomId);
         }
 
         /// <summary>
@@ -73,10 +79,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpPut]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<RoomDto>> UpdateRoom(Guid roomId,UpdateRoomDto dto)
+        public async Task<IActionResult> UpdateRoom(Guid roomId, UpdateRoomDto dto)
         {
-            var room = await _bookingSystemFacade.UpdateRoom(roomId,dto);
-            return Ok(room);
+            var room = await _bookingSystemFacade.UpdateRoom(roomId, dto);
+            return this.CreateResponse(200, "Room updated successfully", room);
         }
 
         /// <summary>
@@ -92,10 +98,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpPut("{roomId}/status")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<RoomDto>> UpdateRoomStatus([FromBody] UpdateRoomStatusRequest request)
+        public async Task<IActionResult> UpdateRoomStatus([FromBody] UpdateRoomStatusRequest request)
         {
             var room = await _bookingSystemFacade.UpdateRoomStatus(request);
-            return Ok(room);
+            return this.CreateResponse(200, "Room status updated successfully", room);
         }
 
         /// <summary>
@@ -109,10 +115,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="200">Room details retrieved successfully</response>
         /// <response code="404">Room not found</response>
         [HttpGet("{roomId}")]
-        public async Task<ActionResult<RoomDto>> GetRoomById(Guid roomId)
+        public async Task<IActionResult> GetRoomById(Guid roomId)
         {
             var room = await _bookingSystemFacade.GetRoomById(roomId);
-            return Ok(room);
+            return this.CreateResponse(200, "Room details retrieved successfully", room);
         }
 
         /// <summary>
@@ -124,10 +130,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <returns>List of all rooms in the hotel</returns>
         /// <response code="200">Rooms retrieved successfully</response>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RoomDto>>> GetAllRooms()
+        public async Task<IActionResult> GetAllRooms()
         {
             var rooms = await _bookingSystemFacade.GetAllRooms();
-            return Ok(rooms);
+            return this.CreateResponse(200, "Rooms retrieved successfully", rooms);
         }
 
         /// <summary>
@@ -143,10 +149,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpDelete("{roomId}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<bool>> DeleteRoom(Guid roomId)
+        public async Task<IActionResult> DeleteRoom(Guid roomId)
         {
             var result = await _bookingSystemFacade.DeleteRoom(roomId);
-            return Ok(result);
+            return this.CreateResponse(200, "Room deleted successfully", result);
         }
 
         /// <summary>
@@ -160,11 +166,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="200">Availability check completed</response>
         /// <response code="400">Invalid request parameters</response>
         [HttpGet("room-availability")]
-        public async Task<ActionResult<bool>> CheckRoomAvailability([FromBody] CheckRoomAvailabilityRequest request)
+        public async Task<IActionResult> CheckRoomAvailability([FromBody] CheckRoomAvailabilityRequest request)
         {
-            //this.request.RoomId = roomId;
             var isAvailable = await _bookingSystemFacade.CheckRoomAvailability(request);
-            return Ok(isAvailable);
+            return this.CreateResponse(200, "Availability check completed", isAvailable);
         }
 
         /// <summary>
@@ -180,10 +185,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpGet("room-occupancy-rate")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<decimal>> GetRoomOccupancyRate([FromBody] GetRoomOccupancyRateRequest request)
+        public async Task<IActionResult> GetRoomOccupancyRate([FromBody] GetRoomOccupancyRateRequest request)
         {
             var occupancyRate = await _bookingSystemFacade.GetRoomOccupancyRate(request);
-            return Ok(occupancyRate);
+            return this.CreateResponse(200, "Occupancy rate calculated successfully", occupancyRate);
         }
 
         /// <summary>
@@ -199,10 +204,33 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpGet("room-revenue")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<decimal>> GetRoomRevenue([FromBody] GetRoomRevenueRequest request)
+        public async Task<IActionResult> GetRoomRevenue([FromBody] GetRoomRevenueRequest request)
         {
             var revenue = await _bookingSystemFacade.GetRoomRevenue(request);
-            return Ok(revenue);
+            return this.CreateResponse(200, "Revenue calculated successfully", revenue);
+        }
+
+        /// <summary>
+        /// Test endpoint for file upload debugging.
+        /// </summary>
+        [HttpPost("test-upload")]
+        [AllowAnonymous]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> TestUpload([FromForm] IFormFile file)
+        {
+            if (file == null)
+            {
+                return this.CreateResponse(400, "No file provided");
+            }
+
+            var result = new
+            {
+                fileName = file.FileName,
+                contentType = file.ContentType,
+                fileSize = file.Length
+            };
+
+            return this.CreateResponse(200, "File received successfully", result);
         }
 
         /// <summary>
@@ -218,18 +246,33 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="400">Invalid files or room not found</response>
         /// <response code="401">User not authenticated</response>
         /// <response code="403">User not authorized (admin role required)</response>
-        /// 
-
-        [AllowAnonymous]
-        [HttpPost("{roomId}/images")]
+        [HttpPost("upload-images/{roomId}")]
+        [AllowAnonymous] // Temporarily allow anonymous for debugging
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadRoomImages(Guid roomId, [FromForm] List<IFormFile> files)
         {
-            // If your business logic expects IFormFileCollection, convert:
-            var fileCollection = new FormFileCollection();
-            foreach (var file in files)
-                fileCollection.Add(file);
+            _logger.LogInformation("=== UPLOAD ENDPOINT HIT ===");
+            _logger.LogInformation("UploadRoomImages called for room {RoomId} with {FileCount} files", roomId, files?.Count ?? 0);
 
+            if (files == null || files.Count == 0)
+            {
+                _logger.LogWarning("No files provided for room {RoomId}", roomId);
+                return this.CreateResponse(400, "No files provided");
+            }
+
+            // Filter out null or empty files
+            var validFiles = files.Where(f => f != null && f.Length > 0).ToList();
+
+            if (validFiles.Count == 0)
+            {
+                _logger.LogWarning("No valid files provided for room {RoomId}", roomId);
+                return this.CreateResponse(400, "No valid files provided");
+            }
+
+            _logger.LogInformation("Processing {ValidFileCount} valid files for room {RoomId}", validFiles.Count, roomId);
+
+            // Create a custom IFormFileCollection implementation
+            var fileCollection = new CustomFormFileCollection(validFiles);
             var result = await _bookingSystemFacade.UploadRoomImages(roomId, fileCollection);
             return this.CreateResponse(result);
         }
@@ -249,11 +292,66 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpPost("{roomId}/image")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UploadRoomImage(Guid roomId, IFormFile file)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadRoomImage(Guid roomId, [FromForm] IFormFile file)
         {
-            var files = new FormFileCollection { file };
-            var result = await _bookingSystemFacade.UploadRoomImages(roomId, files);
+            if (file == null || file.Length == 0)
+            {
+                return this.CreateResponse(400, "No file provided");
+            }
+
+            var fileCollection = new CustomFormFileCollection(new List<IFormFile> { file });
+            var result = await _bookingSystemFacade.UploadRoomImages(roomId, fileCollection);
             return this.CreateResponse(result);
         }
+
+        /// <summary>
+        /// Test endpoint to verify controller is working.
+        /// </summary>
+        [HttpGet("test")]
+        [AllowAnonymous]
+        public IActionResult Test()
+        {
+            _logger.LogInformation("Test endpoint hit");
+            return this.CreateResponse(200, "RoomController is working", new { timestamp = DateTime.UtcNow });
+        }
+
+        /// <summary>
+        /// Test POST endpoint to verify POST routing is working.
+        /// </summary>
+        [HttpPost("test-post")]
+        [AllowAnonymous]
+        public IActionResult TestPost()
+        {
+            _logger.LogInformation("Test POST endpoint hit");
+            return this.CreateResponse(200, "POST routing is working", new { timestamp = DateTime.UtcNow });
+        }
+    }
+
+    /// <summary>
+    /// Custom implementation of IFormFileCollection for handling file uploads.
+    /// </summary>
+    public class CustomFormFileCollection : IFormFileCollection
+    {
+        private readonly List<IFormFile> _files;
+
+        public CustomFormFileCollection(List<IFormFile> files)
+        {
+            _files = files ?? new List<IFormFile>();
+        }
+
+        public IFormFile? this[string name] => _files.FirstOrDefault(f => f.Name == name);
+
+        public IFormFile? this[int index] => index >= 0 && index < _files.Count ? _files[index] : null;
+
+        public int Count => _files.Count;
+
+        public IEnumerator<IFormFile> GetEnumerator() => _files.GetEnumerator();
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IFormFile? GetFile(string name) => this[name];
+
+        public IReadOnlyList<IFormFile> GetFiles(string name) => _files.Where(f => f.Name == name).ToList();
     }
 } 
