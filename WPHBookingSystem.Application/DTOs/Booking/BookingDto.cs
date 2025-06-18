@@ -39,6 +39,13 @@ namespace WPHBookingSystem.Application.DTOs.Booking
         [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
         public string Address { get; set; } = string.Empty;
 
+        [EmailAddress(ErrorMessage = "Email address is not valid.")]
+        public string EmailAddress { get; set; } = string.Empty;
+
         public string? RoomName { get; set; } // Optional projection
+
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
     }
 }
