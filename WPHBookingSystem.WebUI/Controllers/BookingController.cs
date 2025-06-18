@@ -199,40 +199,61 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// </summary>
         /// <param name="emailAddres">Email address of the user whose bookings to retrieve</param>
         /// <returns>Standardized response with list of user bookings</returns>
-        /// <response code="200">Bookings retrieved successfully</response>
+        /// <response code="200">User bookings retrieved successfully</response>
+        /// <response code="400">Invalid email address</response>
         /// <response code="401">User not authenticated</response>
-        /// <response code="403">User not authorized to view these bookings</response>
-        /// 
-
         [AllowAnonymous]
         [HttpGet("{emailAddres}/get-bookings")]
         public async Task<IActionResult> GetUserBookings(string emailAddres)
         {
-            if (string.IsNullOrEmpty(emailAddres))
+            if (string.IsNullOrWhiteSpace(emailAddres))
             {
-                _logger.LogWarning("Get user bookings request with empty email address");
+                _logger.LogWarning("Empty or null email address provided for booking retrieval");
                 return this.CreateResponse(400, "Email address is required");
             }
 
-            _logger.LogInformation("Get user bookings attempt for email {Email}", emailAddres);
+            _logger.LogInformation("Retrieving bookings for user with email {EmailAddress}", emailAddres);
             
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    _logger.LogWarning("User not authenticated for bookings retrieval");
-                    return this.CreateResponse(401, "User not authenticated");
-                }
-
                 var result = await _facade.GetUserBookings(emailAddres);
-                _logger.LogInformation("User bookings retrieved successfully for email {Email}", emailAddres);
+                _logger.LogInformation("Successfully retrieved {Count} bookings for user {EmailAddress}", 
+                    result.Data?.Count ?? 0, emailAddres);
                 return this.CreateResponse(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving user bookings for email {Email}", emailAddres);
+                _logger.LogError(ex, "Error retrieving bookings for user {EmailAddress}", emailAddres);
                 return this.CreateResponse(500, $"An error occurred while retrieving user bookings: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Retrieves all bookings in the system.
+        /// 
+        /// Returns a list of all bookings including current, past, and cancelled bookings.
+        /// This endpoint provides administrative access to all booking data for management purposes.
+        /// </summary>
+        /// <returns>Standardized response with list of all bookings</returns>
+        /// <response code="200">All bookings retrieved successfully</response>
+        /// <response code="401">User not authenticated</response>
+        /// <response code="403">User not authorized for administrative access</response>
+        [HttpGet]
+        public async Task<IActionResult> GetAllBookings()
+        {
+            _logger.LogInformation("Retrieving all bookings in the system");
+            
+            try
+            {
+                var result = await _facade.GetAllBookings();
+                _logger.LogInformation("Successfully retrieved {Count} bookings from the system", 
+                    result.Data?.Count ?? 0);
+                return this.CreateResponse(200,"Bookings Retrieved",result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all bookings");
+                return this.CreateResponse(500, $"An error occurred while retrieving all bookings: {ex.Message}");
             }
         }
 
