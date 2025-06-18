@@ -28,14 +28,16 @@
                 {
                     builder.AllowAnyOrigin()
                            .AllowAnyMethod()
-                           .AllowAnyHeader();
+                           .AllowAnyHeader()
+                           .WithExposedHeaders("Content-Disposition");
                 });
 
                 options.AddPolicy("AllowProdOrigin", builder =>
                 {
                     builder.WithOrigins("https://backend.gregdoesdev.xyz") // Replace later with actual production URL
                            .AllowAnyMethod()
-                           .AllowAnyHeader();
+                           .AllowAnyHeader()
+                           .WithExposedHeaders("Content-Disposition");
                 });
             });
             // Web UI specific services can be registered here

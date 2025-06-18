@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.IIS;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Http.Features;
 using Scalar.AspNetCore;
 using WPHBookingSystem.Application;
 using WPHBookingSystem.Infrastructure;
@@ -33,6 +36,25 @@ builder.Services.WebUIServices();
 // Add MVC controllers for API endpoints with proper validation
 builder.Services.AddControllers();
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
+// Configure request size limits for file uploads
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = 52428800; // 50MB
+});
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 52428800; // 50MB
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 52428800; // 50MB
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartHeadersLengthLimit = int.MaxValue;
+});
+
 // Configure API behavior for consistent error responses
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -76,6 +98,20 @@ app.UseHttpsRedirection();
 
 // Enable static file serving for uploaded images
 app.UseStaticFiles();
+
+// Add request logging middleware for debugging
+app.Use(async (context, next) =>
+{
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Request: {Method} {Path} {ContentType}", 
+        context.Request.Method, 
+        context.Request.Path, 
+        context.Request.ContentType);
+    
+    await next();
+    
+    logger.LogInformation("Response: {StatusCode}", context.Response.StatusCode);
+});
 
 // Enable authentication middleware (must come before authorization)
 app.UseCors("AllowDevOrigin");
