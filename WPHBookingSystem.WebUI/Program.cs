@@ -95,6 +95,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.MapScalarApiReference();
 
 // Redirect HTTP requests to HTTPS for security
 app.UseHttpsRedirection();
