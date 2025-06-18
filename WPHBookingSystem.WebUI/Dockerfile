@@ -52,19 +52,11 @@ RUN dotnet publish "WPHBookingSystem.WebUI.csproj" -c $BUILD_CONFIGURATION -o /a
 FROM base AS final
 WORKDIR /app
 
-# Create non-root user for security
-RUN adduser --disabled-password --gecos "" appuser && chown -R appuser /app
-USER appuser
+# Create directory for uploaded images
+RUN mkdir -p /app/wwwroot/images/rooms
 
 # Copy published application from publish stage
 COPY --from=publish /app/publish .
-
-# Create directory for uploaded images
-RUN mkdir -p /app/wwwroot/images/rooms && chown -R appuser /app/wwwroot
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:6000/health || exit 1
 
 # Set the entry point to run the application
 ENTRYPOINT ["dotnet", "WPHBookingSystem.WebUI.dll"]
