@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Threading.Tasks;
 using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Room;
 using WPHBookingSystem.Application.Interfaces;
+using WPHBookingSystem.Application.Interfaces.Services;
 using WPHBookingSystem.Domain.Entities;
+using WPHBookingSystem.Domain.ValueObjects;
 
 namespace WPHBookingSystem.Application.UseCases.Rooms
 {
@@ -14,26 +17,51 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
     public class CreateRoomUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IImageUploadService _imageUploadService;
 
-        public CreateRoomUseCase(IUnitOfWork unitOfWork)
+        public CreateRoomUseCase(IUnitOfWork unitOfWork, IImageUploadService imageUploadService)
         {
             _unitOfWork = unitOfWork;
+            _imageUploadService = imageUploadService;
         }
 
         /// <summary>
-        /// Creates a new room with the specified details and persists it to the database.
-        /// Uses domain factory method for validation and business rule enforcement.
+        /// Creates a room without images.
         /// </summary>
-        /// <param name="dto">The room creation data transfer object.</param>
-        /// <returns>A result containing the created room ID or error details.</returns>
         public async Task<Result<Guid>> ExecuteAsync(CreateRoomDto dto)
+        {
+            return await ExecuteAsync(dto, null);
+        }
+
+        /// <summary>
+        /// Creates a room with optional images.
+        /// </summary>
+        public async Task<Result<Guid>> ExecuteAsync(CreateRoomDto dto, IFormFileCollection? images = null)
         {
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                var room = Room.Create(dto.Name, dto.Description, dto.Price, dto.Capacity);
-                await _unitOfWork.Repository<Room>().AddAsync(room);
+                // Process images first if provided
+                List<GalleryImage> galleryImages = new();
+                if (images != null && images.Count > 0)
+                {
+                    var validImages = images.Where(f => f != null && f.Length > 0).ToList();
+                    if (validImages.Any())
+                    {
+                        // Upload images and get filenames
+                        var filenames = await _imageUploadService.UploadImagesAsync(images);
+                        
+                        // Create GalleryImage objects from filenames
+                        galleryImages = filenames.Select(filename => new GalleryImage { FileName = filename }).ToList();
+                    }
+                }
+
+                // Create room with images
+                var room = Room.Create(dto.Name, dto.Description, dto.Price, dto.Capacity, galleryImages);
+
+                await _unitOfWork.RoomRepository.AddAsync(room);
+                await _unitOfWork.SaveChangesAsync();
                 await _unitOfWork.CommitTransactionAsync();
 
                 return Result<Guid>.Success(room.Id, "Room created successfully.");

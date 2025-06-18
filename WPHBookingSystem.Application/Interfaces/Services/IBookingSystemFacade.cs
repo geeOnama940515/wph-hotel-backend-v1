@@ -75,12 +75,21 @@ namespace WPHBookingSystem.Application.Interfaces.Services
         #region Room Operations
 
         /// <summary>
-        /// Creates a new room with the specified details.
-        /// This operation validates room information and creates the room entity.
+        /// Creates a new room in the hotel inventory.
+        /// This operation handles room creation with basic information and validation.
         /// </summary>
-        /// <param name="dto">The data transfer object containing all room creation information.</param>
+        /// <param name="dto">The data transfer object containing room creation information.</param>
         /// <returns>A result containing the ID of the created room or error details.</returns>
         Task<Result<Guid>> CreateRoom(CreateRoomDto dto);
+
+        /// <summary>
+        /// Creates a new room in the hotel inventory with optional images.
+        /// This operation handles room creation with basic information, validation, and image uploads.
+        /// </summary>
+        /// <param name="dto">The data transfer object containing room creation information.</param>
+        /// <param name="images">Optional collection of image files to upload with the room.</param>
+        /// <returns>A result containing the ID of the created room or error details.</returns>
+        Task<Result<Guid>> CreateRoom(CreateRoomDto dto, IFormFileCollection? images = null);
 
         /// <summary>
         /// Updates the details of an existing room.
