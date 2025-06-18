@@ -26,7 +26,7 @@ namespace WPHBookingSystem.Application.DTOs.Room
         public int Capacity { get; set; }
 
         // [StringLength(500, ErrorMessage = "Image URL cannot exceed 500 characters.")]
-        public List<GalleryImage> Images { get; set; } = new();
+        public List<GalleryImage>? Images { get; set; } = new();
 
         public RoomStatus Status { get; set; }
     }
