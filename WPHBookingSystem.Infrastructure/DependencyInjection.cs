@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using WPHBookingSystem.Application.DTOs.Email;
 using WPHBookingSystem.Application.Interfaces;
 using WPHBookingSystem.Application.Interfaces.Services;
 using WPHBookingSystem.Infrastructure.Identity;
@@ -106,6 +107,10 @@ namespace WPHBookingSystem.Infrastructure
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IImageUploadService, ImageUploadService>();
+            services.AddScoped<IEmailService, EmailService>();
+
+            // Configure Email Settings
+            services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
             //services.AddHealthChecks()
             //    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy())
