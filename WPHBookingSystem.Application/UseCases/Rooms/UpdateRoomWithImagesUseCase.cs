@@ -33,27 +33,43 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
                     return Result<RoomDto>.Failure($"Room with ID {roomId} not found.", 404);
                 }
 
-                // Handle new images if provided
-                var allImages = new List<GalleryImage>(existingRoom.Images);
+                // Handle images based on the replace flag
+                List<GalleryImage> finalImages;
+                
                 if (request.NewImages != null && request.NewImages.Any())
                 {
                     // Create a custom IFormFileCollection for the new images
                     var fileCollection = new CustomFormFileCollection(request.NewImages);
                     var uploadResults = await _imageService.UploadImagesAsync(fileCollection, roomId);
                     
-                    // Add successful uploads to the collection
+                    // Get successful uploads
                     var successfulUploads = uploadResults.Where(r => r.IsSuccess).ToList();
-                    foreach (var upload in successfulUploads)
+                    var newGalleryImages = successfulUploads.Select(upload => new GalleryImage
                     {
-                        allImages.Add(new GalleryImage
-                        {
-                            FileName = upload.FileName
-                        });
+                        FileName = upload.FileName
+                    }).ToList();
+
+                    if (request.ReplaceExistingImages)
+                    {
+                        // Replace existing images - delete old files from server
+                        await DeleteExistingImagesFromServer(existingRoom.Images);
+                        finalImages = newGalleryImages;
                     }
+                    else
+                    {
+                        // Add to existing images
+                        finalImages = new List<GalleryImage>(existingRoom.Images);
+                        finalImages.AddRange(newGalleryImages);
+                    }
+                }
+                else
+                {
+                    // No new images provided, keep existing ones
+                    finalImages = new List<GalleryImage>(existingRoom.Images);
                 }
 
                 // Update room properties using the domain method
-                existingRoom.UpdateDetails(request.Name, request.Description, request.Price, request.Capacity, allImages);
+                existingRoom.UpdateDetails(request.Name, request.Description, request.Price, request.Capacity, finalImages);
 
                 // Update the room
                 await _unitOfWork.RoomRepository.UpdateAsync(existingRoom);
@@ -71,11 +87,36 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
                     Images = existingRoom.Images
                 };
 
-                return Result<RoomDto>.Success(roomDto, "Room updated successfully with new images.");
+                var message = request.ReplaceExistingImages 
+                    ? "Room updated successfully with replaced images." 
+                    : "Room updated successfully with new images added.";
+
+                return Result<RoomDto>.Success(roomDto, message);
             }
             catch (Exception ex)
             {
                 return Result<RoomDto>.Failure($"Failed to update room with images: {ex.Message}", 500);
+            }
+        }
+
+        /// <summary>
+        /// Deletes existing image files from the server when replacing images.
+        /// </summary>
+        private async Task DeleteExistingImagesFromServer(List<GalleryImage> existingImages)
+        {
+            try
+            {
+                foreach (var image in existingImages)
+                {
+                    await _imageService.DeleteImageAsync(image.FileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error but don't fail the operation
+                // The database update will still succeed even if file deletion fails
+                // You might want to inject ILogger here for proper logging
+                Console.WriteLine($"Warning: Failed to delete some image files: {ex.Message}");
             }
         }
     }
