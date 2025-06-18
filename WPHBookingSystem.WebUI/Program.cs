@@ -95,7 +95,12 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 app.MapOpenApi();
-app.MapScalarApiReference();
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "WPH Hotel Booking API v1");
+    c.RoutePrefix = "swagger"; // Serve at /swagger
+});
 
 // Redirect HTTP requests to HTTPS for security
 app.UseHttpsRedirection();
