@@ -101,5 +101,18 @@ namespace WPHBookingSystem.Infrastructure.Repositories
 
             return await query.SumAsync(b => b.TotalAmount);
         }
+
+        /// <summary>
+        /// Retrieves all bookings with room information included.
+        /// Provides complete booking data with associated room details for administrative purposes.
+        /// </summary>
+        /// <returns>A list of all bookings with room information.</returns>
+        public async Task<List<Booking>> GetAllBookingsWithRoomAsync()
+        {
+            return await _context.Bookings
+                .Include(b => b.Room)
+                .OrderByDescending(b => b.CheckIn)
+                .ToListAsync();
+        }
     }
 }
