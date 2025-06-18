@@ -21,6 +21,25 @@
         public static IServiceCollection WebUIServices(this IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowDevOrigin", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .WithExposedHeaders("Content-Disposition");
+                });
+
+                options.AddPolicy("AllowProdOrigin", builder =>
+                {
+                    builder.WithOrigins("https://backend.gregdoesdev.xyz") // Replace later with actual production URL
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .WithExposedHeaders("Content-Disposition");
+                });
+            });
             // Web UI specific services can be registered here
             // Currently empty as most services are handled by Application and Infrastructure layers
             return services;

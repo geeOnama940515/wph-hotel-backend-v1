@@ -63,6 +63,7 @@ namespace WPHBookingSystem.Infrastructure.Persistence.Data
             });
 
             BookingSeeder.Seed(builder);
+            UserRoleSeeder.Seed(builder);
         }
 
     }
