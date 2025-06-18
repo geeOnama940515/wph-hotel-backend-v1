@@ -255,8 +255,8 @@ namespace WPHBookingSystem.Domain.Entities
                 b.CheckIn > DateTime.UtcNow &&
                 (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Booked));
 
-            //if (hasFutureBookings)
-            //    throw new DomainException("Cannot set room to occupied");
+            if (hasFutureBookings)
+                throw new DomainException("Cannot set room to occupied");
 
             Status = RoomStatus.Occupied;
         }
