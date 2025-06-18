@@ -45,6 +45,7 @@ namespace WPHBookingSystem.Application
             // These use cases handle all room-related business operations
             services.AddScoped<CreateRoomUseCase>();
             services.AddScoped<UpdateRoomUseCase>();
+            services.AddScoped<UpdateRoomWithImagesUseCase>();
             services.AddScoped<UpdateRoomStatusUseCase>();
             services.AddScoped<GetRoomByIdUseCase>();
             services.AddScoped<GetAllRoomsUseCase>();

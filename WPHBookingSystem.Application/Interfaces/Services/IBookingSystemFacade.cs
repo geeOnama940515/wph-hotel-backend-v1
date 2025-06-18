@@ -101,6 +101,15 @@ namespace WPHBookingSystem.Application.Interfaces.Services
         Task<Result<RoomDto>> UpdateRoom(Guid roomId, UpdateRoomDto dto);
 
         /// <summary>
+        /// Updates the details of an existing room with new images.
+        /// This operation validates the updated information, uploads new images, and applies the changes.
+        /// </summary>
+        /// <param name="roomId">The unique identifier of the room to update.</param>
+        /// <param name="dto">The data transfer object containing the updated room information and new images.</param>
+        /// <returns>A result containing the updated room information or error details.</returns>
+        Task<Result<RoomDto>> UpdateRoomWithImages(Guid roomId, UpdateRoomWithImagesDto dto);
+
+        /// <summary>
         /// Updates the operational status of a room (e.g., available, maintenance, inactive).
         /// This operation enforces business rules for status changes.
         /// </summary>
