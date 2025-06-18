@@ -33,7 +33,7 @@ echo [INFO] Waiting for application to start...
 timeout /t 10 /nobreak >nul
 
 REM Check if the application is running
-curl -f http://localhost:6000/health >nul 2>&1
+curl -f http://localhost:5069/health >nul 2>&1
 if errorlevel 1 (
     echo [ERROR] ❌ Application failed to start. Check logs with: docker-compose logs wph-hotel-api
     pause
@@ -42,9 +42,9 @@ if errorlevel 1 (
     echo [INFO] ✅ Application is running successfully!
     echo.
     echo 🌐 API Endpoints:
-    echo    - Health Check: http://localhost:6000/health
-    echo    - API Base: http://localhost:6000/api
-    echo    - Swagger UI: http://localhost:6000/swagger
+    echo    - Health Check: http://localhost:5069/health
+    echo    - API Base: http://localhost:5069/api
+    echo    - Swagger UI: http://localhost:5069/swagger
     echo.
     echo 📊 Container Status:
     docker-compose ps
