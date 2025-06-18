@@ -15,10 +15,10 @@
 # Base stage - Runtime environment for the application
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
-EXPOSE 6000
+EXPOSE 5069
 
 # Set environment variables for production
-ENV ASPNETCORE_URLS=http://+:6000
+ENV ASPNETCORE_URLS=http://+:5069
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Build stage - SDK environment for compiling the application
