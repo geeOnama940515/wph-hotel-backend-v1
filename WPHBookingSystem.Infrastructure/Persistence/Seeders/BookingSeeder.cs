@@ -34,7 +34,7 @@ namespace WPHBookingSystem.Infrastructure.Persistence.Seeders
             modelBuilder.Entity<Booking>().HasData(new
             {
                 Id = bookingId,
-                UserId = userId,
+                GuestName = "Juan Dela Cruz",
                 RoomId = roomId,
                 CheckIn = checkIn,
                 CheckOut = checkOut,
@@ -45,7 +45,7 @@ namespace WPHBookingSystem.Infrastructure.Persistence.Seeders
                 SpecialRequests = "Vegetarian meals only",
                 BookingToken = bookingToken,
                 CreatedAt = createdAt,
-                CreatedBy = "Seeder"
+                CreatedBy = "Seeder",
             });
 
             modelBuilder.Entity<Booking>().OwnsOne(b => b.ContactInfo).HasData(new

@@ -51,12 +51,30 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="201">Booking created successfully</response>
         /// <response code="400">Invalid booking data or room not available</response>
         /// <response code="401">User not authenticated</response>
+        /// 
+
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> CreateBooking(CreateBookingDto dto)
         {
-            var result = await _facade.CreateBooking(dto);
-            return this.CreateResponse(result);
+            try
+            {
+                var result = await _facade.CreateBooking(dto);
+                return this.CreateResponse(result);
+            }
+            catch (ApplicationException ex)
+            {
+                // For domain-related exceptions like "Room not available"
+                return this.CreateResponse(400, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // For unexpected errors
+               // _logger.LogError(ex, "Unexpected error occurred while creating a booking.");
+                return this.CreateResponse(500, "An unexpected error occurred.");
+            }
         }
+
 
         /// <summary>
         /// Updates the check-in and check-out dates for an existing booking.
@@ -125,6 +143,9 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="200">Bookings retrieved successfully</response>
         /// <response code="401">User not authenticated</response>
         /// <response code="403">User not authorized to view these bookings</response>
+        /// 
+
+        [AllowAnonymous]
         [HttpGet("{emailAddres}/get-bookings")]
         public async Task<IActionResult> GetUserBookings(string emailAddres)
         {
@@ -167,7 +188,7 @@ namespace WPHBookingSystem.WebUI.Controllers
                 var bookingDto = new BookingDto
                 {
                     Id = Guid.NewGuid(),
-                    UserId = Guid.NewGuid(),
+                    GuestName = "Gregorio Amano",
                     RoomId = Guid.NewGuid(),
                     RoomName = "Test Room",
                     CheckIn = DateTime.Now.AddDays(7),
