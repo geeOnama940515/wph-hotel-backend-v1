@@ -4,6 +4,7 @@ using Scalar.AspNetCore;
 using WPHBookingSystem.Application;
 using WPHBookingSystem.Infrastructure;
 using WPHBookingSystem.Infrastructure.Identity;
+using WPHBookingSystem.WebUI;
 //using Microsoft.AspNetCore.Mvc;
 /// <summary>
 /// Main entry point for the WPH Hotel Booking System Web API.
@@ -26,6 +27,8 @@ builder.Services.ApplicationDependencyiInjection();
 
 // Register infrastructure layer services (database, identity, repositories)
 builder.Services.AddInfrastructureInjection(builder.Configuration);
+
+builder.Services.WebUIServices();
 
 // Add MVC controllers for API endpoints with proper validation
 builder.Services.AddControllers();
@@ -67,6 +70,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+
 // Redirect HTTP requests to HTTPS for security
 app.UseHttpsRedirection();
 
@@ -74,6 +78,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 // Enable authentication middleware (must come before authorization)
+app.UseCors("AllowDevOrigin");
 app.UseAuthentication();
 
 // Enable authorization middleware for protected endpoints
