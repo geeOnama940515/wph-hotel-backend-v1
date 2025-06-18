@@ -58,7 +58,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="401">User not authenticated</response>
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> CreateRoom(CreateRoomDto dto)
         {
             var roomId = await _bookingSystemFacade.CreateRoom(dto);
@@ -79,7 +79,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="404">Room not found</response>
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpPut]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> UpdateRoom(Guid roomId, UpdateRoomDto dto)
         {
             var room = await _bookingSystemFacade.UpdateRoom(roomId, dto);
@@ -98,7 +98,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="400">Invalid status or room not found</response>
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpPut("{roomId}/status")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> UpdateRoomStatus([FromBody] UpdateRoomStatusRequest request)
         {
             var room = await _bookingSystemFacade.UpdateRoomStatus(request);
@@ -149,7 +149,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="404">Room not found</response>
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpDelete("{roomId}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteRoom(Guid roomId)
         {
             var result = await _bookingSystemFacade.DeleteRoom(roomId);
@@ -185,7 +185,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="400">Invalid request parameters</response>
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpGet("room-occupancy-rate")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetRoomOccupancyRate([FromBody] GetRoomOccupancyRateRequest request)
         {
             var occupancyRate = await _bookingSystemFacade.GetRoomOccupancyRate(request);
@@ -204,7 +204,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="400">Invalid request parameters</response>
         /// <response code="403">User not authorized (admin role required)</response>
         [HttpGet("room-revenue")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetRoomRevenue([FromBody] GetRoomRevenueRequest request)
         {
             var revenue = await _bookingSystemFacade.GetRoomRevenue(request);
@@ -308,6 +308,48 @@ namespace WPHBookingSystem.WebUI.Controllers
             return this.CreateResponse(result);
         }
 
+        /// <summary>
+        /// Creates a new room in the hotel inventory with images.
+        /// 
+        /// Admin-only endpoint that adds a new room with specified details and uploads
+        /// associated images in a single operation.
+        /// </summary>
+        /// <param name="dto">Room creation data including type, capacity, pricing, and images</param>
+        /// <returns>Unique identifier of the created room</returns>
+        /// <response code="200">Room created successfully with images</response>
+        /// <response code="400">Invalid room data or image upload failed</response>
+        /// <response code="401">User not authenticated</response>
+        /// <response code="403">User not authorized (admin role required)</response>
+        [HttpPost("with-images")]
+        [Authorize(Roles = "Administrator")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateRoomWithImages([FromForm] CreateRoomWithImagesDto dto)
+        {
+            _logger.LogInformation("Creating room with {ImageCount} images", dto.Images?.Count ?? 0);
+
+            // Convert to original DTO
+            var createRoomDto = new CreateRoomDto
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Price = dto.Price,
+                Capacity = dto.Capacity
+            };
+
+            // Convert images to IFormFileCollection
+            IFormFileCollection? imageCollection = null;
+            if (dto.Images?.Any() == true)
+            {
+                var validImages = dto.Images.Where(f => f != null && f.Length > 0).ToList();
+                if (validImages.Any())
+                {
+                    imageCollection = new CustomFormFileCollection(validImages);
+                }
+            }
+
+            var roomId = await _bookingSystemFacade.CreateRoom(createRoomDto, imageCollection);
+            return this.CreateResponse(200, "Room created successfully with images", roomId);
+        }
 
         /// <summary>
         /// Test endpoint to verify controller is working.
@@ -318,6 +360,48 @@ namespace WPHBookingSystem.WebUI.Controllers
         {
             _logger.LogInformation("Test endpoint hit");
             return this.CreateResponse(200, "RoomController is working", new { timestamp = DateTime.UtcNow });
+        }
+
+        /// <summary>
+        /// Test authentication endpoint.
+        /// </summary>
+        [HttpGet("test-auth")]
+        [Authorize]
+        public IActionResult TestAuth()
+        {
+            var user = User;
+            var claims = user.Claims.Select(c => new { c.Type, c.Value }).ToList();
+            var roles = user.Claims.Where(c => c.Type == "role" || c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role").Select(c => c.Value).ToList();
+            
+            _logger.LogInformation("Test auth endpoint hit by user: {UserId}", user.Identity?.Name);
+            _logger.LogInformation("User roles: {Roles}", string.Join(", ", roles));
+            
+            return this.CreateResponse(200, "Authentication working", new { 
+                userId = user.Identity?.Name,
+                isAuthenticated = user.Identity?.IsAuthenticated,
+                roles = roles,
+                claims = claims,
+                timestamp = DateTime.UtcNow 
+            });
+        }
+
+        /// <summary>
+        /// Test authorization endpoint for Administrator role.
+        /// </summary>
+        [HttpGet("test-admin")]
+        [Authorize(Roles = "Administrator")]
+        public IActionResult TestAdmin()
+        {
+            var user = User;
+            var roles = user.Claims.Where(c => c.Type == "role" || c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role").Select(c => c.Value).ToList();
+            
+            _logger.LogInformation("Test admin endpoint hit by user: {UserId} with roles: {Roles}", user.Identity?.Name, string.Join(", ", roles));
+            
+            return this.CreateResponse(200, "Administrator authorization working", new { 
+                userId = user.Identity?.Name,
+                roles = roles,
+                timestamp = DateTime.UtcNow 
+            });
         }
 
         /// <summary>
