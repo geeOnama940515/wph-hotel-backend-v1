@@ -14,5 +14,6 @@ namespace WPHBookingSystem.Application.Interfaces
         Task<List<Booking>> GetBookingsByEmailAsync(string emailAddress);
         Task<decimal> GetTotalRevenueAsync(Guid roomId, DateTime? start = null, DateTime? end = null);
         Task<int> GetOccupancyRateAsync(Guid roomId, DateTime start, DateTime end);
+        Task<List<Booking>> GetAllBookingsWithRoomAsync();
     }
 }

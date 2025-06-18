@@ -33,6 +33,7 @@ namespace WPHBookingSystem.Application.Services
         private readonly UpdateBookingStatusUseCase _updateBookingStatusUseCase;
         private readonly CancelBookingUseCase _cancelBookingUseCase;
         private readonly GetUserBookingsUseCase _getUserBookingsUseCase;
+        private readonly GetAllBookingsUseCase _getAllBookingsUseCase;
         private readonly ViewBookingByTokenUseCase _viewBookingByTokenUseCase;
 
         // Room-related use cases
@@ -59,6 +60,7 @@ namespace WPHBookingSystem.Application.Services
         /// <param name="updateBookingStatusUseCase">Use case for updating booking status.</param>
         /// <param name="cancelBookingUseCase">Use case for cancelling bookings.</param>
         /// <param name="getUserBookingsUseCase">Use case for retrieving user bookings.</param>
+        /// <param name="getAllBookingsUseCase">Use case for retrieving all bookings.</param>
         /// <param name="createRoomUseCase">Use case for creating new rooms.</param>
         /// <param name="updateRoomUseCase">Use case for updating room details.</param>
         /// <param name="updateRoomStatusUseCase">Use case for updating room status.</param>
@@ -77,6 +79,7 @@ namespace WPHBookingSystem.Application.Services
             UpdateBookingStatusUseCase updateBookingStatusUseCase,
             CancelBookingUseCase cancelBookingUseCase,
             GetUserBookingsUseCase getUserBookingsUseCase,
+            GetAllBookingsUseCase getAllBookingsUseCase,
             CreateRoomUseCase createRoomUseCase,
             UpdateRoomUseCase updateRoomUseCase,
             UpdateRoomWithImagesUseCase updateRoomWithImagesUseCase,
@@ -95,6 +98,7 @@ namespace WPHBookingSystem.Application.Services
             _updateBookingStatusUseCase = updateBookingStatusUseCase;
             _cancelBookingUseCase = cancelBookingUseCase;
             _getUserBookingsUseCase = getUserBookingsUseCase;
+            _getAllBookingsUseCase = getAllBookingsUseCase;
             _createRoomUseCase = createRoomUseCase;
             _updateRoomUseCase = updateRoomUseCase;
             _updateRoomWithImagesUseCase = updateRoomWithImagesUseCase;
@@ -170,6 +174,15 @@ namespace WPHBookingSystem.Application.Services
         public async Task<Result<List<BookingDto>>> GetUserBookings(string emailAddress)
         {
             return await _getUserBookingsUseCase.ExecuteAsync(emailAddress);
+        }
+
+        /// <summary>
+        /// Retrieves all bookings by delegating to the GetAllBookingsUseCase.
+        /// </summary>
+        /// <returns>A result containing the list of all bookings or error details.</returns>
+        public async Task<Result<List<BookingDto>>> GetAllBookings()
+        {
+            return await _getAllBookingsUseCase.ExecuteAsync();
         }
 
         #endregion

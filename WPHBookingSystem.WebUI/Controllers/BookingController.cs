@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -28,16 +29,19 @@ namespace WPHBookingSystem.WebUI.Controllers
     {
         private readonly IBookingSystemFacade _facade;
         private readonly IEmailService _emailService;
+        private readonly ILogger<BookingController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the BookingController with the booking system facade.
         /// </summary>
         /// <param name="facade">Service facade for coordinating booking operations</param>
         /// <param name="emailService">Service for sending emails</param>
-        public BookingController(IBookingSystemFacade facade, IEmailService emailService)
+        /// <param name="logger">Logger for booking operations</param>
+        public BookingController(IBookingSystemFacade facade, IEmailService emailService, ILogger<BookingController> logger)
         {
             _facade = facade;
             _emailService = emailService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -51,12 +55,40 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="201">Booking created successfully</response>
         /// <response code="400">Invalid booking data or room not available</response>
         /// <response code="401">User not authenticated</response>
+        /// 
+
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> CreateBooking(CreateBookingDto dto)
         {
-            var result = await _facade.CreateBooking(dto);
-            return this.CreateResponse(result);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for booking creation request");
+                return this.CreateResponse(400, "Invalid request data");
+            }
+
+            _logger.LogInformation("Booking creation attempt for room {RoomId}", dto.RoomId);
+            
+            try
+            {
+                var result = await _facade.CreateBooking(dto);
+                _logger.LogInformation("Booking created successfully for room {RoomId}", dto.RoomId);
+                return this.CreateResponse(result);
+            }
+            catch (ApplicationException ex)
+            {
+                // For domain-related exceptions like "Room not available"
+                _logger.LogWarning("Application exception during booking creation: {Message}", ex.Message);
+                return this.CreateResponse(400, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // For unexpected errors
+                _logger.LogError(ex, "Unexpected error occurred while creating a booking for room {RoomId}", dto.RoomId);
+                return this.CreateResponse(500, "An unexpected error occurred.");
+            }
         }
+
 
         /// <summary>
         /// Updates the check-in and check-out dates for an existing booking.
@@ -73,8 +105,25 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPut("{bookingId}/dates")]
         public async Task<IActionResult> UpdateBookingDates(Guid bookingId, UpdateBookingDateDto dto)
         {
-            var result = await _facade.UpdateBooking(bookingId, dto);
-            return this.CreateResponse(result);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for booking dates update request");
+                return this.CreateResponse(400, "Invalid request data");
+            }
+
+            _logger.LogInformation("Booking dates update attempt for booking {BookingId}", bookingId);
+            
+            try
+            {
+                var result = await _facade.UpdateBooking(bookingId, dto);
+                _logger.LogInformation("Booking dates updated successfully for booking {BookingId}", bookingId);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating booking dates for booking {BookingId}", bookingId);
+                return this.CreateResponse(500, $"An error occurred while updating booking dates: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -91,8 +140,25 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPut("{bookingId}/status")]
         public async Task<IActionResult> UpdateBookingStatus(Guid bookingId, UpdateBookingStatusRequest request)
         {
-            var result = await _facade.UpdateBookingStatus(request);
-            return this.CreateResponse(result);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for booking status update request");
+                return this.CreateResponse(400, "Invalid request data");
+            }
+
+            _logger.LogInformation("Booking status update attempt for booking {BookingId} to status {Status}", bookingId, request.NewStatus);
+            
+            try
+            {
+                var result = await _facade.UpdateBookingStatus(request);
+                _logger.LogInformation("Booking status updated successfully for booking {BookingId} to status {Status}", bookingId, request.NewStatus);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating booking status for booking {BookingId}", bookingId);
+                return this.CreateResponse(500, $"An error occurred while updating booking status: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -109,8 +175,19 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPut("{bookingId}/cancel")]
         public async Task<IActionResult> CancelBooking(Guid bookingId)
         {
-            var result = await _facade.CancelBooking(bookingId);
-            return this.CreateResponse(result);
+            _logger.LogInformation("Booking cancellation attempt for booking {BookingId}", bookingId);
+            
+            try
+            {
+                var result = await _facade.CancelBooking(bookingId);
+                _logger.LogInformation("Booking cancelled successfully for booking {BookingId}", bookingId);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error cancelling booking {BookingId}", bookingId);
+                return this.CreateResponse(500, $"An error occurred while cancelling the booking: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -122,18 +199,62 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// </summary>
         /// <param name="emailAddres">Email address of the user whose bookings to retrieve</param>
         /// <returns>Standardized response with list of user bookings</returns>
-        /// <response code="200">Bookings retrieved successfully</response>
+        /// <response code="200">User bookings retrieved successfully</response>
+        /// <response code="400">Invalid email address</response>
         /// <response code="401">User not authenticated</response>
-        /// <response code="403">User not authorized to view these bookings</response>
+        [AllowAnonymous]
         [HttpGet("{emailAddres}/get-bookings")]
         public async Task<IActionResult> GetUserBookings(string emailAddres)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return this.CreateResponse(401, "User not authenticated");
+            if (string.IsNullOrWhiteSpace(emailAddres))
+            {
+                _logger.LogWarning("Empty or null email address provided for booking retrieval");
+                return this.CreateResponse(400, "Email address is required");
+            }
 
-            var result = await _facade.GetUserBookings(emailAddres);
-            return this.CreateResponse(result);
+            _logger.LogInformation("Retrieving bookings for user with email {EmailAddress}", emailAddres);
+            
+            try
+            {
+                var result = await _facade.GetUserBookings(emailAddres);
+                _logger.LogInformation("Successfully retrieved {Count} bookings for user {EmailAddress}", 
+                    result.Data?.Count ?? 0, emailAddres);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving bookings for user {EmailAddress}", emailAddres);
+                return this.CreateResponse(500, $"An error occurred while retrieving user bookings: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Retrieves all bookings in the system.
+        /// 
+        /// Returns a list of all bookings including current, past, and cancelled bookings.
+        /// This endpoint provides administrative access to all booking data for management purposes.
+        /// </summary>
+        /// <returns>Standardized response with list of all bookings</returns>
+        /// <response code="200">All bookings retrieved successfully</response>
+        /// <response code="401">User not authenticated</response>
+        /// <response code="403">User not authorized for administrative access</response>
+        [HttpGet]
+        public async Task<IActionResult> GetAllBookings()
+        {
+            _logger.LogInformation("Retrieving all bookings in the system");
+            
+            try
+            {
+                var result = await _facade.GetAllBookings();
+                _logger.LogInformation("Successfully retrieved {Count} bookings from the system", 
+                    result.Data?.Count ?? 0);
+                return this.CreateResponse(200,"Bookings Retrieved",result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all bookings");
+                return this.CreateResponse(500, $"An error occurred while retrieving all bookings: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -151,8 +272,19 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpGet("view/{bookingToken}")]
         public async Task<IActionResult> ViewBookingByToken(Guid bookingToken)
         {
-            var result = await _facade.ViewBookingByToken(bookingToken);
-            return this.CreateResponse(result);
+            _logger.LogInformation("View booking by token attempt for token {BookingToken}", bookingToken);
+            
+            try
+            {
+                var result = await _facade.ViewBookingByToken(bookingToken);
+                _logger.LogInformation("Booking details retrieved successfully for token {BookingToken}", bookingToken);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving booking details for token {BookingToken}", bookingToken);
+                return this.CreateResponse(500, $"An error occurred while retrieving booking details: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -162,12 +294,20 @@ namespace WPHBookingSystem.WebUI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> TestEmail([FromBody] TestEmailRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for test email request");
+                return this.CreateResponse(400, "Invalid request data");
+            }
+
+            _logger.LogInformation("Test email sending attempt for email {Email}", request.Email);
+            
             try
             {
                 var bookingDto = new BookingDto
                 {
                     Id = Guid.NewGuid(),
-                    UserId = Guid.NewGuid(),
+                    GuestName = "Gregorio Amano",
                     RoomId = Guid.NewGuid(),
                     RoomName = "Test Room",
                     CheckIn = DateTime.Now.AddDays(7),
@@ -184,15 +324,18 @@ namespace WPHBookingSystem.WebUI.Controllers
                 
                 if (result)
                 {
+                    _logger.LogInformation("Test email sent successfully to {Email}", request.Email);
                     return this.CreateResponse(200, "Test email sent successfully");
                 }
                 else
                 {
+                    _logger.LogWarning("Test email sending failed for {Email}", request.Email);
                     return this.CreateResponse(500, "Failed to send test email");
                 }
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error sending test email to {Email}", request.Email);
                 return this.CreateResponse(500, $"Error sending test email: {ex.Message}");
             }
         }

@@ -26,7 +26,7 @@ namespace WPHBookingSystem.Domain.Entities
         /// Gets the unique identifier of the user who made this booking.
         /// This links the booking to the user account in the system.
         /// </summary>
-        public Guid UserId { get; private set; }
+        public string GuestName { get; private set; }
 
         /// <summary>
         /// Gets the unique identifier of the room that is booked.
@@ -122,7 +122,8 @@ namespace WPHBookingSystem.Domain.Entities
             decimal totalAmount,
             ContactInfo contactInfo,
             string emailAddress = "",
-            string specialRequests = ""
+            string specialRequests = "",
+            string guestName =""
         )
         {
             if (checkIn >= checkOut)
@@ -142,7 +143,8 @@ namespace WPHBookingSystem.Domain.Entities
                 EmailAddress = emailAddress,
                 SpecialRequests = specialRequests,
                 Status = BookingStatus.Pending,
-                BookingToken = Guid.NewGuid()
+                BookingToken = Guid.NewGuid(),
+                GuestName = guestName
             };
         }
 

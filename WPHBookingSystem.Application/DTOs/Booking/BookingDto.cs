@@ -8,8 +8,8 @@ namespace WPHBookingSystem.Application.DTOs.Booking
     {
         public Guid Id { get; set; }
 
-        [Required(ErrorMessage = "User ID is required.")]
-        public Guid UserId { get; set; }
+        [Required(ErrorMessage = "Guest Name is required.")]
+        public string GuestName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Room ID is required.")]
         public Guid RoomId { get; set; }
@@ -39,6 +39,13 @@ namespace WPHBookingSystem.Application.DTOs.Booking
         [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
         public string Address { get; set; } = string.Empty;
 
+        [EmailAddress(ErrorMessage = "Email address is not valid.")]
+        public string EmailAddress { get; set; } = string.Empty;
+
         public string? RoomName { get; set; } // Optional projection
+
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
     }
 }

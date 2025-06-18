@@ -63,6 +63,13 @@ namespace WPHBookingSystem.Application.Interfaces.Services
         Task<Result<List<BookingDto>>> GetUserBookings(string emailAddress);
 
         /// <summary>
+        /// Retrieves all bookings in the system.
+        /// This operation provides an administrative view of all booking data for management purposes.
+        /// </summary>
+        /// <returns>A result containing the list of all bookings or error details.</returns>
+        Task<Result<List<BookingDto>>> GetAllBookings();
+
+        /// <summary>
         /// Retrieves booking information using a booking token.
         /// This allows guests to view their booking details without authentication.
         /// </summary>
