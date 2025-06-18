@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Booking;
 using WPHBookingSystem.Application.Interfaces;
+using WPHBookingSystem.Application.Interfaces.Services;
 using WPHBookingSystem.Domain.Entities;
 using WPHBookingSystem.Domain.Exceptions;
 using WPHBookingSystem.Domain.ValueObjects;
@@ -20,15 +21,18 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
     public class CreateBookingUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailService _emailService;
 
         /// <summary>
         /// Initializes a new instance of the CreateBookingUseCase with the required dependencies.
         /// </summary>
         /// <param name="unitOfWork">The unit of work for transaction management and data access.</param>
-        /// <exception cref="ArgumentNullException">Thrown when unitOfWork is null.</exception>
-        public CreateBookingUseCase(IUnitOfWork unitOfWork)
+        /// <param name="emailService">The email service for sending confirmation emails.</param>
+        /// <exception cref="ArgumentNullException">Thrown when unitOfWork or emailService is null.</exception>
+        public CreateBookingUseCase(IUnitOfWork unitOfWork, IEmailService emailService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
         }
 
         /// <summary>
@@ -77,6 +81,26 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                 
                 // Commit the transaction
                 await _unitOfWork.CommitTransactionAsync();
+
+                // Create BookingDto for email
+                var bookingDto = new BookingDto
+                {
+                    Id = booking.Id,
+                    UserId = booking.UserId,
+                    RoomId = booking.RoomId,
+                    CheckIn = booking.CheckIn,
+                    CheckOut = booking.CheckOut,
+                    Guests = booking.Guests,
+                    TotalAmount = booking.TotalAmount,
+                    Status = booking.Status,
+                    SpecialRequests = booking.SpecialRequests,
+                    Phone = booking.ContactInfo.Phone,
+                    Address = booking.ContactInfo.Address,
+                    RoomName = room.Name
+                };
+
+                // Send confirmation email
+                await _emailService.SendBookingConfirmationAsync(bookingDto, dto.EmailAddress, dto.Guests.ToString());
 
                 // Return success result with booking information
                 return Result<BookingCreatedDto>.Success(
