@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using WPHBookingSystem.Domain.Entities.Common;
+﻿using WPHBookingSystem.Domain.Entities.Common;
 using WPHBookingSystem.Domain.Enums;
 using WPHBookingSystem.Domain.Exceptions;
 using WPHBookingSystem.Domain.ValueObjects;
@@ -89,7 +86,7 @@ namespace WPHBookingSystem.Domain.Entities
         /// <param name="images">The collection of images for the room. Can be null or empty.</param>
         /// <returns>A new Room instance with the specified details.</returns>
         /// <exception cref="DomainException">Thrown when validation fails for any of the parameters.</exception>
-        public static Room Create(string name, string description, decimal price, int capacity)
+        public static Room Create(string name, string description, decimal price, int capacity, List<GalleryImage>? images = null)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new DomainException("Room name is required.");
@@ -105,7 +102,8 @@ namespace WPHBookingSystem.Domain.Entities
                 Description = description?.Trim() ?? string.Empty,
                 Price = price,
                 Capacity = capacity,
-                Status = RoomStatus.Available
+                Status = RoomStatus.Available,
+                Images = images ?? new List<GalleryImage>()
             };
         }
 
