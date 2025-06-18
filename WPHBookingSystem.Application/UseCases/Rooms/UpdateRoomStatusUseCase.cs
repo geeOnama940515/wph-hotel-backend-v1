@@ -56,8 +56,10 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
                         room.SetMaintenance();
                         break;
                     case RoomStatus.Occupied:
+                        room.SetOccupied();
                         break;
                     case RoomStatus.Booked:
+                        room.SetBooked();
                         break;
                     default:
                         return Result<RoomDto>.Failure("Invalid status update. Only Available, Inactive,Occupied,Booked, and Maintenance are allowed.", 400);
