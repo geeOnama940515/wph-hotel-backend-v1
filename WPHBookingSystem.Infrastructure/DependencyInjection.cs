@@ -83,6 +83,10 @@ namespace WPHBookingSystem.Infrastructure
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IImageService, ImageService>();
 
+            //services.AddHealthChecks()
+            //    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy())
+            //    .UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
+
             return services;
         }
     }
