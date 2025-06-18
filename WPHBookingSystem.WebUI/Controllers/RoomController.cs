@@ -78,7 +78,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="400">Invalid room data</response>
         /// <response code="404">Room not found</response>
         /// <response code="403">User not authorized (admin role required)</response>
-        [HttpPut]
+        [HttpPut("{roomId}")]
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> UpdateRoom(Guid roomId, UpdateRoomDto dto)
         {
@@ -413,6 +413,29 @@ namespace WPHBookingSystem.WebUI.Controllers
         {
             _logger.LogInformation("Test POST endpoint hit");
             return this.CreateResponse(200, "POST routing is working", new { timestamp = DateTime.UtcNow });
+        }
+
+        /// <summary>
+        /// Updates room details with new images.
+        /// 
+        /// Admin-only endpoint that allows updating room information and adding new images
+        /// in a single request. This is useful for rooms that were created without images
+        /// and need to have images added later.
+        /// </summary>
+        /// <param name="roomId">Unique identifier of the room to update</param>
+        /// <param name="dto">Room update data with optional new images</param>
+        /// <returns>Updated room details with new images</returns>
+        /// <response code="200">Room updated successfully with new images</response>
+        /// <response code="400">Invalid room data or images</response>
+        /// <response code="404">Room not found</response>
+        /// <response code="403">User not authorized (admin role required)</response>
+        [HttpPut("{roomId}/with-images")]
+        [Authorize(Roles = "Administrator")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateRoomWithImages(Guid roomId, [FromForm] UpdateRoomWithImagesDto dto)
+        {
+            var room = await _bookingSystemFacade.UpdateRoomWithImages(roomId, dto);
+            return this.CreateResponse(200, "Room updated successfully with new images", room);
         }
     }
 
