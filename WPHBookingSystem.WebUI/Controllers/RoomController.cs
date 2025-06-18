@@ -418,12 +418,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <summary>
         /// Updates room details with new images.
         /// 
-        /// Admin-only endpoint that allows updating room information and adding new images
-        /// in a single request. This is useful for rooms that were created without images
-        /// and need to have images added later.
+        /// Admin-only endpoint that allows updating room information and managing images
+        /// in a single request. Supports two modes:
+        /// - Add mode (default): Keeps existing images and adds new ones
+        /// - Replace mode: Removes existing images and replaces with new ones
+        /// 
+        /// Use ReplaceExistingImages=true to replace all existing images with new ones.
+        /// Use ReplaceExistingImages=false (or omit) to add new images to existing ones.
         /// </summary>
         /// <param name="roomId">Unique identifier of the room to update</param>
-        /// <param name="dto">Room update data with optional new images</param>
+        /// <param name="dto">Room update data with optional new images and replacement flag</param>
         /// <returns>Updated room details with new images</returns>
         /// <response code="200">Room updated successfully with new images</response>
         /// <response code="400">Invalid room data or images</response>

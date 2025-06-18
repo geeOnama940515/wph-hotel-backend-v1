@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Booking;
 using WPHBookingSystem.Application.Interfaces.Services;
+using WPHBookingSystem.Domain.Enums;
 using WPHBookingSystem.WebUI.Extensions;
 
 namespace WPHBookingSystem.WebUI.Controllers
@@ -26,14 +27,17 @@ namespace WPHBookingSystem.WebUI.Controllers
     public class BookingController : ControllerBase
     {
         private readonly IBookingSystemFacade _facade;
+        private readonly IEmailService _emailService;
 
         /// <summary>
         /// Initializes a new instance of the BookingController with the booking system facade.
         /// </summary>
         /// <param name="facade">Service facade for coordinating booking operations</param>
-        public BookingController(IBookingSystemFacade facade)
+        /// <param name="emailService">Service for sending emails</param>
+        public BookingController(IBookingSystemFacade facade, IEmailService emailService)
         {
             _facade = facade;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -150,5 +154,53 @@ namespace WPHBookingSystem.WebUI.Controllers
             var result = await _facade.ViewBookingByToken(bookingToken);
             return this.CreateResponse(result);
         }
+
+        /// <summary>
+        /// Test endpoint for email service.
+        /// </summary>
+        [HttpPost("test-email")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TestEmail([FromBody] TestEmailRequest request)
+        {
+            try
+            {
+                var bookingDto = new BookingDto
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = Guid.NewGuid(),
+                    RoomId = Guid.NewGuid(),
+                    RoomName = "Test Room",
+                    CheckIn = DateTime.Now.AddDays(7),
+                    CheckOut = DateTime.Now.AddDays(10),
+                    Guests = 2,
+                    TotalAmount = 300.00m,
+                    Status = Domain.Enums.BookingStatus.Confirmed,
+                    SpecialRequests = "Test special request",
+                    Phone = "+1234567890",
+                    Address = "123 Test Street"
+                };
+
+                var result = await _emailService.SendBookingConfirmationAsync(bookingDto, request.Email, request.GuestName);
+                
+                if (result)
+                {
+                    return this.CreateResponse(200, "Test email sent successfully");
+                }
+                else
+                {
+                    return this.CreateResponse(500, "Failed to send test email");
+                }
+            }
+            catch (Exception ex)
+            {
+                return this.CreateResponse(500, $"Error sending test email: {ex.Message}");
+            }
+        }
+    }
+
+    public class TestEmailRequest
+    {
+        public string Email { get; set; } = string.Empty;
+        public string GuestName { get; set; } = string.Empty;
     }
 } 

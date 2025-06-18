@@ -55,8 +55,12 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
                     case RoomStatus.Maintenance:
                         room.SetMaintenance();
                         break;
+                    case RoomStatus.Occupied:
+                        break;
+                    case RoomStatus.Booked:
+                        break;
                     default:
-                        return Result<RoomDto>.Failure("Invalid status update. Only Available, Inactive, and Maintenance are allowed.", 400);
+                        return Result<RoomDto>.Failure("Invalid status update. Only Available, Inactive,Occupied,Booked, and Maintenance are allowed.", 400);
                 }
 
                 await _unitOfWork.Repository<Room>().UpdateAsync(room);
