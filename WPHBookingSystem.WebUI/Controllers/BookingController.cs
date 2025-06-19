@@ -61,13 +61,15 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBooking(CreateBookingDto dto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                _logger.LogWarning("Invalid model state for booking creation request");
-                return this.CreateResponse(400, "Invalid request data");
-            }
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid model state for booking creation request");
+                    return this.CreateResponse(400, "Invalid request data");
+                }
 
-            _logger.LogInformation("Booking creation attempt for room {RoomId}", dto.RoomId);           
+                _logger.LogInformation("Booking creation attempt for room {RoomId}", dto.RoomId);           
                 var result = await _facade.CreateBooking(dto);
                 if (!result.IsSuccess)
                 {
@@ -76,7 +78,12 @@ namespace WPHBookingSystem.WebUI.Controllers
                 }
                 _logger.LogInformation("Booking created successfully for room {RoomId}", dto.RoomId);
                 return this.CreateResponse(result);
-
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error occurred while creating booking for room {RoomId}: {ErrorMessage}", dto.RoomId, ex.Message);
+                return this.CreateResponse(500, $"Booking creation failed: {ex.Message}");
+            }
         }
 
 
@@ -95,14 +102,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPut("{bookingId}/dates")]
         public async Task<IActionResult> UpdateBookingDates(Guid bookingId, UpdateBookingDateDto dto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                _logger.LogWarning("Invalid model state for booking dates update request");
-                return this.CreateResponse(400, "Invalid request data");
-            }
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid model state for booking dates update request");
+                    return this.CreateResponse(400, "Invalid request data");
+                }
 
-            _logger.LogInformation("Booking dates update attempt for booking {BookingId}", bookingId);
-            
+                _logger.LogInformation("Booking dates update attempt for booking {BookingId}", bookingId);
+                
 
                 var result = await _facade.UpdateBooking(bookingId, dto);
                 if (!result.IsSuccess)
@@ -112,7 +121,12 @@ namespace WPHBookingSystem.WebUI.Controllers
                 }
                 _logger.LogInformation("Booking dates updated successfully for booking {BookingId}", bookingId);
                 return this.CreateResponse(result);
-
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error occurred while updating booking dates for booking {BookingId}: {ErrorMessage}", bookingId, ex.Message);
+                return this.CreateResponse(500, $"Booking dates update failed: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -129,14 +143,16 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPut("{bookingId}/status")]
         public async Task<IActionResult> UpdateBookingStatus(Guid bookingId, UpdateBookingStatusRequest request)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                _logger.LogWarning("Invalid model state for booking status update request");
-                return this.CreateResponse(400, "Invalid request data");
-            }
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid model state for booking status update request");
+                    return this.CreateResponse(400, "Invalid request data");
+                }
 
-            _logger.LogInformation("Booking status update attempt for booking {BookingId} to status {Status}", bookingId, request.NewStatus);
-            
+                _logger.LogInformation("Booking status update attempt for booking {BookingId} to status {Status}", bookingId, request.NewStatus);
+                
                 var result = await _facade.UpdateBookingStatus(request);
                 if (!result.IsSuccess)
                 {
@@ -145,6 +161,12 @@ namespace WPHBookingSystem.WebUI.Controllers
                 }
                 _logger.LogInformation("Booking status updated successfully for booking {BookingId} to status {Status}", bookingId, request.NewStatus);
                 return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error occurred while updating booking status for booking {BookingId}: {ErrorMessage}", bookingId, ex.Message);
+                return this.CreateResponse(500, $"Booking status update failed: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -161,8 +183,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpPut("{bookingId}/cancel")]
         public async Task<IActionResult> CancelBooking(Guid bookingId)
         {
-            _logger.LogInformation("Booking cancellation attempt for booking {BookingId}", bookingId);
-            
+            try
+            {
+                _logger.LogInformation("Booking cancellation attempt for booking {BookingId}", bookingId);
+                
                 var result = await _facade.CancelBooking(bookingId);
                 if (!result.IsSuccess)
                 {
@@ -171,6 +195,12 @@ namespace WPHBookingSystem.WebUI.Controllers
                 }
                 _logger.LogInformation("Booking cancelled successfully for booking {BookingId}", bookingId);
                 return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error occurred while cancelling booking {BookingId}: {ErrorMessage}", bookingId, ex.Message);
+                return this.CreateResponse(500, $"Booking cancellation failed: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -189,24 +219,30 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpGet("{emailAddres}/get-bookings")]
         public async Task<IActionResult> GetUserBookings(string emailAddres)
         {
-            if (string.IsNullOrWhiteSpace(emailAddres))
+            try
             {
-                _logger.LogWarning("Empty or null email address provided for booking retrieval");
-                return this.CreateResponse(400, "Email address is required");
-            }
+                if (string.IsNullOrWhiteSpace(emailAddres))
+                {
+                    _logger.LogWarning("Empty or null email address provided for booking retrieval");
+                    return this.CreateResponse(400, "Email address is required");
+                }
 
-            _logger.LogInformation("Retrieving bookings for user with email {EmailAddress}", emailAddres);
-            
+                _logger.LogInformation("Retrieving bookings for user with email {EmailAddress}", emailAddres);
+                
                 var result = await _facade.GetUserBookings(emailAddres);
                 if (!result.IsSuccess)
                 {
-                    _logger.LogWarning("Failed to retrieve bookings for user {EmailAddress}: {Message}", emailAddres, result.Message);
+                    _logger.LogWarning("Failed to retrieve bookings for email {EmailAddress}: {Message}", emailAddres, result.Message);
                     return this.CreateResponse(result.StatusCode, result.Message);
                 }
-                _logger.LogInformation("Successfully retrieved {Count} bookings for user {EmailAddress}", 
-                    result.Data?.Count ?? 0, emailAddres);
+                _logger.LogInformation("Successfully retrieved bookings for email {EmailAddress}", emailAddres);
                 return this.CreateResponse(result);
-
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error occurred while retrieving bookings for email {EmailAddress}: {ErrorMessage}", emailAddres, ex.Message);
+                return this.CreateResponse(500, $"Failed to retrieve bookings: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -222,7 +258,9 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllBookings()
         {
-            _logger.LogInformation("Retrieving all bookings in the system");
+            try
+            {
+                _logger.LogInformation("Retrieving all bookings in the system");
                 var result = await _facade.GetAllBookings();
                 if (!result.IsSuccess)
                 {
@@ -232,6 +270,12 @@ namespace WPHBookingSystem.WebUI.Controllers
                 _logger.LogInformation("Successfully retrieved {Count} bookings from the system", 
                     result.Data?.Count ?? 0);
                 return this.CreateResponse(200,"Bookings Retrieved",result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error occurred while retrieving all bookings: {ErrorMessage}", ex.Message);
+                return this.CreateResponse(500, $"Failed to retrieve bookings: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -249,16 +293,28 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpGet("view/{bookingToken}")]
         public async Task<IActionResult> ViewBookingByToken(Guid bookingToken)
         {
-
-            _logger.LogInformation("View booking by token attempt for token {BookingToken}", bookingToken);         
+            try
+            {
+                _logger.LogInformation("View booking by token attempt for token {BookingToken}", bookingToken);         
                 var result = await _facade.ViewBookingByToken(bookingToken);
                 if (result == null)
+                {
+                    _logger.LogWarning("Failed to retrieve booking details for token {BookingToken}: Booking not found", bookingToken);
+                    return this.CreateResponse(404, "Booking not found");
+                }
+                if (!result.IsSuccess)
                 {
                     _logger.LogWarning("Failed to retrieve booking details for token {BookingToken}: {Message}", bookingToken, result.Message);
                     return this.CreateResponse(result.StatusCode, result.Message);
                 }
                 _logger.LogInformation("Booking details retrieved successfully for token {BookingToken}", bookingToken);
                 return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error occurred while viewing booking by token {BookingToken}: {ErrorMessage}", bookingToken, ex.Message);
+                return this.CreateResponse(500, $"Failed to retrieve booking details: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -312,6 +368,32 @@ namespace WPHBookingSystem.WebUI.Controllers
             {
                 _logger.LogError(ex, "Error sending test email to {Email}", request.Email);
                 return this.CreateResponse(500, $"Error sending test email: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Debug endpoint to test booking creation without email.
+        /// </summary>
+        [HttpPost("debug-create")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DebugCreateBooking([FromBody] CreateBookingDto dto)
+        {
+            try
+            {
+                _logger.LogInformation("Debug booking creation attempt for room {RoomId}", dto.RoomId);
+                
+                // Test if the facade is working
+                var result = await _facade.CreateBooking(dto);
+                
+                _logger.LogInformation("Debug booking creation result: Success={IsSuccess}, Message={Message}", 
+                    result.IsSuccess, result.Message);
+                
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Debug booking creation failed for room {RoomId}: {ErrorMessage}", dto.RoomId, ex.Message);
+                return this.CreateResponse(500, $"Debug booking creation failed: {ex.Message}");
             }
         }
     }
