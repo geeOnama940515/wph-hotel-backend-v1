@@ -27,7 +27,7 @@ namespace WPHBookingSystem.WebUI.Controllers
     /// and provides both public and administrative room management capabilities.
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/rooms")]
     public class RoomController : ControllerBase
     {
         private readonly IBookingSystemFacade _bookingSystemFacade;
