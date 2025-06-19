@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using WPHBookingSystem.Application.Interfaces.Services;
 using WPHBookingSystem.Application.Services;
 using WPHBookingSystem.Application.UseCases.Bookings;
+using WPHBookingSystem.Application.UseCases.ContactMessages;
 using WPHBookingSystem.Application.UseCases.Rooms;
 
 namespace WPHBookingSystem.Application
@@ -56,6 +57,13 @@ namespace WPHBookingSystem.Application
             services.AddScoped<GetRoomRevenueUseCase>();
             services.AddScoped<UploadRoomImagesUseCase>();
             services.AddScoped<ViewBookingByTokenUseCase>();
+
+            // Register ContactMessage Use Cases
+            services.AddScoped<CreateContactMessageUseCase>();
+            services.AddScoped<GetAllContactMessagesUseCase>();
+            services.AddScoped<GetContactMessageByIdUseCase>();
+            services.AddScoped<UpdateContactMessageUseCase>();
+            services.AddScoped<DeleteContactMessageUseCase>();
 
             // Register Facade Service
             // The BookingSystemFacade acts as a unified entry point for all booking system operations
