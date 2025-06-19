@@ -43,16 +43,21 @@ namespace WPHBookingSystem.Application.UseCases.Rooms
         {
             try
             {
-                var room = await _unitOfWork.Repository<Room>().GetByIdAsync(request.RoomId);
-                if (room == null)
-                    return Result<CheckRoomAvailabilityResponse>.Failure("Room not found.", 404);
+                var isRoomAvailable = await _unitOfWork.RoomRepository.IsRoomAvailableAsync(request.RoomId, request.CheckIn, request.CheckOut);
+                if (!isRoomAvailable)
+                    return Result<CheckRoomAvailabilityResponse>.Failure("Room is not available on the date", 404);
+               // var format = "yyyy-MM-dd";
 
-                var isAvailable = room.IsAvailable(request.CheckIn, request.CheckOut);
-                return Result<CheckRoomAvailabilityResponse>.Success(new CheckRoomAvailabilityResponse(isAvailable), "Room availability checked successfully.");
+                
+
+               // Console.Write(isRoomAvailable.ToString());
+
+               // var isAvailable = room.IsAvailable(request.CheckIn, request.CheckOut);
+                return Result<CheckRoomAvailabilityResponse>.Success(new CheckRoomAvailabilityResponse(isRoomAvailable), "Room availability checked successfully.");
             }
             catch (Exception ex)
             {
-                return Result<CheckRoomAvailabilityResponse>.Failure($"Failed to check room availability: {ex.Message}", 500);
+                return Result<CheckRoomAvailabilityResponse>.Failure(ex.Message, 500);
             }
         }
     }
