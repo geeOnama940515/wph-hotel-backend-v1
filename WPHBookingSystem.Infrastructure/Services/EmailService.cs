@@ -170,7 +170,7 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine("            <div class=\"booking-details\">");
             html.AppendLine("                <h3>Booking Details</h3>");
             html.AppendLine("                <table style=\"width: 100%; border-collapse: collapse;\">");
-            html.AppendLine("                    <tr><td style=\"font-weight: bold; padding: 8px;\">Guest Name:</td><td style=\"padding: 8px;\">{guestName}</td></tr>");
+            html.AppendLine($"                    <tr><td style=\"font-weight: bold; padding: 8px;\">Guest Name:</td><td style=\"padding: 8px;\">{guestName}</td></tr>");
             html.AppendLine($"                    <tr><td style=\"font-weight: bold; padding: 8px;\">Room:</td><td style=\"padding: 8px;\">{booking.RoomName}</td></tr>");
             html.AppendLine($"                    <tr><td style=\"font-weight: bold; padding: 8px;\">Number of Guests:</td><td style=\"padding: 8px;\">{booking.Guests}</td></tr>");
             html.AppendLine($"                    <tr><td style=\"font-weight: bold; padding: 8px;\">Check-in:</td><td style=\"padding: 8px;\">{booking.CheckIn:dddd, MMMM dd, yyyy}</td></tr>");
