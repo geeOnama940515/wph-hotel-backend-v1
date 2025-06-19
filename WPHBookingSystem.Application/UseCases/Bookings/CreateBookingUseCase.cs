@@ -102,7 +102,7 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                 };
 
                 // Send confirmation email
-                await _emailService.SendBookingConfirmationAsync(bookingDto, dto.EmailAddress, dto.Guests.ToString());
+                await _emailService.SendBookingConfirmationAsync(bookingDto, dto.EmailAddress, dto.GuestName);
 
                 // Return success result with booking information
                 return Result<BookingCreatedDto>.Success(

@@ -113,34 +113,7 @@ namespace WPHBookingSystem.Infrastructure.Services
             try
             {
 
-                await _emailService.SendAsync(toEmail,subject,htmlBody,isHtml:true);
-                //var message = new MimeMessage();
-                //message.From.Add(new MailboxAddress(_emailSettings.FromName, _emailSettings.FromEmail));
-                //message.To.Add(new MailboxAddress("", toEmail));
-                //message.Subject = subject;
-
-                //var bodyBuilder = new BodyBuilder
-                //{
-                //    HtmlBody = htmlBody
-                //};
-                //message.Body = bodyBuilder.ToMessageBody();
-
-                //using var client = new SmtpClient();
-                
-                //// Configure SSL/TLS based on settings
-                //var secureSocketOptions = _emailSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None;
-                
-                //await client.ConnectAsync(_emailSettings.SmtpHost, _emailSettings.SmtpPort, secureSocketOptions);
-
-                //// Authenticate if required
-                //if (_emailSettings.EnableAuthentication && !string.IsNullOrEmpty(_emailSettings.Username))
-                //{
-                //    await client.AuthenticateAsync(_emailSettings.Username, _emailSettings.Password);
-                //}
-
-                //await client.SendAsync(message);
-                //await client.DisconnectAsync(true);
-                
+                await _emailService.SendAsync(toEmail,subject,htmlBody,isHtml:true);                
                 _logger.LogInformation("Email sent successfully to {ToEmail}", toEmail);
                 return true;
             }
