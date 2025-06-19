@@ -49,6 +49,12 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                     case BookingStatus.Completed:
                         booking.Complete();
                         break;
+                    case BookingStatus.CheckedIn:
+                        booking.CheckedIn();
+                        break;
+                    case BookingStatus.CheckedOut:
+                        booking.CheckedOut();
+                        break;
                     default:
                         return Result<BookingDto>.Failure("Unsupported or invalid status transition.", 400);
                 }
