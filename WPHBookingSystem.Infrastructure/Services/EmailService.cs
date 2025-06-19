@@ -1,12 +1,15 @@
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using MimeKit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MimeKit;
+using NETCore.MailKit;
+using NETCore.MailKit.Core;
+using NETCore.MailKit.Infrastructure.Internal;
+using System.Text;
 using WPHBookingSystem.Application.DTOs.Booking;
 using WPHBookingSystem.Application.DTOs.Email;
 using WPHBookingSystem.Application.Interfaces.Services;
-using System.Text;
 
 namespace WPHBookingSystem.Infrastructure.Services
 {
@@ -17,14 +20,31 @@ namespace WPHBookingSystem.Infrastructure.Services
     /// updates, and cancellations to guests. MailKit provides better reliability and
     /// easier configuration compared to System.Net.Mail.
     /// </summary>
-    public class EmailService : IEmailService
+    public class EmailConfigService : IEmailSenderService
     {
         private readonly EmailSettings _emailSettings;
+        //private readonly EmailOptions _options;
         private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IOptions<EmailSettings> emailSettings, ILogger<EmailService> logger)
+        private readonly EmailService _emailService;
+
+        public EmailConfigService(IOptions<EmailSettings> options, ILogger<EmailService> logger)
         {
-            _emailSettings = emailSettings.Value;
+            _emailSettings = options.Value;
+            _emailService = new EmailService(new MailKitProvider(new MailKitOptions
+            {
+                // TODO : Secure this using sercets.json
+                Port = 587,
+                SenderName = _emailSettings.FromName,
+                Server = _emailSettings.SmtpHost,
+                SenderEmail = _emailSettings.FromEmail,
+                Account = _emailSettings.Username,
+                Password = _emailSettings.Password,
+                Security = true
+
+            }));
+
+           // _emailSettings = options.Value;
             _logger = logger;
         }
 
@@ -92,32 +112,34 @@ namespace WPHBookingSystem.Infrastructure.Services
         {
             try
             {
-                var message = new MimeMessage();
-                message.From.Add(new MailboxAddress(_emailSettings.FromName, _emailSettings.FromEmail));
-                message.To.Add(new MailboxAddress("", toEmail));
-                message.Subject = subject;
 
-                var bodyBuilder = new BodyBuilder
-                {
-                    HtmlBody = htmlBody
-                };
-                message.Body = bodyBuilder.ToMessageBody();
+                await _emailService.SendAsync(toEmail,subject,htmlBody,isHtml:true);
+                //var message = new MimeMessage();
+                //message.From.Add(new MailboxAddress(_emailSettings.FromName, _emailSettings.FromEmail));
+                //message.To.Add(new MailboxAddress("", toEmail));
+                //message.Subject = subject;
 
-                using var client = new SmtpClient();
+                //var bodyBuilder = new BodyBuilder
+                //{
+                //    HtmlBody = htmlBody
+                //};
+                //message.Body = bodyBuilder.ToMessageBody();
+
+                //using var client = new SmtpClient();
                 
-                // Configure SSL/TLS based on settings
-                var secureSocketOptions = _emailSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None;
+                //// Configure SSL/TLS based on settings
+                //var secureSocketOptions = _emailSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None;
                 
-                await client.ConnectAsync(_emailSettings.SmtpHost, _emailSettings.SmtpPort, secureSocketOptions);
+                //await client.ConnectAsync(_emailSettings.SmtpHost, _emailSettings.SmtpPort, secureSocketOptions);
 
-                // Authenticate if required
-                if (_emailSettings.EnableAuthentication && !string.IsNullOrEmpty(_emailSettings.Username))
-                {
-                    await client.AuthenticateAsync(_emailSettings.Username, _emailSettings.Password);
-                }
+                //// Authenticate if required
+                //if (_emailSettings.EnableAuthentication && !string.IsNullOrEmpty(_emailSettings.Username))
+                //{
+                //    await client.AuthenticateAsync(_emailSettings.Username, _emailSettings.Password);
+                //}
 
-                await client.SendAsync(message);
-                await client.DisconnectAsync(true);
+                //await client.SendAsync(message);
+                //await client.DisconnectAsync(true);
                 
                 _logger.LogInformation("Email sent successfully to {ToEmail}", toEmail);
                 return true;
@@ -449,6 +471,20 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine("</html>");
 
             return html.ToString();
+        }
+
+        public class EmailOptions
+        {
+            public const string EmailOption = "EmailOptions";
+            public string SenderName { get; set; }
+
+            public string SenderEmail { get; set; }
+
+            public string Account { get; set; }
+
+            public string Password { get; set; }
+            public string Server { get; set; }
+
         }
     }
 } 

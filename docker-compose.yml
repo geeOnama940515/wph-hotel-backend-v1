@@ -13,6 +13,7 @@ services:
       # Application Settings
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5069
+      - AllowedHosts=*
       
       # Database Connection
       - ConnectionStrings__DefaultConnection=Host=ep-rough-brook-a15a4fjt-pooler.ap-southeast-1.aws.neon.tech;Database=wph-hotel;Username=neondb_owner;Password=npg_uKp9a4Wdvegn;Ssl Mode=Require;Trust Server Certificate=true
@@ -26,15 +27,20 @@ services:
       # Image Upload Settings
       - ImageSettings__UploadPath=wwwroot/images/rooms
       - ImageSettings__BaseUrl=/images/rooms
-      - ImageSettings__MaxFileSize=52428800
+      - ImageSettings__MaxFileSize=5242880
+      - ImageSettings__AllowedExtensions__0=.jpg
+      - ImageSettings__AllowedExtensions__1=.jpeg
+      - ImageSettings__AllowedExtensions__2=.png
+      - ImageSettings__AllowedExtensions__3=.gif
+      - ImageSettings__AllowedExtensions__4=.webp
       
       # Email Settings (MailKit)
-      - EmailSettings__SmtpHost=smtp.gmail.com
+      - EmailSettings__SmtpHost=mail.venvi.com
       - EmailSettings__SmtpPort=587
-      - EmailSettings__FromEmail=noreply@wphhotel.com
+      - EmailSettings__FromEmail=administrator@venvi.com
       - EmailSettings__FromName=WPH Hotel
-      - EmailSettings__Username=your-email@gmail.com
-      - EmailSettings__Password=your-app-password
+      - EmailSettings__Username=administrator@venvi.com
+      - EmailSettings__Password=newmis2021
       - EmailSettings__EnableSsl=true
       - EmailSettings__EnableAuthentication=true
       - EmailSettings__BaseUrl=https://wph-hotel.gregdoesdev.xyz
@@ -44,12 +50,14 @@ services:
       - EmailSettings__HotelInfo__Address=123 Hotel Street, City, Country
       - EmailSettings__HotelInfo__Phone=+1 (555) 123-4567
       - EmailSettings__HotelInfo__Email=info@wphhotel.com
-      - EmailSettings__HotelInfo__Website=https://www.wphhotel.com
-      - EmailSettings__HotelInfo__LogoUrl=https://www.wphhotel.com/images/logo.png
+      - EmailSettings__HotelInfo__Website=https://wph-hotel.gregdoesdev.xyz
+      - EmailSettings__HotelInfo__LogoUrl=https://wph-hotel.gregdoesdev.xyz/ChatGPT%20Image%20Jun%204,%202025,%2002_33_57%20PM.png
       
       # Logging Configuration
       - Logging__LogLevel__Default=Information
-      - Logging__LogLevel__Microsoft.AspNetCore=Warning
+      - Logging__LogLevel__Microsoft.AspNetCore=Information
+      - Logging__LogLevel__WPHBookingSystem.WebUI=Debug
+      - Logging__LogLevel__Microsoft.AspNetCore.Routing=Debug
       - Logging__LogLevel__Microsoft.AspNetCore.Cors=Information
       - Logging__LogLevel__Microsoft.AspNetCore.Authentication=Information
       - Logging__LogLevel__WPHBookingSystem.Infrastructure.Services.EmailService=Information

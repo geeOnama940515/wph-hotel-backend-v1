@@ -319,28 +319,6 @@ namespace WPHBookingSystem.WebUI.Controllers
                 return this.CreateResponse(200, "Revenue calculated successfully", revenue);
         }
 
-        /// <summary>
-        /// Test endpoint for file upload debugging.
-        /// </summary>
-        //[HttpPost("test-upload")]
-        //[AllowAnonymous]
-        //[Consumes("multipart/form-data")]
-        //public async Task<IActionResult> TestUpload([FromForm] FileUploadDto file)
-        //{
-        //    if (file == null)
-        //    {
-        //        return this.CreateResponse(400, "No file provided");
-        //    }
-
-        //    var result = new
-        //    {
-        //        fileName = file.FileName,
-        //        contentType = file.ContentType,
-        //        fileSize = file.Length
-        //    };
-
-        //    return this.CreateResponse(200, "File received successfully", result);
-        //}
 
         /// <summary>
         /// Uploads multiple images to a room.
