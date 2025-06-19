@@ -97,7 +97,8 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                     SpecialRequests = booking.SpecialRequests,
                     Phone = booking.ContactInfo.Phone,
                     Address = booking.ContactInfo.Address,
-                    RoomName = room.Name
+                    RoomName = room.Name,
+                    BookingToken = booking.BookingToken.ToString(),
                 };
 
                 // Send confirmation email
