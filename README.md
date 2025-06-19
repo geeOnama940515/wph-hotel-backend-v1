@@ -2,6 +2,20 @@
 
 A modern, scalable hotel booking system built with .NET 9, following Clean Architecture principles and Domain-Driven Design (DDD) patterns.
 
+## 🔒 **Security Notice**
+
+**⚠️ IMPORTANT: This repository is designed for public sharing but contains sensitive configuration examples. For secure deployment:**
+
+- **Use `docker-compose.secure.yml`** instead of `docker-compose.yml` for production
+- **Set environment variables in Portainer** or your deployment platform
+- **Never commit sensitive data** like passwords, API keys, or connection strings
+- **Read the [Portainer Security Guide](PORTAINER_SECURITY_GUIDE.md)** for detailed deployment instructions
+
+### Quick Security Setup:
+1. Use `docker-compose.secure.yml` in your deployment
+2. Set environment variables in Portainer (see `env.example`)
+3. Keep sensitive files out of version control (already in `.gitignore`)
+
 ## 🏗️ Architecture Overview
 
 This project follows a **Clean Architecture** approach with **Domain-Driven Design (DDD)** principles, organized into four distinct layers:
