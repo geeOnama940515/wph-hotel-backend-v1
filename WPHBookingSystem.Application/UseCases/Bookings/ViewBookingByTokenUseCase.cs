@@ -44,7 +44,12 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                     TotalAmount = booking.TotalAmount,
                     Status = booking.Status,
                     SpecialRequests = booking.SpecialRequests,
-                    RoomName = booking.Room?.Name ?? string.Empty
+                    RoomName = booking.Room?.Name ?? string.Empty,
+                    GuestName = booking.GuestName,
+                    Phone = booking.ContactInfo?.Phone ?? string.Empty,
+                    EmailAddress = booking.EmailAddress,
+                    Address = booking.ContactInfo?.Address ?? string.Empty,
+                    CreatedAt = booking.CreatedAt.DateTime
                 };
 
                 return Result<BookingDto>.Success(bookingDto, "Booking retrieved successfully.");

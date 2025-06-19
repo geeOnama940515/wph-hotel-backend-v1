@@ -238,7 +238,7 @@ namespace WPHBookingSystem.Domain.Entities
             // Check for future confirmed bookings
             bool hasFutureBookings = _bookings.Any(b =>
                 b.CheckIn > DateTime.UtcNow &&
-                (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Booked));
+                (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.CheckedIn));
 
             if (hasFutureBookings)
                 throw new DomainException("Cannot set room to booked with upcoming bookings.");
@@ -253,7 +253,7 @@ namespace WPHBookingSystem.Domain.Entities
             // Check for future confirmed bookings
             bool hasFutureBookings = _bookings.Any(b =>
                 b.CheckIn > DateTime.UtcNow &&
-                (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Booked));
+                (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.CheckedIn));
 
             if (hasFutureBookings)
                 throw new DomainException("Cannot set room to occupied");
