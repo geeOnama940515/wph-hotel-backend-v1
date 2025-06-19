@@ -431,5 +431,28 @@ namespace WPHBookingSystem.Infrastructure.Services
 
             return html.ToString();
         }
+
+        public async Task<bool> SendContactMessageReplyAsync(string toEmail, string toName, string replyBody, string originalMessage)
+        {
+            try
+            {
+                var subject = $"WPH Hotel - Reply to Your Message";
+                var htmlBody = $@"
+                    <div style='font-family: Arial, sans-serif; color: #333;'>
+                        <p>Dear {toName},</p>
+                        <p>{replyBody}</p>
+                        <p>From <b>WPH - Hotel</b></p>
+                        <hr/>
+                        <p style='color: #888; font-size: 13px;'><b>Your Message:</b></p>
+                        <blockquote style='border-left: 3px solid #ccc; margin: 0; padding-left: 10px; color: #555;'>{originalMessage}</blockquote>
+                    </div>";
+                return await SendEmailAsync(toEmail, subject, htmlBody);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send contact message reply to {ToEmail}", toEmail);
+                return false;
+            }
+        }
     }
 } 

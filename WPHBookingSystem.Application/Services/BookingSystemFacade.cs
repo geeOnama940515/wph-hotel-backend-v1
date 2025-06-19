@@ -57,6 +57,7 @@ namespace WPHBookingSystem.Application.Services
         private readonly GetContactMessageByIdUseCase _getContactMessageByIdUseCase;
         private readonly UpdateContactMessageUseCase _updateContactMessageUseCase;
         private readonly DeleteContactMessageUseCase _deleteContactMessageUseCase;
+        private readonly IEmailSenderService _emailSenderService;
 
         #endregion
 
@@ -87,6 +88,7 @@ namespace WPHBookingSystem.Application.Services
         /// <param name="updateContactMessageUseCase">Use case for updating a contact message.</param>
         /// <param name="deleteContactMessageUseCase">Use case for deleting a contact message.</param>
         /// <param name="updateRoomWithImagesUseCase">Use case for updating room images.</param>
+        /// <param name="emailSenderService">Service for sending email replies.</param>
         public BookingSystemFacade(
             CreateBookingUseCase createBookingUseCase,
             UpdateBookingDatesUseCase updateBookingUseCase,
@@ -110,7 +112,8 @@ namespace WPHBookingSystem.Application.Services
             GetAllContactMessagesUseCase getAllContactMessagesUseCase,
             GetContactMessageByIdUseCase getContactMessageByIdUseCase,
             UpdateContactMessageUseCase updateContactMessageUseCase,
-            DeleteContactMessageUseCase deleteContactMessageUseCase)
+            DeleteContactMessageUseCase deleteContactMessageUseCase,
+            IEmailSenderService emailSenderService)
         {
             _createBookingUseCase = createBookingUseCase;
             _updateBookingUseCase = updateBookingUseCase;
@@ -135,6 +138,7 @@ namespace WPHBookingSystem.Application.Services
             _getContactMessageByIdUseCase = getContactMessageByIdUseCase;
             _updateContactMessageUseCase = updateContactMessageUseCase;
             _deleteContactMessageUseCase = deleteContactMessageUseCase;
+            _emailSenderService = emailSenderService;
         }
 
         #region Booking Operations
@@ -409,9 +413,15 @@ namespace WPHBookingSystem.Application.Services
         /// <returns>A result indicating success or failure of the reply operation.</returns>
         public async Task<Result> ReplyToContactMessage(string subject, string email, string body)
         {
-            // TODO: Implement email sending logic here using IEmailService
-            // await _emailService.SendEmailAsync(email, subject, body);
-            return Result.Success("Reply sent (stub)");
+            // Find the original message by email (get the latest one)
+            var allMessages = await _getAllContactMessagesUseCase.ExecuteAsync();
+            var original = allMessages.FirstOrDefault(m => m.EmailAddress == email);
+            if (original == null)
+                return Result.Failure("Original message not found for this email.", 404);
+            var sent = await _emailSenderService.SendContactMessageReplyAsync(email, original.Fullname, body, original.Message);
+            if (!sent)
+                return Result.Failure("Failed to send reply email.");
+            return Result.Success("Reply sent successfully.");
         }
 
         #endregion
