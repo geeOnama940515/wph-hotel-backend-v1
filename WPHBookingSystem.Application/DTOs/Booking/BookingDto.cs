@@ -48,6 +48,6 @@ namespace WPHBookingSystem.Application.DTOs.Booking
 
         public DateTime UpdatedAt { get; set; }
 
-        public Guid? BookingToken { get; set; } // Optional for token-based bookings
+        public string? BookingToken { get; set; } // Optional for token-based bookings
     }
 }

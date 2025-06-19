@@ -8,8 +8,9 @@ namespace WPHBookingSystem.Application.Interfaces.Services
     /// This service provides functionality for sending booking confirmations,
     /// updates, and other email notifications to guests.
     /// </summary>
-    public interface IEmailService
+    public interface IEmailSenderService
     {
+
         /// <summary>
         /// Sends a booking confirmation email to the guest.
         /// </summary>

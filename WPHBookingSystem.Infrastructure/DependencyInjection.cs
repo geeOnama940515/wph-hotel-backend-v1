@@ -127,7 +127,7 @@ namespace WPHBookingSystem.Infrastructure
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IImageUploadService, ImageUploadService>();
-            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IEmailSenderService, EmailConfigService>();
 
             // Configure Email Settings
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
