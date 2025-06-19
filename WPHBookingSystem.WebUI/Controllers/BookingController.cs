@@ -24,7 +24,7 @@ namespace WPHBookingSystem.WebUI.Controllers
     /// </summary>
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/bookings")]
     public class BookingController : ControllerBase
     {
         private readonly IBookingSystemFacade _facade;
