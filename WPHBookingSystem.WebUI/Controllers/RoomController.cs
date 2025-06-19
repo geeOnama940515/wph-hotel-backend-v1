@@ -241,8 +241,9 @@ namespace WPHBookingSystem.WebUI.Controllers
                 _logger.LogWarning("Invalid model state for room availability check request");
                 return this.CreateResponse(400, "Invalid request data");
             }
-
-            _logger.LogInformation("Room availability check attempt for room {RoomId}", request.RoomId);
+            try
+            {
+                _logger.LogInformation("Room availability check attempt for room {RoomId}", request.RoomId);
                 var isAvailable = await _bookingSystemFacade.CheckRoomAvailability(request);
                 if (!isAvailable.IsSuccess)
                 {
@@ -251,6 +252,12 @@ namespace WPHBookingSystem.WebUI.Controllers
                 }
                 _logger.LogInformation("Room availability check completed for room {RoomId}, available: {IsAvailable}", request.RoomId, isAvailable);
                 return this.CreateResponse(200, "Availability check completed", isAvailable);
+            }
+            catch (Exception ex)
+            {
+                return this.CreateResponse(400, $"Failed to check availability : {ex.Message}");
+            }
+
 
         }
 

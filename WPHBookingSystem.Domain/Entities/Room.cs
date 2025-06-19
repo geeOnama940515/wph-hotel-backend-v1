@@ -169,11 +169,12 @@ namespace WPHBookingSystem.Domain.Entities
             if (Status != RoomStatus.Available)
                 return false;
 
-            // Check for overlapping confirmed or pending bookings
-            return _bookings.All(b =>
-                (b.Status != BookingStatus.Confirmed && b.Status != BookingStatus.Pending) ||
-                end <= b.CheckIn || start >= b.CheckOut);
+            // Return false if any confirmed or pending booking overlaps
+            return !_bookings.Any(b =>
+                (b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending) &&
+                start < b.CheckOut && end > b.CheckIn);
         }
+
 
         /// <summary>
         /// Activates the room, making it available for booking.
