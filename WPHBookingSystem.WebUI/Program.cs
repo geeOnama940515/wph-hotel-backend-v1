@@ -107,7 +107,7 @@ app.Use(async (context, next) =>
 });
 
 // Auth & CORS
-app.UseCors("AllowProdOrigin");
+app.UseCors("AllowDevOrigin");
 app.UseAuthentication();
 app.UseAuthorization();
 
