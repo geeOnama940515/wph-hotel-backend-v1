@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # WPH Hotel Booking System API
+  wph-hotel-api:
+    build:
+      context: .
+      dockerfile: WPHBookingSystem.WebUI/Dockerfile
+    container_name: wph-hotel-api
+    ports:
+      - "5069:5069"
+    environment:
+      # Application Settings
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5069
+      - AllowedHosts=*
+      
+      # Database Connection - Use environment variables
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+      
+      # JWT Authentication - Use environment variables
+      - JwtSettings__Key=${JWT_SECRET_KEY}
+      - JwtSettings__Issuer=${JWT_ISSUER:-WPHHotelAPI}
+      - JwtSettings__Audience=${JWT_AUDIENCE:-WPHHotelClient}
+      - JwtSettings__ExpirationHours=${JWT_EXPIRATION_HOURS:-24}
+      
+      # Image Upload Settings
+      - ImageSettings__UploadPath=wwwroot/images/rooms
+      - ImageSettings__BaseUrl=/images/rooms
+      - ImageSettings__MaxFileSize=5242880
+      - ImageSettings__AllowedExtensions__0=.jpg
+      - ImageSettings__AllowedExtensions__1=.jpeg
+      - ImageSettings__AllowedExtensions__2=.png
+      - ImageSettings__AllowedExtensions__3=.gif
+      - ImageSettings__AllowedExtensions__4=.webp
+      
+      # Email Settings (MailKit) - Use environment variables
+      - EmailSettings__SmtpHost=${EMAIL_SMTP_HOST}
+      - EmailSettings__SmtpPort=${EMAIL_SMTP_PORT:-587}
+      - EmailSettings__FromEmail=${EMAIL_FROM_EMAIL}
+      - EmailSettings__FromName=${EMAIL_FROM_NAME:-WPH Hotel}
+      - EmailSettings__Username=${EMAIL_USERNAME}
+      - EmailSettings__Password=${EMAIL_PASSWORD}
+      - EmailSettings__EnableSsl=${EMAIL_ENABLE_SSL:-true}
+      - EmailSettings__EnableAuthentication=${EMAIL_ENABLE_AUTH:-true}
+      - EmailSettings__BaseUrl=${EMAIL_BASE_URL}
+      
+      # Hotel Information for Emails - Use environment variables
+      - EmailSettings__HotelInfo__Name=${HOTEL_NAME:-WPH Hotel}
+      - EmailSettings__HotelInfo__Address=${HOTEL_ADDRESS}
+      - EmailSettings__HotelInfo__Phone=${HOTEL_PHONE}
+      - EmailSettings__HotelInfo__Email=${HOTEL_EMAIL}
+      - EmailSettings__HotelInfo__Website=${HOTEL_WEBSITE}
+      - EmailSettings__HotelInfo__LogoUrl=${HOTEL_LOGO_URL}
+      
+      # Logging Configuration
+      - Logging__LogLevel__Default=Information
+      - Logging__LogLevel__Microsoft.AspNetCore=Information
+      - Logging__LogLevel__WPHBookingSystem.WebUI=Debug
+      - Logging__LogLevel__Microsoft.AspNetCore.Routing=Debug
+      - Logging__LogLevel__Microsoft.AspNetCore.Cors=Information
+      - Logging__LogLevel__Microsoft.AspNetCore.Authentication=Information
+      - Logging__LogLevel__WPHBookingSystem.Infrastructure.Services.EmailService=Information
+      
+      # CORS Settings - Use environment variables
+      - CorsSettings__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
+      
+      # Request Limits
+      - RequestLimits__MaxRequestBodySize=52428800
+      - RequestLimits__MultipartBodyLengthLimit=52428800
+    volumes:
+      - wph-hotel-images:/app/wwwroot/images
+    networks:
+      - wph-hotel-network
+    restart: unless-stopped
+
+volumes:
+  wph-hotel-images:
+    driver: local
+
+networks:
+  wph-hotel-network:
+    driver: bridge 
