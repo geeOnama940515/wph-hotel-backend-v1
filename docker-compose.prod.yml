@@ -14,10 +14,10 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5069
       
-      # Database Connection
-      - ConnectionStrings__DefaultConnection=Host=ep-rough-brook-a15a4fjt-pooler.ap-southeast-1.aws.neon.tech;Database=wph-hotel;Username=neondb_owner;Password=npg_uKp9a4Wdvegn;Ssl Mode=Require;Trust Server Certificate=true
+      # Database Connection - UPDATE WITH YOUR ACTUAL VALUES
+      - ConnectionStrings__DefaultConnection=Host=your-neon-host;Database=your-database;Username=your-username;Password=your-password;Ssl Mode=Require;Trust Server Certificate=true
       
-      # JWT Authentication
+      # JWT Authentication - UPDATE WITH YOUR ACTUAL VALUES
       - JwtSettings__Key=your-super-secret-key-with-at-least-256-bits-32-characters-long
       - JwtSettings__Issuer=WPHHotelAPI
       - JwtSettings__Audience=WPHHotelClient
@@ -28,24 +28,24 @@ services:
       - ImageSettings__BaseUrl=/images/rooms
       - ImageSettings__MaxFileSize=52428800
       
-      # Email Settings (MailKit)
+      # Email Settings (MailKit) - UPDATE WITH YOUR ACTUAL VALUES
       - EmailSettings__SmtpHost=smtp.gmail.com
       - EmailSettings__SmtpPort=587
-      - EmailSettings__FromEmail=noreply@wphhotel.com
+      - EmailSettings__FromEmail=your-email@yourdomain.com
       - EmailSettings__FromName=WPH Hotel
       - EmailSettings__Username=your-email@gmail.com
       - EmailSettings__Password=your-app-password
       - EmailSettings__EnableSsl=true
       - EmailSettings__EnableAuthentication=true
-      - EmailSettings__BaseUrl=https://wph-hotel.gregdoesdev.xyz
+      - EmailSettings__BaseUrl=https://your-frontend-domain.com
       
-      # Hotel Information for Emails
+      # Hotel Information for Emails - UPDATE WITH YOUR ACTUAL VALUES
       - EmailSettings__HotelInfo__Name=WPH Hotel
-      - EmailSettings__HotelInfo__Address=123 Hotel Street, City, Country
-      - EmailSettings__HotelInfo__Phone=+1 (555) 123-4567
-      - EmailSettings__HotelInfo__Email=info@wphhotel.com
-      - EmailSettings__HotelInfo__Website=https://www.wphhotel.com
-      - EmailSettings__HotelInfo__LogoUrl=https://www.wphhotel.com/images/logo.png
+      - EmailSettings__HotelInfo__Address=Your Hotel Address
+      - EmailSettings__HotelInfo__Phone=Your Hotel Phone
+      - EmailSettings__HotelInfo__Email=info@yourdomain.com
+      - EmailSettings__HotelInfo__Website=https://yourdomain.com
+      - EmailSettings__HotelInfo__LogoUrl=https://yourdomain.com/images/logo.png
       
       # Logging Configuration
       - Logging__LogLevel__Default=Information
@@ -54,8 +54,8 @@ services:
       - Logging__LogLevel__Microsoft.AspNetCore.Authentication=Information
       - Logging__LogLevel__WPHBookingSystem.Infrastructure.Services.EmailService=Information
       
-      # CORS Settings (for production)
-      - CorsSettings__AllowedOrigins=https://wph-hotel.gregdoesdev.xyz,http://localhost:3000,http://localhost:3001
+      # CORS Settings - UPDATE WITH YOUR ACTUAL FRONTEND DOMAINS
+      - CorsSettings__AllowedOrigins=https://your-frontend-domain.com,https://www.your-frontend-domain.com
       
       # Request Limits
       - RequestLimits__MaxRequestBodySize=52428800
