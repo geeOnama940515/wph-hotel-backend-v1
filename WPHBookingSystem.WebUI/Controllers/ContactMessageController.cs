@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace WPHBookingSystem.WebUI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/contact-messages")]
     public class ContactMessageController : ControllerBase
     {
         private readonly IBookingSystemFacade _facade;
