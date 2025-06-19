@@ -159,18 +159,45 @@ namespace WPHBookingSystem.Domain.Entities
                 throw new DomainException("Only pending bookings can be confirmed.");
             Status = BookingStatus.Confirmed;
         }
+
+        /// <summary>
+        /// Sets the booking status to EmailVerificationPending for OTP verification.
+        /// Only pending bookings can be set to email verification pending.
+        /// </summary>
+        /// <exception cref="DomainException">Thrown when the booking is not in Pending status.</exception>
+        public void SetEmailVerificationPending()
+        {
+            if (Status != BookingStatus.Pending)
+                throw new DomainException("Only pending bookings can be set to email verification pending.");
+            Status = BookingStatus.EmailVerificationPending;
+        }
+
+        /// <summary>
+        /// Confirms this booking after successful email verification, changing its status from EmailVerificationPending to Confirmed.
+        /// Only email verification pending bookings can be confirmed.
+        /// </summary>
+        /// <exception cref="DomainException">Thrown when the booking is not in EmailVerificationPending status.</exception>
+        public void ConfirmAfterVerification()
+        {
+            if (Status != BookingStatus.EmailVerificationPending)
+                throw new DomainException("Only email verification pending bookings can be confirmed after verification.");
+            Status = BookingStatus.Confirmed;
+        }
+
         public void CheckedIn()
         {
             if (Status != BookingStatus.Confirmed)
-                throw new DomainException("Only pending bookings can be checked in.");
+                throw new DomainException("Only confirmed bookings can be checked in.");
             Status = BookingStatus.CheckedIn;
         }
+
         public void CheckedOut()
         {
             if (Status != BookingStatus.CheckedIn)
                 throw new DomainException("Only checked in bookings can be checked out.");
             Status = BookingStatus.CheckedOut;
         }
+
         /// <summary>
         /// Cancels this booking, changing its status to Cancelled.
         /// Completed bookings cannot be cancelled.

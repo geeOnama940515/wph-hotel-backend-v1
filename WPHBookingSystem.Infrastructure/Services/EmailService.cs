@@ -106,6 +106,25 @@ namespace WPHBookingSystem.Infrastructure.Services
         }
 
         /// <summary>
+        /// Sends an OTP verification email to the guest for booking verification.
+        /// </summary>
+        public async Task<bool> SendOtpVerificationAsync(string guestEmail, string guestName, string otpCode, Guid bookingId)
+        {
+            try
+            {
+                var subject = $"WPH Hotel - Email Verification Required #{bookingId:N}";
+                var htmlBody = GenerateOtpVerificationHtml(guestName, otpCode, bookingId);
+                
+                return await SendEmailAsync(guestEmail, subject, htmlBody);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send OTP verification email to {GuestEmail}", guestEmail);
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Sends an email using MailKit SMTP client.
         /// </summary>
         private async Task<bool> SendEmailAsync(string toEmail, string subject, string htmlBody)
@@ -409,6 +428,85 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine("            </div>");
 
             html.AppendLine("            <p>We hope to welcome you back in the future!</p>");
+            html.AppendLine("        </div>");
+            html.AppendLine("        <div class=\"footer\">");
+            html.AppendLine($"            <p>{_emailSettings.HotelInfo.Name}</p>");
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Address))
+            {
+                html.AppendLine($"            <p>{_emailSettings.HotelInfo.Address}</p>");
+            }
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Phone))
+            {
+                html.AppendLine($"            <p>Phone: {_emailSettings.HotelInfo.Phone}</p>");
+            }
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Email))
+            {
+                html.AppendLine($"            <p>Email: {_emailSettings.HotelInfo.Email}</p>");
+            }
+            html.AppendLine("        </div>");
+            html.AppendLine("    </div>");
+            html.AppendLine("</body>");
+            html.AppendLine("</html>");
+
+            return html.ToString();
+        }
+
+        /// <summary>
+        /// Generates HTML content for OTP verification email.
+        /// </summary>
+        private string GenerateOtpVerificationHtml(string guestName, string otpCode, Guid bookingId)
+        {
+            var html = new StringBuilder();
+            
+            html.AppendLine("<!DOCTYPE html>");
+            html.AppendLine("<html lang=\"en\">");
+            html.AppendLine("<head>");
+            html.AppendLine("    <meta charset=\"UTF-8\">");
+            html.AppendLine("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+            html.AppendLine("    <title>Email Verification Required</title>");
+            html.AppendLine("    <style>");
+            html.AppendLine("        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }");
+            html.AppendLine("        .container { max-width: 600px; margin: 0 auto; padding: 20px; }");
+            html.AppendLine("        .header { background-color: #3498db; color: white; padding: 20px; text-align: center; }");
+            html.AppendLine("        .content { background-color: #f8f9fa; padding: 30px; }");
+            html.AppendLine("        .otp-box { background-color: #e8f4fd; border: 2px solid #3498db; padding: 20px; margin: 20px 0; border-radius: 10px; text-align: center; }");
+            html.AppendLine("        .otp-code { font-size: 32px; font-weight: bold; color: #2c3e50; letter-spacing: 5px; margin: 10px 0; }");
+            html.AppendLine("        .footer { background-color: #34495e; color: white; padding: 20px; text-align: center; font-size: 14px; }");
+            html.AppendLine("        .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 15px 0; border-radius: 5px; color: #856404; }");
+            html.AppendLine("        .booking-info { background-color: white; padding: 20px; margin: 20px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }");
+            html.AppendLine("        .expiry-notice { background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; margin: 15px 0; border-radius: 5px; color: #721c24; }");
+            html.AppendLine("    </style>");
+            html.AppendLine("</head>");
+            html.AppendLine("<body>");
+            html.AppendLine("    <div class=\"container\">");
+            html.AppendLine("        <div class=\"header\">");
+            html.AppendLine($"            <h1>{_emailSettings.HotelInfo.Name}</h1>");
+            html.AppendLine("            <p>Email Verification Required</p>");
+            html.AppendLine("        </div>");
+            html.AppendLine("        <div class=\"content\">");
+            html.AppendLine($"            <h2>Dear {guestName},</h2>");
+            html.AppendLine("            <p>Thank you for your booking request! To complete your reservation, please verify your email address using the verification code below.</p>");
+            html.AppendLine("            <div class=\"booking-info\">");
+            html.AppendLine($"                <h3>Booking Reference: #{bookingId:N}</h3>");
+            html.AppendLine("            </div>");
+            html.AppendLine("            <div class=\"otp-box\">");
+            html.AppendLine("                <h3>Your Verification Code</h3>");
+            html.AppendLine($"                <div class=\"otp-code\">{otpCode}</div>");
+            html.AppendLine("                <p>Enter this code on our website to confirm your booking.</p>");
+            html.AppendLine("            </div>");
+            html.AppendLine("            <div class=\"warning\">");
+            html.AppendLine("                <h4>⚠️ Important:</h4>");
+            html.AppendLine("                <ul>");
+            html.AppendLine("                    <li>This code will expire in 15 minutes</li>");
+            html.AppendLine("                    <li>Do not share this code with anyone</li>");
+            html.AppendLine("                    <li>If you didn't request this booking, please ignore this email</li>");
+            html.AppendLine("                </ul>");
+            html.AppendLine("            </div>");
+            html.AppendLine("            <div class=\"expiry-notice\">");
+            html.AppendLine("                <h4>⏰ Time Sensitive</h4>");
+            html.AppendLine("                <p>Please complete the verification within 15 minutes. If the code expires, you can request a new one from our website.</p>");
+            html.AppendLine("            </div>");
+            html.AppendLine("            <p>If you have any questions, please contact our support team.</p>");
             html.AppendLine("        </div>");
             html.AppendLine("        <div class=\"footer\">");
             html.AppendLine($"            <p>{_emailSettings.HotelInfo.Name}</p>");

@@ -229,5 +229,25 @@ namespace WPHBookingSystem.Application.Interfaces.Services
         Task<Result> ReplyToContactMessage(string subject, string email, string body);
 
         #endregion
+
+        #region OTP Verification Operations
+
+        /// <summary>
+        /// Verifies booking OTP code for email verification.
+        /// This operation validates the provided OTP code and confirms the booking if valid.
+        /// </summary>
+        /// <param name="dto">The data transfer object containing booking ID and OTP code.</param>
+        /// <returns>A result containing the verified booking information or error details.</returns>
+        Task<Result<BookingDto>> VerifyBookingOtp(BookingVerificationDto dto);
+
+        /// <summary>
+        /// Resends OTP code for booking verification.
+        /// This operation generates a new OTP code and sends it to the guest's email.
+        /// </summary>
+        /// <param name="dto">The data transfer object containing booking ID and email address.</param>
+        /// <returns>A result indicating success or failure of the OTP resend operation.</returns>
+        Task<Result<string>> ResendOtp(ResendOtpDto dto);
+
+        #endregion
     }
 } 
