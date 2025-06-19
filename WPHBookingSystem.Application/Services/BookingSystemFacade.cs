@@ -121,13 +121,9 @@ namespace WPHBookingSystem.Application.Services
         /// </summary>
         /// <param name="dto">The booking creation data transfer object.</param>
         /// <returns>A result containing the created booking information or error details.</returns>
-        /// <exception cref="ApplicationException">Thrown when the use case execution fails.</exception>
         public async Task<Result<BookingCreatedDto>> CreateBooking(CreateBookingDto dto)
         {
-            var result = await _createBookingUseCase.ExecuteAsync(dto);
-            if (!result.IsSuccess)
-                throw new ApplicationException(result.Message);
-            return result;
+            return await _createBookingUseCase.ExecuteAsync(dto);
         }
 
         /// <summary>
@@ -137,13 +133,9 @@ namespace WPHBookingSystem.Application.Services
         /// <param name="bookingId">The unique identifier of the booking to update.</param>
         /// <param name="dto">The data transfer object containing new dates.</param>
         /// <returns>A result containing the updated booking information or error details.</returns>
-        /// <exception cref="ApplicationException">Thrown when the use case execution fails.</exception>
         public async Task<Result<BookingDto>> UpdateBooking(Guid bookingId, UpdateBookingDateDto dto)
         {
-            var result = await _updateBookingUseCase.ExecuteAsync(bookingId, dto);
-            if (!result.IsSuccess)
-                throw new ApplicationException(result.Message);
-            return result;
+            return await _updateBookingUseCase.ExecuteAsync(bookingId, dto);
         }
 
         /// <summary>
