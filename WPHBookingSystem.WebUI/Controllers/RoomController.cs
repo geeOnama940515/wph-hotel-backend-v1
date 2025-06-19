@@ -490,7 +490,8 @@ namespace WPHBookingSystem.WebUI.Controllers
         [AllowAnonymous]
         public IActionResult Test()
         {
-            return this.CreateResponse(200, "GET routing is working", new { timestamp = DateTime.UtcNow });
+            _logger.LogInformation("Test endpoint called");
+            return this.CreateResponse(200, "Test endpoint working", new { message = "CORS test successful", timestamp = DateTime.UtcNow });
         }
 
         /// <summary>
@@ -559,6 +560,20 @@ namespace WPHBookingSystem.WebUI.Controllers
                 _logger.LogError(ex, "Error updating room with images for room {RoomId}", roomId);
                 return this.CreateResponse(500, "An error occurred while updating room with images");
             }
+        }
+
+        [HttpGet("cors-test")]
+        [AllowAnonymous]
+        public IActionResult CorsTest()
+        {
+            _logger.LogInformation("CORS test endpoint called");
+            return this.CreateResponse(200, "CORS test successful", new { 
+                message = "CORS is working", 
+                timestamp = DateTime.UtcNow,
+                origin = Request.Headers["Origin"].ToString(),
+                method = Request.Method,
+                path = Request.Path
+            });
         }
     }
 

@@ -31,7 +31,8 @@ namespace WPHBookingSystem.WebUI
                     builder.AllowAnyOrigin()
                            .AllowAnyMethod()
                            .AllowAnyHeader()
-                           .WithExposedHeaders("Content-Disposition");
+                           .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type")
+                           .SetIsOriginAllowed(origin => true); // Allow any origin for development
                 });
 
                 options.AddPolicy("AllowProdOrigin", builder =>
@@ -39,7 +40,7 @@ namespace WPHBookingSystem.WebUI
                     builder.WithOrigins("https://wph-hotel.gregdoesdev.xyz") // Replace later with actual production URL
                            .AllowAnyMethod()
                            .AllowAnyHeader()
-                           .WithExposedHeaders("Content-Disposition");
+                           .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type");
                 });
             });
 
