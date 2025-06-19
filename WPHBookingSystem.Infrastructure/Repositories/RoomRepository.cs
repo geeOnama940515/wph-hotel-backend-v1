@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using WPHBookingSystem.Application.Exceptions;
 using WPHBookingSystem.Application.Interfaces;
 using WPHBookingSystem.Domain.Entities;
+using WPHBookingSystem.Domain.Enums;
 using WPHBookingSystem.Infrastructure.Persistence.Data;
 
 namespace WPHBookingSystem.Infrastructure.Repositories
@@ -40,7 +41,7 @@ namespace WPHBookingSystem.Infrastructure.Repositories
                 .Where(r => r.IsAvailable(checkIn,checkOut))
                 .Where(r => !r.Bookings.Any(b =>
                     (b.CheckIn <= checkOut && b.CheckOut >= checkIn) && // Overlapping booking
-                    b.Status != Domain.Enums.BookingStatus.Cancelled)) // Not cancelled
+                    b.Status != BookingStatus.Cancelled)) // Not cancelled
                 .OrderBy(r => r.Price)
                 .ToListAsync();
 
@@ -94,7 +95,7 @@ namespace WPHBookingSystem.Infrastructure.Repositories
             // Check if there are any overlapping bookings that aren't cancelled
             var hasOverlappingBooking = room.Bookings.Any(b =>
                 (b.CheckIn <= checkOut && b.CheckOut >= checkIn) && // Overlapping booking
-                b.Status != Domain.Enums.BookingStatus.Cancelled); // Not cancelled
+                b.Status != BookingStatus.Cancelled); // Not cancelled
 
             return !hasOverlappingBooking;
         }
