@@ -69,17 +69,15 @@ namespace WPHBookingSystem.WebUI.Controllers
 
             _logger.LogInformation("Room creation attempt for room {Name}", dto.Name);
             
-            try
-            {
                 var roomId = await _bookingSystemFacade.CreateRoom(dto);
+                if (!roomId.IsSuccess)
+                {
+                    _logger.LogWarning("Room creation failed for room {Name}", dto.Name);
+                    return this.CreateResponse(400, "Failed to create room");
+                }
                 _logger.LogInformation("Room created successfully with ID {RoomId}", roomId);
                 return this.CreateResponse(200, "Room created successfully", roomId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating room");
-                return this.CreateResponse(500, "An error occurred while creating the room");
-            }
+
         }
 
         /// <summary>
@@ -107,17 +105,15 @@ namespace WPHBookingSystem.WebUI.Controllers
 
             _logger.LogInformation("Room update attempt for room {RoomId}", roomId);
             
-            try
-            {
                 var room = await _bookingSystemFacade.UpdateRoom(roomId, dto);
+                if (!room.IsSuccess)
+                {
+                    _logger.LogWarning("Room not found for update attempt with ID {RoomId}", roomId);
+                    return this.CreateResponse(404, "Room not found");
+                }
                 _logger.LogInformation("Room updated successfully for room {RoomId}", roomId);
                 return this.CreateResponse(200, "Room updated successfully", room);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating room {RoomId}", roomId);
-                return this.CreateResponse(500, "An error occurred while updating the room");
-            }
+
         }
 
         /// <summary>
@@ -143,17 +139,14 @@ namespace WPHBookingSystem.WebUI.Controllers
 
             _logger.LogInformation("Room status update attempt for room {RoomId} to status {Status}", request.RoomId, request.NewStatus );
             
-            try
-            {
                 var room = await _bookingSystemFacade.UpdateRoomStatus(request);
+                if (!room.IsSuccess)
+                {
+                    _logger.LogWarning("Room not found or invalid status update for room {RoomId}", request.RoomId);
+                    return this.CreateResponse(404, "Room not found or invalid status update");
+                }
                 _logger.LogInformation("Room status updated successfully for room {RoomId} to status {Status}", request.RoomId, request.NewStatus );
                 return this.CreateResponse(200, "Room status updated successfully", room);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating room status");
-                return this.CreateResponse(500, "An error occurred while updating the room status");
-            }
         }
 
         /// <summary>
@@ -171,17 +164,15 @@ namespace WPHBookingSystem.WebUI.Controllers
         {
             _logger.LogInformation("Room retrieval attempt for room {RoomId}", roomId);
             
-            try
-            {
                 var room = await _bookingSystemFacade.GetRoomById(roomId);
+                if (!room.IsSuccess)
+                {
+                    _logger.LogWarning("Room not found for ID {RoomId}", roomId);
+                    return this.CreateResponse(404, "Room not found");
+                }
                 _logger.LogInformation("Room details retrieved successfully for room {RoomId}", roomId);
                 return this.CreateResponse(200, "Room details retrieved successfully", room);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving room {RoomId}", roomId);
-                return this.CreateResponse(500, "An error occurred while retrieving the room details");
-            }
+
         }
 
         /// <summary>
@@ -196,18 +187,14 @@ namespace WPHBookingSystem.WebUI.Controllers
         public async Task<IActionResult> GetAllRooms()
         {
             _logger.LogInformation("Get all rooms attempt");
-            
-            try
-            {
                 var rooms = await _bookingSystemFacade.GetAllRooms();
+                if (rooms == null || !rooms.IsSuccess)
+                {
+                    _logger.LogWarning("No rooms found or retrieval failed");
+                    return this.CreateResponse(404, "No rooms found");
+                }
                 _logger.LogInformation("All rooms retrieved successfully, count: {Count}", rooms?.Data?.Count ?? 0);
                 return this.CreateResponse(200, "Rooms retrieved successfully", rooms);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving all rooms");
-                return this.CreateResponse(500, "An error occurred while retrieving the rooms");
-            }
         }
 
         /// <summary>
@@ -226,18 +213,14 @@ namespace WPHBookingSystem.WebUI.Controllers
         public async Task<IActionResult> DeleteRoom(Guid roomId)
         {
             _logger.LogInformation("Room deletion attempt for room {RoomId}", roomId);
-            
-            try
-            {
                 var result = await _bookingSystemFacade.DeleteRoom(roomId);
+                if (!result.IsSuccess)
+                {
+                    _logger.LogWarning("Room deletion failed for room {RoomId}", roomId);
+                    return this.CreateResponse(404, "Room not found or deletion failed");
+                }
                 _logger.LogInformation("Room deleted successfully for room {RoomId}, result: {Result}", roomId, result);
                 return this.CreateResponse(200, "Room deleted successfully", result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting room {RoomId}", roomId);
-                return this.CreateResponse(500, "An error occurred while deleting the room");
-            }
         }
 
         /// <summary>
@@ -260,18 +243,15 @@ namespace WPHBookingSystem.WebUI.Controllers
             }
 
             _logger.LogInformation("Room availability check attempt for room {RoomId}", request.RoomId);
-            
-            try
-            {
                 var isAvailable = await _bookingSystemFacade.CheckRoomAvailability(request);
+                if (!isAvailable.IsSuccess)
+                {
+                    _logger.LogWarning("Room availability check failed for room {RoomId}", request.RoomId);
+                    return this.CreateResponse(400, "Room not found or availability check failed");
+                }
                 _logger.LogInformation("Room availability check completed for room {RoomId}, available: {IsAvailable}", request.RoomId, isAvailable);
                 return this.CreateResponse(200, "Availability check completed", isAvailable);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error checking room availability");
-                return this.CreateResponse(500, "An error occurred while checking room availability");
-            }
+
         }
 
         /// <summary>
@@ -296,18 +276,15 @@ namespace WPHBookingSystem.WebUI.Controllers
             }
 
             _logger.LogInformation("Room occupancy rate calculation attempt for room {RoomId}", request.RoomId);
-            
-            try
-            {
                 var occupancyRate = await _bookingSystemFacade.GetRoomOccupancyRate(request);
+                if (!occupancyRate.IsSuccess)
+                {
+                    _logger.LogWarning("Room occupancy rate calculation failed for room {RoomId}", request.RoomId);
+                    return this.CreateResponse(400, "Room not found or occupancy rate calculation failed");
+                }
                 _logger.LogInformation("Room occupancy rate calculated successfully for room {RoomId}, rate: {OccupancyRate}", request.RoomId, occupancyRate);
                 return this.CreateResponse(200, "Occupancy rate calculated successfully", occupancyRate);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error calculating room occupancy rate");
-                return this.CreateResponse(500, "An error occurred while calculating room occupancy rate");
-            }
+
         }
 
         /// <summary>
@@ -332,18 +309,14 @@ namespace WPHBookingSystem.WebUI.Controllers
             }
 
             _logger.LogInformation("Room revenue calculation attempt for room {RoomId}", request.RoomId);
-            
-            try
-            {
                 var revenue = await _bookingSystemFacade.GetRoomRevenue(request);
+                if (!revenue.IsSuccess)
+                {
+                    _logger.LogWarning("Room revenue calculation failed for room {RoomId}", request.RoomId);
+                    return this.CreateResponse(400, "Room not found or revenue calculation failed");
+                }
                 _logger.LogInformation("Room revenue calculated successfully for room {RoomId}, revenue: {Revenue}", request.RoomId, revenue);
                 return this.CreateResponse(200, "Revenue calculated successfully", revenue);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error calculating room revenue");
-                return this.CreateResponse(500, "An error occurred while calculating room revenue");
-            }
         }
 
         /// <summary>
@@ -387,8 +360,6 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadRoomImages(Guid roomId, [FromForm] RoomImageUploadDto files)
         {
-            try
-            {
                 _logger.LogInformation("=== UPLOAD ENDPOINT HIT ===");
                 _logger.LogInformation("UploadRoomImages called for room {RoomId} with {FileCount} files", roomId, files.Files?.Count ?? 0);
 
@@ -412,14 +383,14 @@ namespace WPHBookingSystem.WebUI.Controllers
                 // Create a custom IFormFileCollection implementation
                 var fileCollection = new CustomFormFileCollection(validFiles);
                 var result = await _bookingSystemFacade.UploadRoomImages(roomId, fileCollection);
+                if (!result.IsSuccess)
+                {
+                    _logger.LogWarning("Room images upload failed for room {RoomId}", roomId);
+                    return this.CreateResponse(400, "Failed to upload room images");
+                }
                 _logger.LogInformation("Room images uploaded successfully for room {RoomId}", roomId);
                 return this.CreateResponse(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error uploading room images for room {RoomId}", roomId);
-                return this.CreateResponse(500, "An error occurred while uploading room images");
-            }
+
         }
 
         /// <summary>
@@ -440,8 +411,6 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadRoomImage(Guid roomId, [FromForm] RoomImageDto dto)
         {
-            try
-            {
                 var file = dto.File;
 
                 if (file == null || file.Length == 0)
@@ -454,14 +423,14 @@ namespace WPHBookingSystem.WebUI.Controllers
 
                 var fileCollection = new CustomFormFileCollection(new List<IFormFile> { file });
                 var result = await _bookingSystemFacade.UploadRoomImages(roomId, fileCollection);
+                if (!result.IsSuccess)
+                {
+                    _logger.LogWarning("Room image upload failed for room {RoomId}", roomId);
+                    return this.CreateResponse(400, "Failed to upload room image");
+                }
                 _logger.LogInformation("Single room image uploaded successfully for room {RoomId}", roomId);
                 return this.CreateResponse(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error uploading room image for room {RoomId}", roomId);
-                return this.CreateResponse(500, "An error occurred while uploading room image");
-            }
+
         }
 
         /// <summary>
@@ -481,8 +450,6 @@ namespace WPHBookingSystem.WebUI.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> CreateRoomWithImages([FromForm] CreateRoomWithImagesDto dto)
         {
-            try
-            {
                 _logger.LogInformation("Creating room with {ImageCount} images", dto.Images?.Count ?? 0);
 
                 // Convert to original DTO
@@ -506,14 +473,14 @@ namespace WPHBookingSystem.WebUI.Controllers
                 }
 
                 var roomId = await _bookingSystemFacade.CreateRoom(createRoomDto, imageCollection);
+                if (!roomId.IsSuccess)
+                {
+                    _logger.LogWarning("Room creation failed with images, room name: {RoomName}", dto.Name);
+                    return this.CreateResponse(400, "Failed to create room with images");
+                }
                 _logger.LogInformation("Room created successfully with images, room ID: {RoomId}", roomId);
                 return this.CreateResponse(200, "Room created successfully with images", roomId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating room with images");
-                return this.CreateResponse(500, "An error occurred while creating room with images");
-            }
+
         }
 
         /// <summary>
