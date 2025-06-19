@@ -248,7 +248,7 @@ namespace WPHBookingSystem.WebUI.Controllers
                 if (!isAvailable.IsSuccess)
                 {
                     _logger.LogWarning("Room availability check failed for room {RoomId}", request.RoomId);
-                    return this.CreateResponse(400, "Room not found or availability check failed");
+                    return this.CreateResponse(400, isAvailable.Message,isAvailable);
                 }
                 _logger.LogInformation("Room availability check completed for room {RoomId}, available: {IsAvailable}", request.RoomId, isAvailable);
                 return this.CreateResponse(200, "Availability check completed", isAvailable);
