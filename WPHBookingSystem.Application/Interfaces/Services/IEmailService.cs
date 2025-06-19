@@ -38,5 +38,7 @@ namespace WPHBookingSystem.Application.Interfaces.Services
         /// <param name="guestName">The name of the guest</param>
         /// <returns>True if the email was sent successfully; otherwise, false</returns>
         Task<bool> SendBookingCancellationAsync(BookingDto bookingDto, string guestEmail, string guestName);
+
+        Task<bool> SendContactMessageReplyAsync(string email,string originalfullname,string body,string original);
     }
 } 

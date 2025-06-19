@@ -4,6 +4,7 @@ using WPHBookingSystem.Application.DTOs.Booking;
 using WPHBookingSystem.Application.DTOs.Room;
 using WPHBookingSystem.Application.UseCases.Rooms;
 using static WPHBookingSystem.Application.UseCases.Rooms.CheckRoomAvailabilityUseCase;
+using WPHBookingSystem.Application.DTOs.ContactMessage;
 
 namespace WPHBookingSystem.Application.Interfaces.Services
 {
@@ -178,6 +179,54 @@ namespace WPHBookingSystem.Application.Interfaces.Services
         /// <param name="files">Collection of image files to upload.</param>
         /// <returns>A result containing upload information and any errors.</returns>
         Task<Result<ImageUploadResponseDto>> UploadRoomImages(Guid roomId, IFormFileCollection files);
+
+        #endregion
+
+        #region Contact Message Operations
+
+        /// <summary>
+        /// Creates a new contact message.
+        /// </summary>
+        /// <param name="dto">The data transfer object containing contact message information.</param>
+        /// <returns>A result containing the ID of the created contact message or error details.</returns>
+        Task<Result<Guid>> CreateContactMessage(CreateContactMessageDto dto);
+
+        /// <summary>
+        /// Retrieves all contact messages.
+        /// </summary>
+        /// <returns>A result containing the list of all contact messages or error details.</returns>
+        Task<Result<List<ContactMessageDto>>> GetAllContactMessages();
+
+        /// <summary>
+        /// Retrieves a contact message by its ID.
+        /// </summary>
+        /// <param name="id">The unique identifier of the contact message to retrieve.</param>
+        /// <returns>A result containing the contact message information or error details.</returns>
+        Task<Result<ContactMessageDto>> GetContactMessageById(Guid id);
+
+        /// <summary>
+        /// Updates an existing contact message.
+        /// </summary>
+        /// <param name="id">The unique identifier of the contact message to update.</param>
+        /// <param name="dto">The data transfer object containing the updated contact message information.</param>
+        /// <returns>A result indicating success or failure of the update operation.</returns>
+        Task<Result> UpdateContactMessage(Guid id, UpdateContactMessageDto dto);
+
+        /// <summary>
+        /// Deletes a contact message.
+        /// </summary>
+        /// <param name="id">The unique identifier of the contact message to delete.</param>
+        /// <returns>A result indicating success or failure of the deletion operation.</returns>
+        Task<Result> DeleteContactMessage(Guid id);
+
+        /// <summary>
+        /// Replies to a contact message.
+        /// </summary>
+        /// <param name="subject">The subject of the reply.</param>
+        /// <param name="email">The email address of the recipient.</param>
+        /// <param name="body">The body of the reply.</param>
+        /// <returns>A result indicating success or failure of the reply operation.</returns>
+        Task<Result> ReplyToContactMessage(string subject, string email, string body);
 
         #endregion
     }

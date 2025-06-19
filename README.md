@@ -261,7 +261,17 @@ Authorization: Bearer <your-jwt-token>
 - **Administrator**: Full access to all endpoints including room management and system administration
 - **User**: Access to booking operations and personal data
 
-## 📡 API Endpoints
+## �� API Endpoints
+
+### Contact Message (Contact Us) Endpoints
+| Method | Endpoint | Description | Authorization |
+|--------|----------|-------------|---------------|
+| POST | `/api/contactmessage` | Submit a contact message (Contact Us) | None (Anonymous) |
+| GET | `/api/contactmessage` | Get all contact messages | Administrator |
+| GET | `/api/contactmessage/{id}` | Get a contact message by ID | Administrator |
+| POST | `/api/contactmessage/reply` | Admin reply to a contact message (sends email) | None (Anonymous, but recommend admin only) |
+
+**Note:** Only administrators can view messages. Anyone can submit a message or send a reply (for now; you may want to restrict reply to admins only).
 
 ### Authentication Endpoints
 | Method | Endpoint | Description | Authorization |
@@ -542,3 +552,31 @@ For support and questions:
 ---
 
 **Note**: This is a comprehensive hotel booking system designed for scalability and maintainability. The architecture follows industry best practices and is suitable for production deployment with Docker support.
+
+## 📨 Contact Message (Contact Us) Feature
+
+- Users can submit a contact message (Contact Us) via the API.
+- Only administrators can view or retrieve messages.
+- Admins can reply to a message, which sends a thread-style email to the user:
+
+  ```
+  Dear {FullName},
+
+  {Admin reply body}
+
+  From WPH - Hotel
+
+  Your Message:
+  {Original Message}
+  ```
+- All replies are sent via email; the conversation continues in the user's email client.
+
+## 🧭 API Documentation & Testing
+
+This project uses **Swagger** for interactive API documentation and testing.
+
+- **Swagger UI (HTTP):** http://localhost:5187/swagger
+- **Swagger UI (HTTPS):** https://localhost:7153/swagger
+- **API Base URL:** https://localhost:7153/api
+
+To access the Swagger UI, run the application and navigate to the `/swagger` endpoint in your browser.

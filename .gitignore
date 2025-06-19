@@ -397,3 +397,4 @@ appsettings.Staging.json
 docker-compose.override.yml
 docker-compose.prod.yml
 /WPHBookingSystem.WebUI/wwwroot/images/rooms
+.qodo

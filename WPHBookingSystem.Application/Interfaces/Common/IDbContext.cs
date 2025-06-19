@@ -12,5 +12,6 @@ namespace WPHBookingSystem.Application.Interfaces.Common
     {
         public DbSet<Room> Rooms {get;}
         public DbSet<Booking> Bookings {get;}
+        public DbSet<ContactMessage> ContactMessages {get;}
     }
 }
