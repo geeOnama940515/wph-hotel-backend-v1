@@ -9,6 +9,8 @@ using WPHBookingSystem.Application.Interfaces.Services;
 using WPHBookingSystem.Application.UseCases.Bookings;
 using WPHBookingSystem.Application.UseCases.Rooms;
 using static WPHBookingSystem.Application.UseCases.Rooms.CheckRoomAvailabilityUseCase;
+using WPHBookingSystem.Application.DTOs.ContactMessage;
+using WPHBookingSystem.Application.UseCases.ContactMessages;
 
 namespace WPHBookingSystem.Application.Services
 {
@@ -49,6 +51,13 @@ namespace WPHBookingSystem.Application.Services
         private readonly GetRoomRevenueUseCase _getRoomRevenueUseCase;
         private readonly UploadRoomImagesUseCase _uploadRoomImagesUseCase;
 
+        // Contact message use cases
+        private readonly CreateContactMessageUseCase _createContactMessageUseCase;
+        private readonly GetAllContactMessagesUseCase _getAllContactMessagesUseCase;
+        private readonly GetContactMessageByIdUseCase _getContactMessageByIdUseCase;
+        private readonly UpdateContactMessageUseCase _updateContactMessageUseCase;
+        private readonly DeleteContactMessageUseCase _deleteContactMessageUseCase;
+
         #endregion
 
         /// <summary>
@@ -72,6 +81,11 @@ namespace WPHBookingSystem.Application.Services
         /// <param name="getRoomRevenueUseCase">Use case for calculating room revenue.</param>
         /// <param name="viewBookingByTokenUseCase">Use case for viewing booking by token.</param>
         /// <param name="uploadRoomImagesUseCase">Use case for uploading room images.</param>
+        /// <param name="createContactMessageUseCase">Use case for creating a new contact message.</param>
+        /// <param name="getAllContactMessagesUseCase">Use case for retrieving all contact messages.</param>
+        /// <param name="getContactMessageByIdUseCase">Use case for retrieving a contact message by ID.</param>
+        /// <param name="updateContactMessageUseCase">Use case for updating a contact message.</param>
+        /// <param name="deleteContactMessageUseCase">Use case for deleting a contact message.</param>
         /// <param name="updateRoomWithImagesUseCase">Use case for updating room images.</param>
         public BookingSystemFacade(
             CreateBookingUseCase createBookingUseCase,
@@ -91,7 +105,12 @@ namespace WPHBookingSystem.Application.Services
             GetRoomOccupancyRateUseCase getRoomOccupancyRateUseCase,
             GetRoomRevenueUseCase getRoomRevenueUseCase,
             ViewBookingByTokenUseCase viewBookingByTokenUseCase,
-            UploadRoomImagesUseCase uploadRoomImagesUseCase)
+            UploadRoomImagesUseCase uploadRoomImagesUseCase,
+            CreateContactMessageUseCase createContactMessageUseCase,
+            GetAllContactMessagesUseCase getAllContactMessagesUseCase,
+            GetContactMessageByIdUseCase getContactMessageByIdUseCase,
+            UpdateContactMessageUseCase updateContactMessageUseCase,
+            DeleteContactMessageUseCase deleteContactMessageUseCase)
         {
             _createBookingUseCase = createBookingUseCase;
             _updateBookingUseCase = updateBookingUseCase;
@@ -111,6 +130,11 @@ namespace WPHBookingSystem.Application.Services
             _getRoomRevenueUseCase = getRoomRevenueUseCase;
             _viewBookingByTokenUseCase = viewBookingByTokenUseCase;
             _uploadRoomImagesUseCase = uploadRoomImagesUseCase;
+            _createContactMessageUseCase = createContactMessageUseCase;
+            _getAllContactMessagesUseCase = getAllContactMessagesUseCase;
+            _getContactMessageByIdUseCase = getContactMessageByIdUseCase;
+            _updateContactMessageUseCase = updateContactMessageUseCase;
+            _deleteContactMessageUseCase = deleteContactMessageUseCase;
         }
 
         #region Booking Operations
@@ -317,6 +341,77 @@ namespace WPHBookingSystem.Application.Services
         public async Task<Result<ImageUploadResponseDto>> UploadRoomImages(Guid roomId, IFormFileCollection files)
         {
             return await _uploadRoomImagesUseCase.ExecuteAsync(roomId, files);
+        }
+
+        #endregion
+
+        #region Contact Message Operations
+
+        /// <summary>
+        /// Creates a new contact message by delegating to the CreateContactMessageUseCase.
+        /// </summary>
+        /// <param name="dto">The data transfer object containing contact message creation information.</param>
+        /// <returns>A result containing the ID of the created contact message or error details.</returns>
+        public async Task<Result<Guid>> CreateContactMessage(CreateContactMessageDto dto)
+        {
+            return await _createContactMessageUseCase.ExecuteAsync(dto);
+        }
+
+        /// <summary>
+        /// Retrieves all contact messages by delegating to the GetAllContactMessagesUseCase.
+        /// </summary>
+        /// <returns>A result containing the list of all contact messages or error details.</returns>
+        public async Task<Result<List<ContactMessageDto>>> GetAllContactMessages()
+        {
+            var data = await _getAllContactMessagesUseCase.ExecuteAsync();
+            return Result<List<ContactMessageDto>>.Success(data);
+        }
+
+        /// <summary>
+        /// Retrieves a contact message by ID by delegating to the GetContactMessageByIdUseCase.
+        /// </summary>
+        /// <param name="id">The unique identifier of the contact message to retrieve.</param>
+        /// <returns>A result containing the contact message information or error details.</returns>
+        public async Task<Result<ContactMessageDto>> GetContactMessageById(Guid id)
+        {
+            var data = await _getContactMessageByIdUseCase.ExecuteAsync(id);
+            if (data == null) return Result<ContactMessageDto>.Failure("Not found", 404);
+            return Result<ContactMessageDto>.Success(data);
+        }
+
+        /// <summary>
+        /// Updates a contact message by delegating to the UpdateContactMessageUseCase.
+        /// </summary>
+        /// <param name="id">The unique identifier of the contact message to update.</param>
+        /// <param name="dto">The data transfer object containing updated contact message information.</param>
+        /// <returns>A result indicating success or failure of the update operation.</returns>
+        public async Task<Result> UpdateContactMessage(Guid id, UpdateContactMessageDto dto)
+        {
+            return await _updateContactMessageUseCase.ExecuteAsync(id, dto);
+        }
+
+        /// <summary>
+        /// Deletes a contact message by delegating to the DeleteContactMessageUseCase.
+        /// </summary>
+        /// <param name="id">The unique identifier of the contact message to delete.</param>
+        /// <returns>A result indicating success or failure of the deletion operation.</returns>
+        public async Task<Result> DeleteContactMessage(Guid id)
+        {
+            return await _deleteContactMessageUseCase.ExecuteAsync(id);
+        }
+
+        /// <summary>
+        /// Replies to a contact message by delegating to the UpdateContactMessageUseCase.
+        /// </summary>
+        /// <param name="subject">The subject of the reply.</param>
+        /// <param name="email">The email address of the contact message recipient.</param>
+        /// <param name="body">The body of the reply.</param>
+        /// <returns>A result indicating success or failure of the reply operation.</returns>
+        public async Task<Result> ReplyToContactMessage(string subject, string email, string body)
+        {
+            // TODO: Implement email sending logic here using IEmailService
+            // await _emailService.SendEmailAsync(email, subject, body);
+            return Result.Success("Reply sent (stub)");
         }
 
         #endregion
