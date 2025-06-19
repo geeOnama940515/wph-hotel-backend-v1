@@ -162,7 +162,7 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine("            <p>Booking Confirmation</p>");
             html.AppendLine("        </div>");
             html.AppendLine("        <div class=\"content\">");
-            html.AppendLine($"            <h2>Dear {guestName},</h2>");
+            html.AppendLine($"            <h2>Dear {booking.GuestName},</h2>");
             html.AppendLine("            <p>Thank you for choosing to stay with us! Your booking has been confirmed.</p>");
             html.AppendLine("            <div class=\"booking-token\">");
             html.AppendLine($"                <strong>Booking Reference:</strong> #{booking.Id:N}");
