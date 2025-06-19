@@ -9,6 +9,7 @@ namespace WPHBookingSystem.Application.Interfaces
         IGenericRepository<T> Repository<T>() where T : class;
         IBookingRepository BookingRepository { get; }
         IRoomRepository RoomRepository { get; }
+        IContactMessageRepository ContactMessageRepository { get; }
         Task<int> SaveChangesAsync();
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();
