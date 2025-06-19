@@ -30,21 +30,25 @@ docker-compose up -d
 
 REM Wait for the application to start
 echo [INFO] Waiting for application to start...
-timeout /t 10 /nobreak >nul
+timeout /t 15 /nobreak >nul
 
-REM Check if the application is running
-curl -f http://localhost:5069/health >nul 2>&1
+REM Check if the application is running using the CORS test endpoint
+echo [INFO] Checking application health...
+curl -f http://localhost:5069/api/cors-test >nul 2>&1
 if errorlevel 1 (
-    echo [ERROR] ❌ Application failed to start. Check logs with: docker-compose logs wph-hotel-api
+    echo [ERROR] ❌ Application failed to start. Checking logs...
+    docker-compose logs wph-hotel-api
+    echo [ERROR] Check logs with: docker-compose logs wph-hotel-api
     pause
     exit /b 1
 ) else (
     echo [INFO] ✅ Application is running successfully!
     echo.
     echo 🌐 API Endpoints:
-    echo    - Health Check: http://localhost:5069/health
+    echo    - CORS Test: http://localhost:5069/api/cors-test
     echo    - API Base: http://localhost:5069/api
     echo    - Swagger UI: http://localhost:5069/swagger
+    echo    - Scalar UI: http://localhost:5069/scalar
     echo.
     echo 📊 Container Status:
     docker-compose ps
