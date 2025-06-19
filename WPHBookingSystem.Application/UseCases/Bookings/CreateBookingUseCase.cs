@@ -21,7 +21,7 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
     public class CreateBookingUseCase
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IEmailService _emailService;
+        private readonly IEmailSenderService _emailService;
 
         /// <summary>
         /// Initializes a new instance of the CreateBookingUseCase with the required dependencies.
@@ -29,7 +29,7 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
         /// <param name="unitOfWork">The unit of work for transaction management and data access.</param>
         /// <param name="emailService">The email service for sending confirmation emails.</param>
         /// <exception cref="ArgumentNullException">Thrown when unitOfWork or emailService is null.</exception>
-        public CreateBookingUseCase(IUnitOfWork unitOfWork, IEmailService emailService)
+        public CreateBookingUseCase(IUnitOfWork unitOfWork, IEmailSenderService emailService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
