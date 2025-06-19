@@ -159,7 +159,18 @@ namespace WPHBookingSystem.Domain.Entities
                 throw new DomainException("Only pending bookings can be confirmed.");
             Status = BookingStatus.Confirmed;
         }
-
+        public void CheckedIn()
+        {
+            if (Status != BookingStatus.Confirmed)
+                throw new DomainException("Only pending bookings can be checked in.");
+            Status = BookingStatus.CheckedIn;
+        }
+        public void CheckedOut()
+        {
+            if (Status != BookingStatus.CheckedIn)
+                throw new DomainException("Only checked in bookings can be checked out.");
+            Status = BookingStatus.CheckedOut;
+        }
         /// <summary>
         /// Cancels this booking, changing its status to Cancelled.
         /// Completed bookings cannot be cancelled.
@@ -179,8 +190,8 @@ namespace WPHBookingSystem.Domain.Entities
         /// <exception cref="DomainException">Thrown when the booking is not confirmed or check-out date hasn't passed.</exception>
         public void Complete()
         {
-            if (Status != BookingStatus.Confirmed)
-                throw new DomainException("Only confirmed bookings can be completed.");
+            if (Status != BookingStatus.CheckedOut)
+                throw new DomainException("Only checked out bookings can be completed.");
             if (DateTime.UtcNow < CheckOut)
                 throw new DomainException("Check-out date has not passed yet.");
             Status = BookingStatus.Completed;
