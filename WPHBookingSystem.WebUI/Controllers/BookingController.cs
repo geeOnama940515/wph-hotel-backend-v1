@@ -28,7 +28,7 @@ namespace WPHBookingSystem.WebUI.Controllers
     public class BookingController : ControllerBase
     {
         private readonly IBookingSystemFacade _facade;
-        private readonly IEmailService _emailService;
+        private readonly IEmailSenderService _emailService;
         private readonly ILogger<BookingController> _logger;
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <param name="facade">Service facade for coordinating booking operations</param>
         /// <param name="emailService">Service for sending emails</param>
         /// <param name="logger">Logger for booking operations</param>
-        public BookingController(IBookingSystemFacade facade, IEmailService emailService, ILogger<BookingController> logger)
+        public BookingController(IBookingSystemFacade facade, IEmailSenderService emailService, ILogger<BookingController> logger)
         {
             _facade = facade;
             _emailService = emailService;
@@ -249,9 +249,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         [HttpGet("view/{bookingToken}")]
         public async Task<IActionResult> ViewBookingByToken(Guid bookingToken)
         {
+
             _logger.LogInformation("View booking by token attempt for token {BookingToken}", bookingToken);         
                 var result = await _facade.ViewBookingByToken(bookingToken);
-                if (!result.IsSuccess)
+                if (result == null)
                 {
                     _logger.LogWarning("Failed to retrieve booking details for token {BookingToken}: {Message}", bookingToken, result.Message);
                     return this.CreateResponse(result.StatusCode, result.Message);
@@ -290,7 +291,8 @@ namespace WPHBookingSystem.WebUI.Controllers
                     Status = Domain.Enums.BookingStatus.Confirmed,
                     SpecialRequests = "Test special request",
                     Phone = "+1234567890",
-                    Address = "123 Test Street"
+                    Address = "123 Test Street",
+                    BookingToken = "ce4de5b2-f0a8-4207-aa26-09ac33102f6d",
                 };
 
                 var result = await _emailService.SendBookingConfirmationAsync(bookingDto, request.Email, request.GuestName);
