@@ -23,6 +23,7 @@ namespace WPHBookingSystem.Infrastructure.Repositories
         private IDbContextTransaction? _transaction;
         private IBookingRepository? _bookingRepository;
         private IRoomRepository? _roomRepository;
+        private IContactMessageRepository? _contactMessageRepository;
 
         /// <summary>
         /// Initializes a new instance of the UnitOfWork with the specified DbContext.
@@ -59,6 +60,16 @@ namespace WPHBookingSystem.Infrastructure.Repositories
             {
                 _bookingRepository ??= new BookingRepository(_context);
                 return _bookingRepository;
+            }
+        }
+
+
+        public IContactMessageRepository ContactMessageRepository
+        {
+            get
+            {
+                _contactMessageRepository ??= new ContactMessageRepository(_context);
+                return _contactMessageRepository;
             }
         }
 
