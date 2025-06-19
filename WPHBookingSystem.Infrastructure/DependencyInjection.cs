@@ -78,21 +78,21 @@ namespace WPHBookingSystem.Infrastructure
                 };
                 
                 // Add events for better debugging
-                options.Events = new JwtBearerEvents
-                {
-                    OnAuthenticationFailed = context =>
-                    {
-                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                        logger.LogWarning("JWT Authentication failed: {Error}", context.Exception.Message);
-                        return Task.CompletedTask;
-                    },
-                    OnChallenge = context =>
-                    {
-                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                        logger.LogInformation("JWT Challenge issued for path: {Path}", context.HttpContext.Request.Path);
-                        return Task.CompletedTask;
-                    }
-                };
+                //options.Events = new JwtBearerEvents
+                //{
+                //    OnAuthenticationFailed = context =>
+                //    {
+                //        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                //        logger.LogWarning("JWT Authentication failed: {Error}", context.Exception.Message);
+                //        return Task.CompletedTask;
+                //    },
+                //    OnChallenge = context =>
+                //    {
+                //        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                //        logger.LogInformation("JWT Challenge issued for path: {Path}", context.HttpContext.Request.Path);
+                //        return Task.CompletedTask;
+                //    }
+                //};
             });
 
             // Configure Identity options for security and validation
