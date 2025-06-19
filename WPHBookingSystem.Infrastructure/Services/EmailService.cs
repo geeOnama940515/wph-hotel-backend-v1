@@ -1,19 +1,21 @@
-using System.Net.Mail;
-using System.Net;
-using System.Text;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WPHBookingSystem.Application.DTOs.Booking;
 using WPHBookingSystem.Application.DTOs.Email;
 using WPHBookingSystem.Application.Interfaces.Services;
+using System.Text;
 
 namespace WPHBookingSystem.Infrastructure.Services
 {
     /// <summary>
-    /// Implementation of the email service for sending booking-related emails.
+    /// Implementation of the email service for sending booking-related emails using MailKit.
     /// 
-    /// This service uses SMTP to send HTML-formatted emails with booking confirmations,
-    /// updates, and cancellations to guests.
+    /// This service uses MailKit to send HTML-formatted emails with booking confirmations,
+    /// updates, and cancellations to guests. MailKit provides better reliability and
+    /// easier configuration compared to System.Net.Mail.
     /// </summary>
     public class EmailService : IEmailService
     {
@@ -84,42 +86,45 @@ namespace WPHBookingSystem.Infrastructure.Services
         }
 
         /// <summary>
-        /// Sends an email using SMTP.
+        /// Sends an email using MailKit SMTP client.
         /// </summary>
         private async Task<bool> SendEmailAsync(string toEmail, string subject, string htmlBody)
         {
             try
             {
-                using var client = new SmtpClient(_emailSettings.SmtpHost, _emailSettings.SmtpPort)
-                {
-                    EnableSsl = _emailSettings.EnableSsl,
-                    UseDefaultCredentials = !_emailSettings.EnableAuthentication
-                };
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(_emailSettings.FromName, _emailSettings.FromEmail));
+                message.To.Add(new MailboxAddress("", toEmail));
+                message.Subject = subject;
 
-                if (_emailSettings.EnableAuthentication)
+                var bodyBuilder = new BodyBuilder
                 {
-                    client.Credentials = new NetworkCredential(_emailSettings.Username, _emailSettings.Password);
+                    HtmlBody = htmlBody
+                };
+                message.Body = bodyBuilder.ToMessageBody();
+
+                using var client = new SmtpClient();
+                
+                // Configure SSL/TLS based on settings
+                var secureSocketOptions = _emailSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None;
+                
+                await client.ConnectAsync(_emailSettings.SmtpHost, _emailSettings.SmtpPort, secureSocketOptions);
+
+                // Authenticate if required
+                if (_emailSettings.EnableAuthentication && !string.IsNullOrEmpty(_emailSettings.Username))
+                {
+                    await client.AuthenticateAsync(_emailSettings.Username, _emailSettings.Password);
                 }
 
-                var message = new MailMessage
-                {
-                    From = new MailAddress(_emailSettings.FromEmail, _emailSettings.FromName),
-                    Subject = subject,
-                    Body = htmlBody,
-                    IsBodyHtml = true,
-                    Priority = MailPriority.Normal
-                };
-
-                message.To.Add(toEmail);
-
-                await client.SendMailAsync(message);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
                 
                 _logger.LogInformation("Email sent successfully to {ToEmail}", toEmail);
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send email to {ToEmail}", toEmail);
+                _logger.LogError(ex, "Failed to send email to {ToEmail}. Error: {ErrorMessage}", toEmail, ex.Message);
                 return false;
             }
         }
@@ -150,6 +155,9 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine("        .logo { max-width: 150px; height: auto; }");
             html.AppendLine("        .special-request { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 15px 0; border-radius: 5px; }");
             html.AppendLine("        .booking-token { background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center; font-weight: bold; }");
+            html.AppendLine("        .view-summary-btn { display: inline-block; background-color: #27ae60; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }");
+            html.AppendLine("        .view-summary-btn:hover { background-color: #229954; }");
+            html.AppendLine("        .summary-section { text-align: center; margin: 30px 0; }");
             html.AppendLine("    </style>");
             html.AppendLine("</head>");
             html.AppendLine("<body>");
@@ -204,24 +212,30 @@ namespace WPHBookingSystem.Infrastructure.Services
                 html.AppendLine("            </div>");
             }
 
+            html.AppendLine("            <div class=\"summary-section\">");
+            html.AppendLine("                <h3>View Your Booking Summary</h3>");
+            html.AppendLine("                <p>Click the button below to view your complete booking details online:</p>");
+            html.AppendLine($"                <a href=\"{_emailSettings.BaseUrl}/view-booking-summary?bookingtoken={booking.BookingToken}\" class=\"view-summary-btn\">View Booking Summary</a>");
+            html.AppendLine("            </div>");
+
             html.AppendLine("            <p>We look forward to welcoming you to our hotel!</p>");
-            html.AppendLine("            <p>If you have any questions or need to make changes to your booking, please don't hesitate to contact us.</p>");
+            html.AppendLine("            <p>If you have any questions, please don't hesitate to contact us.</p>");
             html.AppendLine("        </div>");
             html.AppendLine("        <div class=\"footer\">");
-            html.AppendLine($"            <p><strong>{_emailSettings.HotelInfo.Name}</strong></p>");
-            if (!string.IsNullOrEmpty(_emailSettings.HotelInfo.Address))
+            html.AppendLine($"            <p>{_emailSettings.HotelInfo.Name}</p>");
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Address))
             {
                 html.AppendLine($"            <p>{_emailSettings.HotelInfo.Address}</p>");
             }
-            if (!string.IsNullOrEmpty(_emailSettings.HotelInfo.Phone))
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Phone))
             {
                 html.AppendLine($"            <p>Phone: {_emailSettings.HotelInfo.Phone}</p>");
             }
-            if (!string.IsNullOrEmpty(_emailSettings.HotelInfo.Email))
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Email))
             {
                 html.AppendLine($"            <p>Email: {_emailSettings.HotelInfo.Email}</p>");
             }
-            if (!string.IsNullOrEmpty(_emailSettings.HotelInfo.Website))
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Website))
             {
                 html.AppendLine($"            <p>Website: {_emailSettings.HotelInfo.Website}</p>");
             }
@@ -249,14 +263,17 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine("    <style>");
             html.AppendLine("        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }");
             html.AppendLine("        .container { max-width: 600px; margin: 0 auto; padding: 20px; }");
-            html.AppendLine("        .header { background-color: #f39c12; color: white; padding: 20px; text-align: center; }");
+            html.AppendLine("        .header { background-color: #3498db; color: white; padding: 20px; text-align: center; }");
             html.AppendLine("        .content { background-color: #f8f9fa; padding: 30px; }");
             html.AppendLine("        .booking-details { background-color: white; padding: 20px; margin: 20px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }");
             html.AppendLine("        .detail-row { display: flex; justify-content: space-between; margin: 10px 0; padding: 8px 0; border-bottom: 1px solid #eee; }");
             html.AppendLine("        .detail-label { font-weight: bold; color: #2c3e50; }");
             html.AppendLine("        .detail-value { color: #555; }");
             html.AppendLine("        .footer { background-color: #34495e; color: white; padding: 20px; text-align: center; font-size: 14px; }");
-            html.AppendLine("        .update-notice { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 15px 0; border-radius: 5px; }");
+            html.AppendLine("        .update-notice { background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; margin: 15px 0; border-radius: 5px; }");
+            html.AppendLine("        .view-summary-btn { display: inline-block; background-color: #27ae60; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }");
+            html.AppendLine("        .view-summary-btn:hover { background-color: #229954; }");
+            html.AppendLine("        .summary-section { text-align: center; margin: 30px 0; }");
             html.AppendLine("    </style>");
             html.AppendLine("</head>");
             html.AppendLine("<body>");
@@ -272,6 +289,10 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine("            </div>");
             html.AppendLine("            <div class=\"booking-details\">");
             html.AppendLine("                <h3>Updated Booking Details</h3>");
+            html.AppendLine("                <div class=\"detail-row\">");
+            html.AppendLine("                    <span class=\"detail-label\">Booking Reference:</span>");
+            html.AppendLine($"                    <span class=\"detail-value\">#{booking.Id:N}</span>");
+            html.AppendLine("                </div>");
             html.AppendLine("                <div class=\"detail-row\">");
             html.AppendLine("                    <span class=\"detail-label\">Guest Name:</span>");
             html.AppendLine($"                    <span class=\"detail-value\">{guestName}</span>");
@@ -301,15 +322,26 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine($"                    <span class=\"detail-value\">{booking.Status}</span>");
             html.AppendLine("                </div>");
             html.AppendLine("            </div>");
-            html.AppendLine("            <p>If you have any questions about these changes, please contact us.</p>");
+
+            html.AppendLine("            <div class=\"summary-section\">");
+            html.AppendLine("                <h3>View Your Updated Booking Summary</h3>");
+            html.AppendLine("                <p>Click the button below to view your complete booking details online:</p>");
+            html.AppendLine($"                <a href=\"{_emailSettings.BaseUrl}/view-booking-summary?bookingtoken={booking.BookingToken}\" class=\"view-summary-btn\">View Booking Summary</a>");
+            html.AppendLine("            </div>");
+
+            html.AppendLine("            <p>If you have any questions about this update, please contact us.</p>");
             html.AppendLine("        </div>");
             html.AppendLine("        <div class=\"footer\">");
-            html.AppendLine($"            <p><strong>{_emailSettings.HotelInfo.Name}</strong></p>");
-            if (!string.IsNullOrEmpty(_emailSettings.HotelInfo.Phone))
+            html.AppendLine($"            <p>{_emailSettings.HotelInfo.Name}</p>");
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Address))
+            {
+                html.AppendLine($"            <p>{_emailSettings.HotelInfo.Address}</p>");
+            }
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Phone))
             {
                 html.AppendLine($"            <p>Phone: {_emailSettings.HotelInfo.Phone}</p>");
             }
-            if (!string.IsNullOrEmpty(_emailSettings.HotelInfo.Email))
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Email))
             {
                 html.AppendLine($"            <p>Email: {_emailSettings.HotelInfo.Email}</p>");
             }
@@ -345,6 +377,9 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine("        .detail-value { color: #555; }");
             html.AppendLine("        .footer { background-color: #34495e; color: white; padding: 20px; text-align: center; font-size: 14px; }");
             html.AppendLine("        .cancellation-notice { background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; margin: 15px 0; border-radius: 5px; color: #721c24; }");
+            html.AppendLine("        .view-summary-btn { display: inline-block; background-color: #27ae60; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }");
+            html.AppendLine("        .view-summary-btn:hover { background-color: #229954; }");
+            html.AppendLine("        .summary-section { text-align: center; margin: 30px 0; }");
             html.AppendLine("    </style>");
             html.AppendLine("</head>");
             html.AppendLine("<body>");
@@ -361,6 +396,10 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine("            <div class=\"booking-details\">");
             html.AppendLine("                <h3>Cancelled Booking Details</h3>");
             html.AppendLine("                <div class=\"detail-row\">");
+            html.AppendLine("                    <span class=\"detail-label\">Booking Reference:</span>");
+            html.AppendLine($"                    <span class=\"detail-value\">#{booking.Id:N}</span>");
+            html.AppendLine("                </div>");
+            html.AppendLine("                <div class=\"detail-row\">");
             html.AppendLine("                    <span class=\"detail-label\">Guest Name:</span>");
             html.AppendLine($"                    <span class=\"detail-value\">{guestName}</span>");
             html.AppendLine("                </div>");
@@ -376,16 +415,31 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine("                    <span class=\"detail-label\">Check-out:</span>");
             html.AppendLine($"                    <span class=\"detail-value\">{booking.CheckOut:dddd, MMMM dd, yyyy}</span>");
             html.AppendLine("                </div>");
+            html.AppendLine("                <div class=\"detail-row\">");
+            html.AppendLine("                    <span class=\"detail-label\">Status:</span>");
+            html.AppendLine($"                    <span class=\"detail-value\">{booking.Status}</span>");
+            html.AppendLine("                </div>");
             html.AppendLine("            </div>");
+
+            html.AppendLine("            <div class=\"summary-section\">");
+            html.AppendLine("                <h3>View Your Cancelled Booking Summary</h3>");
+            html.AppendLine("                <p>Click the button below to view your cancelled booking details online:</p>");
+            html.AppendLine($"                <a href=\"{_emailSettings.BaseUrl}/view-booking-summary?bookingtoken={booking.BookingToken}\" class=\"view-summary-btn\">View Booking Summary</a>");
+            html.AppendLine("            </div>");
+
             html.AppendLine("            <p>We hope to welcome you back in the future!</p>");
             html.AppendLine("        </div>");
             html.AppendLine("        <div class=\"footer\">");
-            html.AppendLine($"            <p><strong>{_emailSettings.HotelInfo.Name}</strong></p>");
-            if (!string.IsNullOrEmpty(_emailSettings.HotelInfo.Phone))
+            html.AppendLine($"            <p>{_emailSettings.HotelInfo.Name}</p>");
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Address))
+            {
+                html.AppendLine($"            <p>{_emailSettings.HotelInfo.Address}</p>");
+            }
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Phone))
             {
                 html.AppendLine($"            <p>Phone: {_emailSettings.HotelInfo.Phone}</p>");
             }
-            if (!string.IsNullOrEmpty(_emailSettings.HotelInfo.Email))
+            if (!string.IsNullOrWhiteSpace(_emailSettings.HotelInfo.Email))
             {
                 html.AppendLine($"            <p>Email: {_emailSettings.HotelInfo.Email}</p>");
             }
