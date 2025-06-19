@@ -43,6 +43,13 @@ namespace WPHBookingSystem.Infrastructure.Persistence.Data
         /// Provides access to booking data for CRUD operations and queries.
         /// </summary>
         public DbSet<Booking> Bookings => Set<Booking>();
+
+        /// <summary>
+        /// Gets the DbSet for ContactMessage entities.
+        /// Provides access to contact message data for CRUD operations and queries.
+        /// </summary>
+        public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
