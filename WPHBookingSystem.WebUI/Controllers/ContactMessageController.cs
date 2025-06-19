@@ -43,9 +43,12 @@ namespace WPHBookingSystem.WebUI.Controllers
             return Ok(result);
         }
 
-        [HttpPost("reply")]
-        public async Task<IActionResult> Reply([FromBody] ReplyContactMessageDto dto)
+        [HttpPost("reply/{messageId}")]
+        public async Task<IActionResult> Reply(Guid messageId,[FromBody] ReplyContactMessageDto dto)
         {
+
+            var getMessage = await _facade.GetContactMessageById(messageId);
+
             var result = await _facade.ReplyToContactMessage(dto.Subject, dto.Email, dto.Body);
             if (!result.IsSuccess) return BadRequest(result.Message);
             return Ok(result);
