@@ -14,6 +14,7 @@ namespace WPHBookingSystem.Domain.Enums
     public enum BookingStatus
     {
         Pending,
+        EmailVerificationPending,
         Confirmed,
         Cancelled,
         CheckedIn,
