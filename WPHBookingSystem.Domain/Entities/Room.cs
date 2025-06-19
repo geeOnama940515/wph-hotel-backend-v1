@@ -166,8 +166,8 @@ namespace WPHBookingSystem.Domain.Entities
             if (start >= end)
                 throw new DomainException("Start date must be before end date.");
 
-            if (Status != RoomStatus.Available)
-                return false;
+            //if (Status != RoomStatus.Available)
+            //    return false;
 
             // Return false if any confirmed or pending booking overlaps
             return !_bookings.Any(b =>
