@@ -106,13 +106,60 @@ app.Use(async (context, next) =>
     logger.LogInformation("Response: {StatusCode}", context.Response.StatusCode);
 });
 
+// Global exception handler
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Unhandled exception occurred: {Message}", ex.Message);
+        
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        
+        var errorResponse = new
+        {
+            success = false,
+            message = "An unexpected error occurred. Please try again later.",
+            status = 500,
+            traceId = context.TraceIdentifier
+        };
+        
+        await context.Response.WriteAsJsonAsync(errorResponse);
+    }
+});
+
 // Auth & CORS
+app.Use(async (context, next) =>
+{
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    
+    // Log CORS preflight requests
+    if (context.Request.Method == "OPTIONS")
+    {
+        logger.LogInformation("CORS Preflight Request: {Origin} -> {Method} {Path}", 
+            context.Request.Headers["Origin"], 
+            context.Request.Headers["Access-Control-Request-Method"], 
+            context.Request.Path);
+    }
+    
+    await next();
+});
+
 app.UseCors("AllowDevOrigin");
 app.UseAuthentication();
 app.UseAuthorization();
 
 // Map routes
 app.MapControllers();
+
+// Add a simple CORS test endpoint
+app.MapGet("/api/cors-test", () => new { message = "CORS is working", timestamp = DateTime.UtcNow })
+    .AllowAnonymous();
 
 // Run app
 app.Run();
