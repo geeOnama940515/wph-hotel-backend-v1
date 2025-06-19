@@ -20,7 +20,7 @@ WPHBookingSystem/
 - **Purpose**: Contains the core business logic, entities, and domain rules
 - **Key Components**:
   - **Entities**: `Room`, `Booking` (with encapsulated business logic)
-  - **Value Objects**: `ContactInfo`, `GalleryImage` (immutable objects)
+  - **Value Objects**: `ContactInfo`, `Image` (immutable objects)
   - **Enums**: `BookingStatus`, `RoomStatus` (domain constants)
   - **Exceptions**: `DomainException` (domain-specific errors)
   - **Base Classes**: `BaseAuditable` (audit trail support)
@@ -40,6 +40,7 @@ WPHBookingSystem/
   - **Persistence**: Entity Framework Core context and repositories
   - **Identity**: ASP.NET Core Identity with JWT authentication
   - **Repositories**: Data access implementations
+  - **Services**: Email, image upload, and other external services
   - **Dependency Injection**: Service registration
 
 #### 4. **Web UI Layer** (`WPHBookingSystem.WebUI`)
@@ -53,7 +54,7 @@ WPHBookingSystem/
 
 ### 1. **Domain-Driven Design (DDD)**
 - **Entities**: Rich domain objects with behavior (`Room`, `Booking`)
-- **Value Objects**: Immutable objects representing concepts (`ContactInfo`)
+- **Value Objects**: Immutable objects representing concepts (`ContactInfo`, `Image`)
 - **Aggregates**: Room as aggregate root managing bookings
 - **Domain Services**: Business logic encapsulated in entities
 
@@ -98,12 +99,24 @@ WPHBookingSystem/
 ### Authentication & Authorization
 - **ASP.NET Core Identity**: User management and authentication
 - **JWT Bearer Tokens**: Stateless authentication
-- **Role-Based Authorization**: Admin and User roles
+- **Role-Based Authorization**: Administrator and User roles
+
+### File Management
+- **Image Upload Service**: Handles room image uploads with validation
+- **File Storage**: Local file system storage with organized directory structure
+- **Image Processing**: Automatic image optimization and validation
+
+### Email Services
+- **MailKit**: Reliable email delivery with better SSL/TLS support
+- **HTML Email Templates**: Professional booking confirmation, update, and cancellation emails
+- **Multiple Provider Support**: Gmail, Outlook, Yahoo, and custom SMTP servers
+- **App Password Support**: Secure authentication for Gmail and Yahoo
 
 ### Development Tools
-- **Docker**: Containerization support
+- **Docker**: Containerization support with multi-stage builds
 - **User Secrets**: Secure configuration management
 - **Nullable Reference Types**: Enhanced null safety
+- **Structured Logging**: Comprehensive logging with Serilog
 
 ## 📋 Prerequisites
 
@@ -119,7 +132,7 @@ Before running the application, ensure you have the following installed:
 ### 1. **Clone the Repository**
 ```bash
 git clone <repository-url>
-cd wph-hotel-backend-v1
+cd wph-hotel-backend-v1-cloned
 ```
 
 ### 2. **Database Setup**
@@ -164,6 +177,8 @@ dotnet ef database update --startup-project ../WPHBookingSystem.WebUI
 ```
 
 ### 4. **Run the Application**
+
+#### Local Development
 ```bash
 # Navigate to the WebUI project
 cd WPHBookingSystem.WebUI
@@ -183,12 +198,19 @@ The API will be available at:
 - **Scalar UI (HTTPS)**: https://localhost:7153/scalar
 - **API Base URL**: https://localhost:7153/api
 
-### 5. **Docker Deployment** (Optional)
+#### Docker Deployment
 ```bash
-# Build and run with Docker
+# Build and run with Docker Compose
+docker-compose up --build
+
+# Or build and run individual container
 docker build -t wph-hotel-backend .
-docker run -p 8080:8080 wph-hotel-backend
+docker run -p 5069:5069 wph-hotel-backend
 ```
+
+The Docker container will be available at:
+- **API Base URL**: http://localhost:5069/api
+- **Scalar UI**: http://localhost:5069/scalar
 
 ## 🔐 Authentication & Authorization
 
@@ -221,6 +243,10 @@ Include the JWT token in the Authorization header:
 Authorization: Bearer <your-jwt-token>
 ```
 
+### Role-Based Access
+- **Administrator**: Full access to all endpoints including room management and system administration
+- **User**: Access to booking operations and personal data
+
 ## 📡 API Endpoints
 
 ### Authentication Endpoints
@@ -236,25 +262,35 @@ Authorization: Bearer <your-jwt-token>
 |--------|----------|-------------|---------------|
 | GET | `/api/room` | Get all rooms | None |
 | GET | `/api/room/{roomId}` | Get room by ID | None |
-| POST | `/api/room` | Create new room | Admin |
-| PUT | `/api/room` | Update room | Admin |
-| PUT | `/api/room/{roomId}/status` | Update room status | Admin |
-| DELETE | `/api/room/{roomId}` | Delete room | Admin |
+| POST | `/api/room` | Create new room | Administrator |
+| PUT | `/api/room/{roomId}` | Update room | Administrator |
+| PUT | `/api/room/{roomId}/status` | Update room status | Administrator |
+| DELETE | `/api/room/{roomId}` | Delete room | Administrator |
 | GET | `/api/room/room-availability` | Check room availability | None |
-| GET | `/api/room/room-occupancy-rate` | Get room occupancy rate | Admin |
-| GET | `/api/room/room-revenue` | Get room revenue | Admin |
-| POST | `/api/room/{roomId}/images` | Upload multiple images to room | Admin |
-| POST | `/api/room/{roomId}/image` | Upload single image to room | Admin |
+| GET | `/api/room/room-occupancy-rate` | Get room occupancy rate | Administrator |
+| GET | `/api/room/room-revenue` | Get room revenue | Administrator |
+| POST | `/api/room/{roomId}/images` | Upload multiple images to room | Administrator |
+| POST | `/api/room/{roomId}/image` | Upload single image to room | Administrator |
+| POST | `/api/room/with-images` | Create room with images | Administrator |
+| PUT | `/api/room/{roomId}/with-images` | Update room with images | Administrator |
 
 ### Booking Management Endpoints
 | Method | Endpoint | Description | Authorization |
 |--------|----------|-------------|---------------|
-| POST | `/api/booking` | Create new booking | User |
-| PUT | `/api/booking/{bookingId}/dates` | Update booking dates | User |
-| PUT | `/api/booking/{bookingId}/status` | Update booking status | User |
-| PUT | `/api/booking/{bookingId}/cancel` | Cancel booking | User |
-| GET | `/api/booking/{emailAddress}/get-bookings` | Get user bookings | User |
+| POST | `/api/booking` | Create new booking | None (Anonymous) |
+| PUT | `/api/booking/{bookingId}/dates` | Update booking dates | None (Anonymous) |
+| PUT | `/api/booking/{bookingId}/status` | Update booking status | None (Anonymous) |
+| PUT | `/api/booking/{bookingId}/cancel` | Cancel booking | None (Anonymous) |
+| GET | `/api/booking/{emailAddress}/get-bookings` | Get user bookings | None (Anonymous) |
+| GET | `/api/booking` | Get all bookings | Administrator |
 | GET | `/api/booking/view/{bookingToken}` | View booking by token | None |
+
+### System Endpoints
+| Method | Endpoint | Description | Authorization |
+|--------|----------|-------------|---------------|
+| POST | `/api/booking/test-email` | Test email functionality | Administrator |
+| GET | `/api/auth/test-auth` | Test authentication | None |
+| GET | `/api/auth/test-admin` | Test admin authorization | Administrator |
 
 ## 📊 Data Models
 
@@ -267,7 +303,7 @@ public class Room : BaseAuditable
     public string Description { get; private set; }
     public decimal Price { get; private set; }
     public int Capacity { get; private set; }
-    public List<GalleryImage> Images { get; private set; }
+    public List<Image> Images { get; private set; }
     public RoomStatus Status { get; private set; }
     public IReadOnlyCollection<Booking> Bookings { get; }
 }
@@ -278,19 +314,52 @@ public class Room : BaseAuditable
 public class Booking : BaseAuditable
 {
     public Guid Id { get; private set; }
-    public Guid UserId { get; private set; }
     public Guid RoomId { get; private set; }
     public DateTime CheckIn { get; private set; }
     public DateTime CheckOut { get; private set; }
     public int Guests { get; private set; }
     public ContactInfo ContactInfo { get; private set; }
     public string EmailAddress { get; private set; }
+    public string GuestName { get; private set; }
     public decimal TotalAmount { get; private set; }
     public BookingStatus Status { get; private set; }
     public string SpecialRequests { get; private set; }
     public Guid BookingToken { get; private set; }
 }
 ```
+
+### Image Upload DTOs
+```csharp
+// Create room with images
+public class CreateRoomWithImagesDto
+{
+    public CreateRoomDto Room { get; set; }
+    public List<IFormFile> Images { get; set; }
+}
+
+// Update room with images
+public class UpdateRoomWithImagesDto
+{
+    public UpdateRoomDto Room { get; set; }
+    public List<IFormFile> Images { get; set; }
+}
+```
+
+## 🖼️ Image Upload Features
+
+### Supported Features
+- **Multiple Image Upload**: Upload multiple images to a room in a single request
+- **Single Image Upload**: Upload individual images to existing rooms
+- **Image Validation**: Automatic validation of file types and sizes
+- **Organized Storage**: Images stored in organized directory structure
+- **Room Creation with Images**: Create rooms with images in a single operation
+- **Room Updates with Images**: Update room details and add new images simultaneously
+
+### Image Requirements
+- **Supported Formats**: JPEG, JPG, PNG
+- **Maximum Size**: 10MB per image
+- **Storage Location**: `wwwroot/images/rooms/`
+- **Naming Convention**: `room-{roomId}-{timestamp}-{hash}.{extension}`
 
 ## 🧪 Testing
 
@@ -317,11 +386,37 @@ dotnet test WPHBookingSystem.Application.Tests
 - `JwtSettings__Issuer`: JWT issuer
 - `JwtSettings__Audience`: JWT audience
 
+### Email Configuration
+For detailed email setup instructions, see [EMAIL_CONFIGURATION.md](EMAIL_CONFIGURATION.md).
+
+**Quick Setup Example (Gmail):**
+```json
+{
+  "EmailSettings": {
+    "SmtpHost": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "FromEmail": "your-email@gmail.com",
+    "FromName": "WPH Hotel",
+    "Username": "your-email@gmail.com",
+    "Password": "your-app-password",
+    "EnableSsl": true,
+    "EnableAuthentication": true
+  }
+}
+```
+
 ### User Secrets (Development)
 ```bash
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=your-neon-host;Database=your-database;Username=your-username;Password=your-password;"
 dotnet user-secrets set "JwtSettings:SecretKey" "your-secret-key"
 ```
+
+### Docker Configuration
+The system includes Docker support with:
+- **Multi-stage builds** for optimized container size
+- **Port 5069** exposed for API access
+- **Root user** for simplified permissions
+- **Docker Compose** for easy deployment
 
 ## 📝 Development Guidelines
 
@@ -330,12 +425,14 @@ dotnet user-secrets set "JwtSettings:SecretKey" "your-secret-key"
 - Use XML documentation for public APIs
 - Implement proper error handling with domain exceptions
 - Use nullable reference types for better null safety
+- Add comprehensive logging for debugging
 
 ### Architecture Principles
 - Keep domain layer independent of external concerns
 - Use dependency injection for loose coupling
 - Implement proper validation at domain boundaries
 - Follow SOLID principles
+- Use consistent response patterns with `CreateResponse` extension
 
 ### Database Guidelines
 - Use Entity Framework migrations for schema changes
@@ -343,9 +440,28 @@ dotnet user-secrets set "JwtSettings:SecretKey" "your-secret-key"
 - Use transactions for data consistency
 - Follow naming conventions for tables and columns
 
+### API Design Guidelines
+- Use consistent HTTP status codes
+- Implement proper model validation
+- Add comprehensive logging for all operations
+- Use standardized response formats
+- Include proper authorization attributes
+
 ## 🚀 Deployment
 
 ### Production Deployment
+
+#### Option 1: Docker Deployment (Recommended)
+```bash
+# Build and run with Docker Compose
+docker-compose up --build -d
+
+# Or use deployment scripts
+./deploy.sh  # Linux/Mac
+deploy.bat   # Windows
+```
+
+#### Option 2: Direct Deployment
 1. **Environment Setup**: Configure production connection strings and secrets
 2. **Database Migration**: Run EF migrations on production database
 3. **Build**: Create production build with optimizations
@@ -354,8 +470,29 @@ dotnet user-secrets set "JwtSettings:SecretKey" "your-secret-key"
 ### Docker Production Build
 ```bash
 docker build -t wph-hotel-backend:latest .
-docker run -d -p 80:8080 --name hotel-backend wph-hotel-backend:latest
+docker run -d -p 5069:5069 --name hotel-backend wph-hotel-backend:latest
 ```
+
+### Deployment Scripts
+The project includes deployment scripts for easy deployment:
+- **`deploy.sh`**: Linux/Mac deployment script
+- **`deploy.bat`**: Windows deployment script
+- **`docker-compose.yml`**: Docker Compose configuration
+- **`DEPLOYMENT.md`**: Detailed deployment guide
+
+## 🔍 Debugging & Monitoring
+
+### Logging
+The system includes comprehensive logging:
+- **Structured Logging**: All operations are logged with context
+- **Error Tracking**: Detailed error logging with stack traces
+- **Performance Monitoring**: Operation timing and performance metrics
+- **Authentication Logging**: Login attempts and authorization failures
+
+### Debug Endpoints
+- **`/api/auth/test-auth`**: Test authentication status
+- **`/api/auth/test-admin`**: Test administrator authorization
+- **`/api/booking/test-email`**: Test email functionality
 
 ## 🤝 Contributing
 
@@ -375,6 +512,7 @@ For support and questions:
 - Create an issue in the repository
 - Contact the development team
 - Check the documentation and API documentation
+- Use the Scalar UI for API testing and exploration
 
 ## 🔄 Version History
 
@@ -382,7 +520,11 @@ For support and questions:
 - **v1.1.0**: Added comprehensive documentation and improved architecture
 - **v1.2.0**: Enhanced security and performance optimizations
 - **v1.3.0**: Added image upload functionality for rooms
+- **v1.4.0**: Implemented Docker deployment and improved authentication
+- **v1.5.0**: Enhanced booking system with guest names and comprehensive logging
+- **v1.6.0**: Added room creation/update with images and improved API design
+- **v1.7.0**: Migrated to MailKit for reliable email delivery with better SSL/TLS support
 
 ---
 
-**Note**: This is a comprehensive hotel booking system designed for scalability and maintainability. The architecture follows industry best practices and is suitable for production deployment.
+**Note**: This is a comprehensive hotel booking system designed for scalability and maintainability. The architecture follows industry best practices and is suitable for production deployment with Docker support.

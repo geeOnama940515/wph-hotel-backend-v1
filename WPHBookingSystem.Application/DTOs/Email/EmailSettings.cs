@@ -46,6 +46,11 @@ namespace WPHBookingSystem.Application.DTOs.Email
         public bool EnableAuthentication { get; set; } = true;
 
         /// <summary>
+        /// Base URL for the application (used for generating booking summary links).
+        /// </summary>
+        public string BaseUrl { get; set; } = "https://wph-hotel.gregdoesdev.xyz";
+
+        /// <summary>
         /// Hotel information for email templates.
         /// </summary>
         public HotelInfo HotelInfo { get; set; } = new();
