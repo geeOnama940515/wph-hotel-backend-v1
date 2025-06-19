@@ -234,7 +234,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="200">Availability check completed</response>
         /// <response code="400">Invalid request parameters</response>
         [HttpGet("room-availability")]
-        public async Task<IActionResult> CheckRoomAvailability([FromBody] CheckRoomAvailabilityRequest request)
+        public async Task<IActionResult> CheckRoomAvailability([FromQuery] CheckRoomAvailabilityRequest request)
         {
             if (!ModelState.IsValid)
             {

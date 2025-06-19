@@ -1,4 +1,4 @@
-using MailKit.Net.Smtp;
+﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -165,47 +165,33 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine($"            <h2>Dear {guestName},</h2>");
             html.AppendLine("            <p>Thank you for choosing to stay with us! Your booking has been confirmed.</p>");
             html.AppendLine("            <div class=\"booking-token\">");
-            html.AppendLine($"                Booking Reference: #{booking.Id:N}");
+            html.AppendLine($"                <strong>Booking Reference:</strong> #{booking.Id:N}");
             html.AppendLine("            </div>");
             html.AppendLine("            <div class=\"booking-details\">");
             html.AppendLine("                <h3>Booking Details</h3>");
-            html.AppendLine("                <div class=\"detail-row\">");
-            html.AppendLine("                    <span class=\"detail-label\">Guest Name:</span>");
-            html.AppendLine($"                    <span class=\"detail-value\">{guestName}</span>");
-            html.AppendLine("                </div>");
-            html.AppendLine("                <div class=\"detail-row\">");
-            html.AppendLine("                    <span class=\"detail-label\">Room:</span>");
-            html.AppendLine($"                    <span class=\"detail-value\">{booking.RoomName}</span>");
-            html.AppendLine("                </div>");
-            html.AppendLine("                <div class=\"detail-row\">");
-            html.AppendLine("                    <span class=\"detail-label\">Number of Guests:</span>");
-            html.AppendLine($"                    <span class=\"detail-value\">{booking.Guests}</span>");
-            html.AppendLine("                </div>");
-            html.AppendLine("                <div class=\"detail-row\">");
-            html.AppendLine("                    <span class=\"detail-label\">Check-in:</span>");
-            html.AppendLine($"                    <span class=\"detail-value\">{booking.CheckIn:dddd, MMMM dd, yyyy}</span>");
-            html.AppendLine("                </div>");
-            html.AppendLine("                <div class=\"detail-row\">");
-            html.AppendLine("                    <span class=\"detail-label\">Check-out:</span>");
-            html.AppendLine($"                    <span class=\"detail-value\">{booking.CheckOut:dddd, MMMM dd, yyyy}</span>");
-            html.AppendLine("                </div>");
-            html.AppendLine("                <div class=\"detail-row\">");
-            html.AppendLine("                    <span class=\"detail-label\">Total Amount:</span>");
-            html.AppendLine($"                    <span class=\"detail-value\">${booking.TotalAmount:F2}</span>");
-            html.AppendLine("                </div>");
-            html.AppendLine("                <div class=\"detail-row\">");
-            html.AppendLine("                    <span class=\"detail-label\">Status:</span>");
-            html.AppendLine($"                    <span class=\"detail-value\">{booking.Status}</span>");
-            html.AppendLine("                </div>");
+            html.AppendLine("                <table style=\"width: 100%; border-collapse: collapse;\">");
+            html.AppendLine("                    <tr><td style=\"font-weight: bold; padding: 8px;\">Guest Name:</td><td style=\"padding: 8px;\">{guestName}</td></tr>");
+            html.AppendLine($"                    <tr><td style=\"font-weight: bold; padding: 8px;\">Room:</td><td style=\"padding: 8px;\">{booking.RoomName}</td></tr>");
+            html.AppendLine($"                    <tr><td style=\"font-weight: bold; padding: 8px;\">Number of Guests:</td><td style=\"padding: 8px;\">{booking.Guests}</td></tr>");
+            html.AppendLine($"                    <tr><td style=\"font-weight: bold; padding: 8px;\">Check-in:</td><td style=\"padding: 8px;\">{booking.CheckIn:dddd, MMMM dd, yyyy}</td></tr>");
+            html.AppendLine($"                    <tr><td style=\"font-weight: bold; padding: 8px;\">Check-out:</td><td style=\"padding: 8px;\">{booking.CheckOut:dddd, MMMM dd, yyyy}</td></tr>");
+            html.AppendLine($"                    <tr><td style=\"font-weight: bold; padding: 8px;\">Total Amount:</td><td style=\"padding: 8px;\">₱ {booking.TotalAmount:F2}</td></tr>");
+            html.AppendLine($"                    <tr><td style=\"font-weight: bold; padding: 8px;\">Status:</td><td style=\"padding: 8px;\">{booking.Status}</td></tr>");
+            html.AppendLine("                </table>");
             html.AppendLine("            </div>");
 
             if (!string.IsNullOrWhiteSpace(booking.SpecialRequests))
             {
-                html.AppendLine("            <div class=\"special-request\">");
+                html.AppendLine("            <div class=\"special-request\" style=\"margin-top: 20px;\">");
                 html.AppendLine("                <h4>Special Requests:</h4>");
                 html.AppendLine($"                <p>{booking.SpecialRequests}</p>");
                 html.AppendLine("            </div>");
             }
+
+            html.AppendLine("    </div>");
+            html.AppendLine("</body>");
+
+        
 
             html.AppendLine("            <div class=\"summary-section\">");
             html.AppendLine("                <h3>View Your Booking Summary</h3>");
@@ -444,20 +430,6 @@ namespace WPHBookingSystem.Infrastructure.Services
             html.AppendLine("</html>");
 
             return html.ToString();
-        }
-
-        public class EmailOptions
-        {
-            public const string EmailOption = "EmailOptions";
-            public string SenderName { get; set; }
-
-            public string SenderEmail { get; set; }
-
-            public string Account { get; set; }
-
-            public string Password { get; set; }
-            public string Server { get; set; }
-
         }
     }
 } 
