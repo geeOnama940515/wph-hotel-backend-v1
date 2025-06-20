@@ -226,6 +226,34 @@ namespace WPHBookingSystem.WebUI.Controllers
             }
         }
 
+        [HttpPost("add-role")]
+        public async Task<IActionResult> CreateRole([FromBody] string roleName)
+        {
+            if (string.IsNullOrEmpty(roleName))
+            {
+                _logger.LogWarning("Add role request with empty role name");
+                return this.CreateResponse(400, "Role name is required");
+            }
+            _logger.LogInformation("Creating role {RoleName}", roleName);
+            try
+            {
+                var isSuccess = await _identityService.AddRole(roleName);
+                if (!isSuccess)
+                {
+                    _logger.LogWarning("Failed to create role {RoleName}", roleName);
+                    return this.CreateResponse(400, "Failed to create role");
+                }
+                _logger.LogInformation("Role {RoleName} created successfully", roleName);
+                return this.CreateResponse(200, "Role created successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating role {RoleName}", roleName);
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
+        }
+
+
 
         [HttpPost("enable-account/{userId}")]
         public async Task<IActionResult> EnableAccount(string userId)
