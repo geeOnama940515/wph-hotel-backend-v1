@@ -43,7 +43,8 @@ namespace WPHBookingSystem.Infrastructure.Persistence.Seeders
                 LockoutEnabled = false,
                 AccessFailedCount = 0,
                 Firstname = "Administrator",
-                LastName = "Administrator"
+                LastName = "Administrator",
+                isDeleted = false
             });
 
             // Seed User Role relationship

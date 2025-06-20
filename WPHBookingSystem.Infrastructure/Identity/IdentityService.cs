@@ -115,7 +115,7 @@ namespace WPHBookingSystem.Infrastructure.Identity
 
         public async Task<List<UserResponse>> GetAllUsersAsync()
         {
-            var users = await _userManager.Users.ToListAsync();
+            var users = await _userManager.Users.Where(x => x.isDeleted == false).ToListAsync();
             var userResponses = new List<UserResponse>();
 
             foreach (var user in users)
@@ -261,26 +261,22 @@ namespace WPHBookingSystem.Infrastructure.Identity
             return result.Succeeded; // Enable the account by removing lockout
         }
 
-        public async Task<bool> AddRoleToAccount(string userId, string roleName)
+        public async Task<bool> SetUserSingleRole(string userId, string newRole)
         {
-            var applicationUser = _userManager.FindByIdAsync(userId);
-            if (applicationUser == null)
-            {
-                return false; // User not found
-            }
-            var result = await _userManager.AddToRoleAsync(applicationUser.Result, roleName);
-            return result.Succeeded; // Add role to user
-        }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return false;
 
-        public async Task<bool> RemoveRoleFromAccount(string userId, string roleName)
-        {
-           var applicationUser = await _userManager.FindByIdAsync(userId);
-            if (applicationUser == null)
-            {
-                return false; // User not found
-            }
-            var result = await _userManager.RemoveFromRoleAsync(applicationUser, roleName);
-            return result.Succeeded; // Remove role from user
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            // Remove all existing roles
+            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            if (!removeResult.Succeeded)
+                return false;
+
+            // Add the new role
+            var addResult = await _userManager.AddToRoleAsync(user, newRole);
+            return addResult.Succeeded;
         }
 
         public async Task<IList<string>> GetUserRolesAsync(string userId)
@@ -292,6 +288,22 @@ namespace WPHBookingSystem.Infrastructure.Identity
             }
             var roles = await _userManager.GetRolesAsync(applicationUser);
             return roles; // Return list of roles for the user
+        }
+
+        public async Task<bool> DeleteAccount(string userId)
+        {
+            var applicationUser = await _userManager.FindByIdAsync(userId);
+            if (applicationUser == null)
+            {
+                return false; // User not found
+            }
+            applicationUser.isDeleted = true; // Mark user as deleted
+            var result = await _userManager.UpdateAsync(applicationUser);
+            if (!result.Succeeded)
+            {
+                return false; // Update failed
+            }
+            return true;
         }
     }
 } 

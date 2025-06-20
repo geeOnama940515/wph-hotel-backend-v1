@@ -47,5 +47,7 @@ namespace WPHBookingSystem.Infrastructure.Identity
         /// </summary>
         [NotMapped]
         public string Role { get; set; }
+
+        public bool isDeleted { get; set; } = false;
     }
 }
