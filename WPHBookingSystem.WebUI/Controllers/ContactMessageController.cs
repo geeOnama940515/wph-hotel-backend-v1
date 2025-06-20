@@ -9,6 +9,7 @@ namespace WPHBookingSystem.WebUI.Controllers
 {
     [ApiController]
     [Route("api/contact-messages")]
+    [Authorize]
     public class ContactMessageController : ControllerBase
     {
         private readonly IBookingSystemFacade _facade;
@@ -26,7 +27,6 @@ namespace WPHBookingSystem.WebUI.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _facade.GetAllContactMessages();
@@ -35,7 +35,6 @@ namespace WPHBookingSystem.WebUI.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _facade.GetContactMessageById(id);

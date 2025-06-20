@@ -23,6 +23,8 @@ namespace WPHBookingSystem.Infrastructure.Identity
     public class IdentityService : IIdentityService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
 
         /// <summary>
@@ -32,10 +34,12 @@ namespace WPHBookingSystem.Infrastructure.Identity
         /// <param name="configuration">The configuration containing JWT settings.</param>
         public IdentityService(
             UserManager<ApplicationUser> userManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -304,6 +308,26 @@ namespace WPHBookingSystem.Infrastructure.Identity
                 return false; // Update failed
             }
             return true;
+        }
+
+        public async Task<bool> AddRole(string roleName)
+        {
+            var result = await _roleManager.CreateAsync(new IdentityRole(roleName));
+            if (!result.Succeeded)
+            {
+                return false; // Role creation failed
+            }
+            return result.Succeeded; // Role created successfully
+        }
+
+        public async Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return false;
+
+            var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            return result.Succeeded;
         }
     }
 } 
