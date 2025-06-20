@@ -106,7 +106,7 @@ namespace WPHBookingSystem.Infrastructure.Identity
             }
 
             // Assign default role
-            await _userManager.AddToRoleAsync(user, "Administrator");
+            await _userManager.AddToRoleAsync(user, "HotelManager");
 
             return await GenerateAuthResponse(user);
         }
