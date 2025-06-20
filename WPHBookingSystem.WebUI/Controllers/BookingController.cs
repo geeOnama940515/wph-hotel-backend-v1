@@ -259,6 +259,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <response code="200">Booking cancelled successfully</response>
         /// <response code="400">Booking not found or already cancelled</response>
         /// <response code="403">User not authorized to cancel this booking</response>
+        /// </summary>
+        /// 
+
+        [AllowAnonymous]
         [HttpPut("{bookingId}/cancel")]
         public async Task<IActionResult> CancelBooking(Guid bookingId)
         {
