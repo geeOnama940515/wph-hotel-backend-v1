@@ -18,6 +18,7 @@ using WPHBookingSystem.Infrastructure.Persistence.Data;
 using WPHBookingSystem.Infrastructure.Repositories;
 using WPHBookingSystem.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
+using WPHBookingSystem.Application.UseCases.ContactMessages;
 
 namespace WPHBookingSystem.Infrastructure
 {
