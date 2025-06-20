@@ -21,6 +21,16 @@ namespace WPHBookingSystem.Application.Interfaces.Services
         Task<bool> SendBookingConfirmationAsync(BookingDto bookingDto, string guestEmail, string guestName);
 
         /// <summary>
+        /// Sends an OTP verification email to the guest for booking verification.
+        /// </summary>
+        /// <param name="guestEmail">The email address of the guest</param>
+        /// <param name="guestName">The name of the guest</param>
+        /// <param name="otpCode">The 6-digit OTP code</param>
+        /// <param name="bookingId">The booking ID for reference</param>
+        /// <returns>True if the email was sent successfully; otherwise, false</returns>
+        Task<bool> SendOtpVerificationAsync(string guestEmail, string guestName, string otpCode, Guid bookingId);
+
+        /// <summary>
         /// Sends a booking update notification email to the guest.
         /// </summary>
         /// <param name="bookingDto">The updated booking details</param>

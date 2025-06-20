@@ -59,6 +59,10 @@ namespace WPHBookingSystem.Application.Services
         private readonly DeleteContactMessageUseCase _deleteContactMessageUseCase;
         private readonly IEmailSenderService _emailSenderService;
 
+        // OTP verification use cases
+        private readonly VerifyBookingOtpUseCase _verifyBookingOtpUseCase;
+        private readonly ResendOtpUseCase _resendOtpUseCase;
+
         #endregion
 
         /// <summary>
@@ -89,6 +93,8 @@ namespace WPHBookingSystem.Application.Services
         /// <param name="deleteContactMessageUseCase">Use case for deleting a contact message.</param>
         /// <param name="updateRoomWithImagesUseCase">Use case for updating room images.</param>
         /// <param name="emailSenderService">Service for sending email replies.</param>
+        /// <param name="verifyBookingOtpUseCase">Use case for verifying booking OTP.</param>
+        /// <param name="resendOtpUseCase">Use case for resending OTP.</param>
         public BookingSystemFacade(
             CreateBookingUseCase createBookingUseCase,
             UpdateBookingDatesUseCase updateBookingUseCase,
@@ -113,7 +119,9 @@ namespace WPHBookingSystem.Application.Services
             GetContactMessageByIdUseCase getContactMessageByIdUseCase,
             UpdateContactMessageUseCase updateContactMessageUseCase,
             DeleteContactMessageUseCase deleteContactMessageUseCase,
-            IEmailSenderService emailSenderService)
+            IEmailSenderService emailSenderService,
+            VerifyBookingOtpUseCase verifyBookingOtpUseCase,
+            ResendOtpUseCase resendOtpUseCase)
         {
             _createBookingUseCase = createBookingUseCase;
             _updateBookingUseCase = updateBookingUseCase;
@@ -139,6 +147,8 @@ namespace WPHBookingSystem.Application.Services
             _updateContactMessageUseCase = updateContactMessageUseCase;
             _deleteContactMessageUseCase = deleteContactMessageUseCase;
             _emailSenderService = emailSenderService;
+            _verifyBookingOtpUseCase = verifyBookingOtpUseCase;
+            _resendOtpUseCase = resendOtpUseCase;
         }
 
         #region Booking Operations
@@ -345,6 +355,30 @@ namespace WPHBookingSystem.Application.Services
         public async Task<Result<ImageUploadResponseDto>> UploadRoomImages(Guid roomId, IFormFileCollection files)
         {
             return await _uploadRoomImagesUseCase.ExecuteAsync(roomId, files);
+        }
+
+        #endregion
+
+        #region OTP Verification Operations
+
+        /// <summary>
+        /// Verifies booking OTP by delegating to the VerifyBookingOtpUseCase.
+        /// </summary>
+        /// <param name="dto">The data transfer object containing booking ID and OTP code.</param>
+        /// <returns>A result containing the verified booking information or error details.</returns>
+        public async Task<Result<BookingDto>> VerifyBookingOtp(BookingVerificationDto dto)
+        {
+            return await _verifyBookingOtpUseCase.ExecuteAsync(dto);
+        }
+
+        /// <summary>
+        /// Resends OTP by delegating to the ResendOtpUseCase.
+        /// </summary>
+        /// <param name="dto">The data transfer object containing booking ID and email address.</param>
+        /// <returns>A result indicating success or failure of the OTP resend operation.</returns>
+        public async Task<Result<string>> ResendOtp(ResendOtpDto dto)
+        {
+            return await _resendOtpUseCase.ExecuteAsync(dto);
         }
 
         #endregion

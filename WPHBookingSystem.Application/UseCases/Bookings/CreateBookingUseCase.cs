@@ -22,17 +22,20 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailSenderService _emailService;
+        private readonly IOtpService _otpService;
 
         /// <summary>
         /// Initializes a new instance of the CreateBookingUseCase with the required dependencies.
         /// </summary>
         /// <param name="unitOfWork">The unit of work for transaction management and data access.</param>
         /// <param name="emailService">The email service for sending confirmation emails.</param>
-        /// <exception cref="ArgumentNullException">Thrown when unitOfWork or emailService is null.</exception>
-        public CreateBookingUseCase(IUnitOfWork unitOfWork, IEmailSenderService emailService)
+        /// <param name="otpService">The OTP service for generating verification codes.</param>
+        /// <exception cref="ArgumentNullException">Thrown when unitOfWork, emailService, or otpService is null.</exception>
+        public CreateBookingUseCase(IUnitOfWork unitOfWork, IEmailSenderService emailService, IOtpService otpService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+            _otpService = otpService ?? throw new ArgumentNullException(nameof(otpService));
         }
 
         /// <summary>
@@ -77,37 +80,36 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
                     dto.GuestName
                 );
 
+                // Set booking status to EmailVerificationPending for OTP verification
+                booking.SetEmailVerificationPending();
+
                 // Persist the booking to the database
                 await _unitOfWork.Repository<Booking>().AddAsync(booking);
                 
+                // Generate OTP code for email verification
+                var otpCode = await _otpService.GenerateOtpAsync(booking.Id, dto.EmailAddress);
+
+                // Send OTP verification email
+                var otpEmailSent = await _emailService.SendOtpVerificationAsync(dto.EmailAddress, dto.GuestName, otpCode, booking.Id);
+                if (!otpEmailSent)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return Result<BookingCreatedDto>.Failure("Failed to send OTP verification email. Please try again.", 500);
+                }
+
                 // Commit the transaction
                 await _unitOfWork.CommitTransactionAsync();
 
-                // Create BookingDto for email
-                var bookingDto = new BookingDto
-                {
-                    Id = booking.Id,
-                    GuestName = booking.GuestName,
-                    RoomId = booking.RoomId,
-                    CheckIn = booking.CheckIn,
-                    CheckOut = booking.CheckOut,
-                    Guests = booking.Guests,
-                    TotalAmount = booking.TotalAmount,
-                    Status = booking.Status,
-                    SpecialRequests = booking.SpecialRequests,
-                    Phone = booking.ContactInfo.Phone,
-                    Address = booking.ContactInfo.Address,
-                    RoomName = room.Name,
-                    BookingToken = booking.BookingToken.ToString(),
-                };
-
-                // Send confirmation email
-                await _emailService.SendBookingConfirmationAsync(bookingDto, dto.EmailAddress, dto.GuestName);
-
-                // Return success result with booking information
+                // Return success result with booking information and verification status
                 return Result<BookingCreatedDto>.Success(
-                    new BookingCreatedDto { Id = booking.Id, BookingToken = booking.BookingToken }, 
-                    "Booking created successfully."
+                    new BookingCreatedDto 
+                    { 
+                        Id = booking.Id, 
+                        BookingToken = booking.BookingToken,
+                        RequiresEmailVerification = true,
+                        EmailAddress = dto.EmailAddress
+                    }, 
+                    "Booking created successfully. Please check your email for verification code."
                 );
             }
             catch (Exception ex)

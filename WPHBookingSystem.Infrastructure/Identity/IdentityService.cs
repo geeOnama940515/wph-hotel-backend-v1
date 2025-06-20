@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -8,7 +9,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using WPHBookingSystem.Application.DTOs.Identity;
-using WPHBookingSystem.Application.Interfaces.Services;
+using WPHBookingSystem.Application.UseCases.ContactMessages;
 
 namespace WPHBookingSystem.Infrastructure.Identity
 {
@@ -106,10 +107,36 @@ namespace WPHBookingSystem.Infrastructure.Identity
             }
 
             // Assign default role
-            await _userManager.AddToRoleAsync(user, "Administrator");
+            await _userManager.AddToRoleAsync(user, "HotelManager");
 
             return await GenerateAuthResponse(user);
         }
+
+
+        public async Task<List<UserResponse>> GetAllUsersAsync()
+        {
+            var users = await _userManager.Users.ToListAsync();
+            var userResponses = new List<UserResponse>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+
+                userResponses.Add(new UserResponse
+                {
+                    FirstName = user.Firstname,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    UserId = user.Id,
+                    PhoneNumber = user.PhoneNumber,
+                    Roles = roles.ToList() // This matches your updated model
+                });
+            }
+
+            return userResponses;
+        }
+
+
 
         /// <summary>
         /// Refreshes an authentication token using a refresh token.
@@ -118,10 +145,24 @@ namespace WPHBookingSystem.Infrastructure.Identity
         /// <param name="refreshToken">The refresh token to use for generating a new access token.</param>
         /// <returns>Authentication response with new tokens.</returns>
         /// <exception cref="NotImplementedException">Thrown as this feature is not yet implemented.</exception>
-        public async Task<AuthResponse> RefreshTokenAsync(string refreshToken)
+        public async Task<AuthResponse> RefreshTokenAsync( string refreshToken)
         {
+            //var applicationUser = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken);
             // Implement refresh token logic here
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> DisableAccount(string userId)
+        {
+            var applicationUser = await _userManager.FindByIdAsync(userId);
+
+            if (applicationUser == null)
+            {
+                return false; // User not found
+            }
+            var result = await _userManager.SetLockoutEndDateAsync(applicationUser, DateTimeOffset.UtcNow.AddYears(100));
+
+            return result.Succeeded; // Lock the account for 100 years
         }
 
         /// <summary>
@@ -207,6 +248,50 @@ namespace WPHBookingSystem.Infrastructure.Identity
         private string GenerateRefreshToken()
         {
             return Guid.NewGuid().ToString();
+        }
+
+        public async Task<bool> EnableAccount(string userId)
+        {
+            var applicationUser = await _userManager.FindByIdAsync(userId);
+            if (applicationUser == null)
+            {
+                return false; // User not found
+            }
+            var result = await _userManager.SetLockoutEndDateAsync(applicationUser, null); // Remove lockout
+            return result.Succeeded; // Enable the account by removing lockout
+        }
+
+        public async Task<bool> AddRoleToAccount(string userId, string roleName)
+        {
+            var applicationUser = _userManager.FindByIdAsync(userId);
+            if (applicationUser == null)
+            {
+                return false; // User not found
+            }
+            var result = await _userManager.AddToRoleAsync(applicationUser.Result, roleName);
+            return result.Succeeded; // Add role to user
+        }
+
+        public async Task<bool> RemoveRoleFromAccount(string userId, string roleName)
+        {
+           var applicationUser = await _userManager.FindByIdAsync(userId);
+            if (applicationUser == null)
+            {
+                return false; // User not found
+            }
+            var result = await _userManager.RemoveFromRoleAsync(applicationUser, roleName);
+            return result.Succeeded; // Remove role from user
+        }
+
+        public async Task<IList<string>> GetUserRolesAsync(string userId)
+        {
+            var applicationUser = await _userManager.FindByIdAsync(userId);
+            if (applicationUser == null)
+            {
+                return new List<string>(); // User not found, return empty list
+            }
+            var roles = await _userManager.GetRolesAsync(applicationUser);
+            return roles; // Return list of roles for the user
         }
     }
 } 

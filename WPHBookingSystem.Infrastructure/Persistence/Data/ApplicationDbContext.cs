@@ -50,6 +50,12 @@ namespace WPHBookingSystem.Infrastructure.Persistence.Data
         /// </summary>
         public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
 
+        /// <summary>
+        /// Gets the DbSet for OtpVerification entities.
+        /// Provides access to OTP verification data for CRUD operations and queries.
+        /// </summary>
+        public DbSet<OtpVerification> OtpVerifications => Set<OtpVerification>();
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
