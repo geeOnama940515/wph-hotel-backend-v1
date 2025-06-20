@@ -257,8 +257,35 @@ namespace WPHBookingSystem.WebUI.Controllers
             }
         }
 
+        [HttpPost("delete-account/{userId}")]
+        public async Task<IActionResult> DeleteAccount(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("Delete account request with empty user ID");
+                return this.CreateResponse(400, "User ID is required");
+            }
+            _logger.LogInformation("Deleting account for user {UserId}", userId);
+            try
+            {
+                var isSuccess = await _identityService.DeleteAccount(userId);
+                if (!isSuccess)
+                {
+                    _logger.LogWarning("Failed to delete account for user {UserId}", userId);
+                    return this.CreateResponse(400, "Failed to delete account");
+                }
+                _logger.LogInformation("Account deleted successfully for user {UserId}", userId);
+                return this.CreateResponse(200, "Account deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting account for user {UserId}", userId);
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
+        }
 
-        [HttpPost("add-role")]
+
+        [HttpPost("set-role")]
         public async Task<IActionResult> AddRoleToAccount([FromBody] AddRoleRequest request)
         {
             if (string.IsNullOrEmpty(request.UserId) || string.IsNullOrEmpty(request.RoleName))
@@ -269,45 +296,18 @@ namespace WPHBookingSystem.WebUI.Controllers
             _logger.LogInformation("Adding role {RoleName} to user {UserId}", request.RoleName, request.UserId);
             try
             {
-                var result = await _identityService.AddRoleToAccount(request.UserId, request.RoleName);
+                var result = await _identityService.SetUserSingleRole(request.UserId, request.RoleName);
                 if (!result)
                 {
                     _logger.LogWarning("Failed to add role {RoleName} to user {UserId}", request.RoleName, request.UserId);
-                    return this.CreateResponse(400, "Failed to add role to account");
+                    return this.CreateResponse(400, "Failed to set role to account");
                 }
                 _logger.LogInformation("Role {RoleName} added successfully to user {UserId}", request.RoleName, request.UserId);
-                return this.CreateResponse(200, "Role added successfully", result);
+                return this.CreateResponse(200, "Role set successfully", result);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error adding role {RoleName} to user {UserId}", request.RoleName, request.UserId);
-                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
-            }
-        }
-
-        [HttpPost("remove-role")]
-        public async Task<IActionResult> RemoveRoleFromAccount([FromBody] AddRoleRequest request)
-        {
-            if (string.IsNullOrEmpty(request.UserId) || string.IsNullOrEmpty(request.RoleName))
-            {
-                _logger.LogWarning("Remove role request with empty user ID or role name");
-                return this.CreateResponse(400, "User ID and role name are required");
-            }
-            _logger.LogInformation($"Removing role {request.RoleName} from user {request.UserId}", request.RoleName, request.UserId);
-            try
-            {
-                var result = await _identityService.RemoveRoleFromAccount(request.UserId, request.RoleName);
-                if (!result)
-                {
-                    _logger.LogWarning("Failed to remove role {RoleName} from user {UserId}", request.RoleName, request.UserId);
-                    return this.CreateResponse(400, "Failed to remove role from account");
-                }
-                _logger.LogInformation("Role {RoleName} removed successfully from user {UserId}", request.RoleName, request.UserId);
-                return this.CreateResponse(200, "Role removed successfully", result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error removing role {RoleName} from user {UserId}", request.RoleName, request.UserId);
                 return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
             }
         }
