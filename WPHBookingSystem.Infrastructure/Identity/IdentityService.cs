@@ -320,13 +320,13 @@ namespace WPHBookingSystem.Infrastructure.Identity
             return result.Succeeded; // Role created successfully
         }
 
-        public async Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+        public async Task<bool> ChangePasswordAsync(ChangePasswordRequest request)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
                 return false;
 
-            var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
             return result.Succeeded;
         }
     }

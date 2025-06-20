@@ -42,6 +42,7 @@ namespace WPHBookingSystem.Application.UseCases.Bookings
 
                 booking.Cancel();
                 await _unitOfWork.Repository<Booking>().UpdateAsync(booking);
+                //await _unitOfWork.RoomRepository.UpdateAsync(booking.Room, room => room.SetAvailable());
                 await _unitOfWork.CommitTransactionAsync();
 
                 return Result<BookingDto>.Success(new BookingDto

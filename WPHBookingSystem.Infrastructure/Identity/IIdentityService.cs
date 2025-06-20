@@ -24,7 +24,7 @@ public interface IIdentityService
 
     Task<List<UserResponse>> GetAllUsersAsync(); // Assuming ApplicationUser is defined in your project
 
-    Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword);
+    Task<bool> ChangePasswordAsync(ChangePasswordRequest request);
 
     //Task<List<ApplicationUser>>
 }
