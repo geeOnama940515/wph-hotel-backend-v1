@@ -1,11 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
-using WPHBookingSystem.Application.Common;
 using WPHBookingSystem.Application.DTOs.Identity;
-using WPHBookingSystem.Application.Interfaces.Services;
+using WPHBookingSystem.Infrastructure.Identity;
 using WPHBookingSystem.WebUI.Extensions;
 
 namespace WPHBookingSystem.WebUI.Controllers
@@ -20,7 +16,7 @@ namespace WPHBookingSystem.WebUI.Controllers
     /// All endpoints are publicly accessible (no authentication required) as they handle
     /// the authentication process itself.
     /// </summary>
-    [AllowAnonymous]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
@@ -49,6 +45,9 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <returns>Authentication response with tokens and user information</returns>
         /// <response code="200">Login successful, returns tokens and user info</response>
         /// <response code="400">Invalid credentials or authentication failed</response>
+        /// </summary>
+
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
@@ -59,7 +58,7 @@ namespace WPHBookingSystem.WebUI.Controllers
             }
 
             _logger.LogInformation("Login attempt for user {Email}", request.Email);
-            
+
             try
             {
                 var response = await _identityService.LoginAsync(request);
@@ -89,6 +88,10 @@ namespace WPHBookingSystem.WebUI.Controllers
         /// <returns>Authentication response with tokens and user information</returns>
         /// <response code="200">Registration successful, returns tokens and user info</response>
         /// <response code="400">Invalid registration data or user already exists</response>
+        ///</summary>
+
+
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
@@ -99,7 +102,7 @@ namespace WPHBookingSystem.WebUI.Controllers
             }
 
             _logger.LogInformation("Registration attempt for user {Email}", request.Email);
-            
+
             try
             {
                 var response = await _identityService.RegisterAsync(request);
@@ -139,7 +142,7 @@ namespace WPHBookingSystem.WebUI.Controllers
             }
 
             _logger.LogInformation("Token refresh attempt");
-            
+
             try
             {
                 var response = await _identityService.RefreshTokenAsync(refreshToken);
@@ -179,7 +182,7 @@ namespace WPHBookingSystem.WebUI.Controllers
             }
 
             _logger.LogInformation("Token revocation attempt");
-            
+
             try
             {
                 var result = await _identityService.RevokeTokenAsync(refreshToken);
@@ -192,5 +195,154 @@ namespace WPHBookingSystem.WebUI.Controllers
                 return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
             }
         }
+
+        [HttpPost("disable-account/{userId}")]
+        public async Task<IActionResult> DisableAccount(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("Disable account request with empty user ID");
+                return this.CreateResponse(400, "User ID is required");
+            }
+
+            _logger.LogInformation("Disabling account for user {UserId}", userId);
+
+            try
+            {
+                var isSuccess = await _identityService.DisableAccount(userId);
+                if (!isSuccess)
+                {
+                    _logger.LogWarning("Failed to disable account for user {UserId}", userId);
+                    return this.CreateResponse(400, "Failed to disable account");
+                }
+
+                _logger.LogInformation("Account disabled successfully for user {UserId}", userId);
+                return this.CreateResponse(200, "Account disabled successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error disabling account for user {UserId}", userId);
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
+        }
+
+
+        [HttpPost("enable-account/{userId}")]
+        public async Task<IActionResult> EnableAccount(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("Enable account request with empty user ID");
+                return this.CreateResponse(400, "User ID is required");
+            }
+
+            _logger.LogInformation("Enabling account for user {UserId}", userId);
+
+            try
+            {
+                var isSuccess = await _identityService.EnableAccount(userId);
+                if (!isSuccess)
+                {
+                    _logger.LogWarning("Failed to enable account for user {UserId}", userId);
+                    return this.CreateResponse(400, "Failed to enable account");
+                }
+
+                _logger.LogInformation("Account enabled successfully for user {UserId}", userId);
+                return this.CreateResponse(200, "Account enabled successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error enabling account for user {UserId}", userId);
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
+        }
+
+
+        [HttpPost("add-role")]
+        public async Task<IActionResult> AddRoleToAccount([FromBody] AddRoleRequest request)
+        {
+            if (string.IsNullOrEmpty(request.UserId) || string.IsNullOrEmpty(request.RoleName))
+            {
+                _logger.LogWarning("Add role request with empty user ID or role name");
+                return this.CreateResponse(400, "User ID and role name are required");
+            }
+            _logger.LogInformation("Adding role {RoleName} to user {UserId}", request.RoleName, request.UserId);
+            try
+            {
+                var result = await _identityService.AddRoleToAccount(request.UserId, request.RoleName);
+                if (!result)
+                {
+                    _logger.LogWarning("Failed to add role {RoleName} to user {UserId}", request.RoleName, request.UserId);
+                    return this.CreateResponse(400, "Failed to add role to account");
+                }
+                _logger.LogInformation("Role {RoleName} added successfully to user {UserId}", request.RoleName, request.UserId);
+                return this.CreateResponse(200, "Role added successfully", result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding role {RoleName} to user {UserId}", request.RoleName, request.UserId);
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
+        }
+
+        [HttpPost("remove-role")]
+        public async Task<IActionResult> RemoveRoleFromAccount([FromBody] AddRoleRequest request)
+        {
+            if (string.IsNullOrEmpty(request.UserId) || string.IsNullOrEmpty(request.RoleName))
+            {
+                _logger.LogWarning("Remove role request with empty user ID or role name");
+                return this.CreateResponse(400, "User ID and role name are required");
+            }
+            _logger.LogInformation($"Removing role {request.RoleName} from user {request.UserId}", request.RoleName, request.UserId);
+            try
+            {
+                var result = await _identityService.RemoveRoleFromAccount(request.UserId, request.RoleName);
+                if (!result)
+                {
+                    _logger.LogWarning("Failed to remove role {RoleName} from user {UserId}", request.RoleName, request.UserId);
+                    return this.CreateResponse(400, "Failed to remove role from account");
+                }
+                _logger.LogInformation("Role {RoleName} removed successfully from user {UserId}", request.RoleName, request.UserId);
+                return this.CreateResponse(200, "Role removed successfully", result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing role {RoleName} from user {UserId}", request.RoleName, request.UserId);
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
+        }
+
+        [HttpGet("list-users")]
+        public async Task<IActionResult> GetUsers()
+        {
+            try
+            {
+                // Assuming you have a method in IIdentityService to get all users
+                var users = await _identityService.GetAllUsersAsync();
+                if (users == null || users.Count == 0)
+                {
+                    _logger.LogInformation("No users found");
+                    return this.CreateResponse(404, "No users found");
+                }
+                _logger.LogInformation("Retrieved {UserCount} users", users.Count);
+                return this.CreateResponse(200, "Users retrieved successfully", users);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving users");
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
+        }
+
+
+
     }
-} 
+
+    public class AddRoleRequest
+    {
+        public string UserId { get; set; }
+        public string RoleName { get; set; }
+    }
+
+
+}
