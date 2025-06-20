@@ -20,7 +20,11 @@ public interface IIdentityService
 
     Task<bool> DeleteAccount(string userId);
 
+    Task<bool> AddRole(string roleName);
+
     Task<List<UserResponse>> GetAllUsersAsync(); // Assuming ApplicationUser is defined in your project
+
+    Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword);
 
     //Task<List<ApplicationUser>>
 }
