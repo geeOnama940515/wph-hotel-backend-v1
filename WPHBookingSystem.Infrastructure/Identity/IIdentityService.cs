@@ -14,10 +14,11 @@ public interface IIdentityService
 
     Task<bool> EnableAccount(string userId);
 
-    Task<bool> AddRoleToAccount(string userId, string roleName);
-    Task<bool> RemoveRoleFromAccount(string userId, string roleName);
+    Task<bool> SetUserSingleRole(string userId, string newRole);
 
     Task<IList<string>> GetUserRolesAsync(string userId);
+
+    Task<bool> DeleteAccount(string userId);
 
     Task<List<UserResponse>> GetAllUsersAsync(); // Assuming ApplicationUser is defined in your project
 
