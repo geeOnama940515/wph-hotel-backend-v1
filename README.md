@@ -261,7 +261,7 @@ Authorization: Bearer <your-jwt-token>
 - **Administrator**: Full access to all endpoints including room management and system administration
 - **User**: Access to booking operations and personal data
 
-## �� API Endpoints
+## 🎯 API Endpoints
 
 ### Contact Message (Contact Us) Endpoints
 | Method | Endpoint | Description | Authorization |
@@ -308,6 +308,58 @@ Authorization: Bearer <your-jwt-token>
 | GET | `/api/booking/{emailAddress}/get-bookings` | Get user bookings | None (Anonymous) |
 | GET | `/api/booking` | Get all bookings | Administrator |
 | GET | `/api/booking/view/{bookingToken}` | View booking by token | None |
+
+### Booking Email Verification (OTP) Feature
+
+**New Security Layer for Bookings:**
+- When a guest creates a booking, the system now requires email verification via a One-Time Password (OTP).
+- The guest receives a 6-digit OTP code via email after booking creation.
+- The booking remains in `EmailVerificationPending` status until the OTP is verified.
+- Only after successful OTP verification is the booking confirmed and a confirmation email sent.
+
+#### OTP Verification Endpoints
+| Method | Endpoint | Description | Authorization |
+|--------|----------|-------------|---------------|
+| POST | `/api/bookings/verify-otp` | Verify OTP code for a booking | None (Anonymous) |
+| POST | `/api/bookings/resend-otp` | Resend OTP code to guest's email | None (Anonymous) |
+
+#### OTP Verification Flow
+1. **Create Booking:**
+   - Guest submits booking details via `POST /api/bookings`.
+   - System creates booking in `EmailVerificationPending` status and sends OTP to guest's email.
+2. **Verify OTP:**
+   - Guest submits OTP code and booking ID to `POST /api/bookings/verify-otp`.
+   - If valid, booking is confirmed and confirmation email is sent.
+3. **Resend OTP (if needed):**
+   - Guest can request a new OTP via `POST /api/bookings/resend-otp` (rate-limited).
+
+#### Example: Verify OTP
+```http
+POST /api/bookings/verify-otp
+Content-Type: application/json
+
+{
+  "bookingId": "<booking-guid>",
+  "otpCode": "123456"
+}
+```
+
+#### Example: Resend OTP
+```http
+POST /api/bookings/resend-otp
+Content-Type: application/json
+
+{
+  "bookingId": "<booking-guid>",
+  "emailAddress": "guest@example.com"
+}
+```
+
+**Security Notes:**
+- OTP codes expire after 15 minutes.
+- Maximum 5 verification attempts per booking.
+- Maximum 3 OTP resends per booking/email.
+- All OTPs are securely hashed and never stored in plain text.
 
 ### System Endpoints
 | Method | Endpoint | Description | Authorization |

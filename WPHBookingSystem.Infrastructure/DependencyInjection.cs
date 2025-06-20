@@ -18,6 +18,7 @@ using WPHBookingSystem.Infrastructure.Persistence.Data;
 using WPHBookingSystem.Infrastructure.Repositories;
 using WPHBookingSystem.Infrastructure.Services;
 using Microsoft.Extensions.Logging;
+using WPHBookingSystem.Application.UseCases.ContactMessages;
 
 namespace WPHBookingSystem.Infrastructure
 {
@@ -122,12 +123,14 @@ namespace WPHBookingSystem.Infrastructure
             //services.AddScoped<IRoomRepository, RoomRepository>();
             //services.AddScoped<IBookingRepository, BookingRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IOtpRepository, OtpRepository>();
 
             // Register Services
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IImageUploadService, ImageUploadService>();
             services.AddScoped<IEmailSenderService, EmailConfigService>();
+            services.AddScoped<IOtpService, OtpService>();
 
             // Configure Email Settings
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));

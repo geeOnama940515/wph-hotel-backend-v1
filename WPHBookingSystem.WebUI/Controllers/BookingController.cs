@@ -86,6 +86,85 @@ namespace WPHBookingSystem.WebUI.Controllers
             }
         }
 
+        /// <summary>
+        /// Verifies the OTP code for a booking to confirm the reservation.
+        /// 
+        /// Validates the provided OTP code and confirms the booking if valid.
+        /// Only bookings in EmailVerificationPending status can be verified.
+        /// </summary>
+        /// <param name="dto">The verification data containing booking ID and OTP code</param>
+        /// <returns>Standardized response with verified booking details or error information</returns>
+        /// <response code="200">Booking verified and confirmed successfully</response>
+        /// <response code="400">Invalid OTP code or booking not in verification pending status</response>
+        /// <response code="404">Booking not found</response>
+        [AllowAnonymous]
+        [HttpPost("verify-otp")]
+        public async Task<IActionResult> VerifyBookingOtp(BookingVerificationDto dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid model state for OTP verification request");
+                    return this.CreateResponse(400, "Invalid request data");
+                }
+
+                _logger.LogInformation("OTP verification attempt for booking {BookingId}", dto.BookingId);
+                var result = await _facade.VerifyBookingOtp(dto);
+                if (!result.IsSuccess)
+                {
+                    _logger.LogWarning("Failed to verify OTP for booking {BookingId}: {Message}", dto.BookingId, result.Message);
+                    return this.CreateResponse(result.StatusCode, result.Message);
+                }
+                _logger.LogInformation("OTP verified successfully for booking {BookingId}", dto.BookingId);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error occurred while verifying OTP for booking {BookingId}: {ErrorMessage}", dto.BookingId, ex.Message);
+                return this.CreateResponse(500, $"OTP verification failed: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Resends OTP code for booking verification.
+        /// 
+        /// Generates a new OTP code and sends it to the guest's email address.
+        /// Only bookings in EmailVerificationPending status can have OTP resent.
+        /// </summary>
+        /// <param name="dto">The resend data containing booking ID and email address</param>
+        /// <returns>Standardized response indicating success or failure of OTP resend</returns>
+        /// <response code="200">OTP code sent successfully</response>
+        /// <response code="400">Invalid request or booking not in verification pending status</response>
+        /// <response code="404">Booking not found</response>
+        [AllowAnonymous]
+        [HttpPost("resend-otp")]
+        public async Task<IActionResult> ResendOtp(ResendOtpDto dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Invalid model state for OTP resend request");
+                    return this.CreateResponse(400, "Invalid request data");
+                }
+
+                _logger.LogInformation("OTP resend attempt for booking {BookingId}", dto.BookingId);
+                var result = await _facade.ResendOtp(dto);
+                if (!result.IsSuccess)
+                {
+                    _logger.LogWarning("Failed to resend OTP for booking {BookingId}: {Message}", dto.BookingId, result.Message);
+                    return this.CreateResponse(result.StatusCode, result.Message);
+                }
+                _logger.LogInformation("OTP resent successfully for booking {BookingId}", dto.BookingId);
+                return this.CreateResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error occurred while resending OTP for booking {BookingId}: {ErrorMessage}", dto.BookingId, ex.Message);
+                return this.CreateResponse(500, $"OTP resend failed: {ex.Message}");
+            }
+        }
 
         /// <summary>
         /// Updates the check-in and check-out dates for an existing booking.
