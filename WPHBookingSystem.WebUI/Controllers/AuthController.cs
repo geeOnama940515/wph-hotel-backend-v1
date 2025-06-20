@@ -122,6 +122,34 @@ namespace WPHBookingSystem.WebUI.Controllers
             }
         }
 
+        [HttpPost("change-password")]
+
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for change password request");
+                return this.CreateResponse(400, "Invalid request data");
+            }
+            _logger.LogInformation("Change password attempt for user {UserId}", request.UserId);
+            try
+            {
+                var response = await _identityService.ChangePasswordAsync(request);
+                if (!response)
+                {
+                    _logger.LogWarning("Change password failed for user {UserId}", request.UserId);
+                    return this.CreateResponse(400, $"Change password failed for user {request.UserId}");
+                }
+                _logger.LogInformation("Change password successful for user {UserId}", request.UserId);
+                return this.CreateResponse(200, "Password changed successfully", response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during change password for user {UserId}", request.UserId);
+                return this.CreateResponse(500, $"An error occurred while processing your request: {ex.Message}");
+            }
+        }
+
         /// <summary>
         /// Refreshes an expired access token using a valid refresh token.
         /// 
@@ -365,6 +393,8 @@ namespace WPHBookingSystem.WebUI.Controllers
 
 
     }
+
+
 
     public class AddRoleRequest
     {
