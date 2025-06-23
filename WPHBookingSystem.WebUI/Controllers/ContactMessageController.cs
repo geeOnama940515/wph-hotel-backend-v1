@@ -19,6 +19,7 @@ namespace WPHBookingSystem.WebUI.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] CreateContactMessageDto dto)
         {
             var result = await _facade.CreateContactMessage(dto);
