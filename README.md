@@ -476,7 +476,15 @@ For detailed email setup instructions, see [EMAIL_CONFIGURATION.md](EMAIL_CONFIG
     "Username": "your-email@gmail.com",
     "Password": "your-app-password",
     "EnableSsl": true,
-    "EnableAuthentication": true
+    "EnableAuthentication": true,
+    "BaseUrl": "https://wph-hotel.gregdoesdev.xyz",
+    "HotelInfo": {
+      "Name": "WPH Hotel",
+      "Address": "123 Hotel Street, City, Country",
+      "Phone": "+1 (555) 123-4567",
+      "Email": "info@wphhotel.com",
+      "Website": "https://www.wphhotel.com"
+    }
   }
 }
 ```
@@ -600,6 +608,7 @@ For support and questions:
 - **v1.5.0**: Enhanced booking system with guest names and comprehensive logging
 - **v1.6.0**: Added room creation/update with images and improved API design
 - **v1.7.0**: Migrated to MailKit for reliable email delivery with better SSL/TLS support
+- **v1.8.0**: Enhanced email service with comprehensive templates, OTP verification emails, and contact message replies
 
 ---
 
@@ -632,3 +641,122 @@ This project uses **Swagger** for interactive API documentation and testing.
 - **API Base URL:** https://localhost:7153/api
 
 To access the Swagger UI, run the application and navigate to the `/swagger` endpoint in your browser.
+
+## 📧 Email Service Features
+
+The system includes a comprehensive email service built with **MailKit** for reliable email delivery and better SSL/TLS support.
+
+### Email Types Sent
+
+#### 1. **Booking Confirmation Emails**
+- **Trigger**: After successful OTP verification
+- **Content**: Professional HTML email with booking details
+- **Includes**: 
+  - Booking reference number
+  - Room details and pricing
+  - Check-in/check-out dates
+  - Guest information
+  - Special requests (if any)
+  - Hotel contact information
+
+#### 2. **Booking Update Emails**
+- **Trigger**: When booking dates or details are modified
+- **Content**: Updated booking information with change notifications
+- **Features**: Clear indication of what was changed
+
+#### 3. **Booking Cancellation Emails**
+- **Trigger**: When a booking is cancelled
+- **Content**: Cancellation confirmation with booking reference
+- **Includes**: Cancellation policy information
+
+#### 4. **OTP Verification Emails**
+- **Trigger**: When a new booking is created
+- **Content**: 6-digit OTP code for email verification
+- **Security**: OTP expires after 15 minutes
+- **Rate Limiting**: Maximum 3 resends per booking
+
+#### 5. **Contact Message Reply Emails**
+- **Trigger**: When admin replies to contact messages
+- **Content**: Thread-style email with original message and admin reply
+- **Format**: Professional response with hotel branding
+
+### Email Service Configuration
+
+#### Supported Email Providers
+- **Gmail**: Using App Passwords for secure authentication
+- **Outlook/Hotmail**: Standard SMTP configuration
+- **Yahoo Mail**: Using App Passwords
+- **Custom SMTP Servers**: Any SMTP provider
+
+#### Configuration Properties
+
+| Property | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `SmtpHost` | SMTP server hostname | - | Yes |
+| `SmtpPort` | SMTP server port | 587 | Yes |
+| `FromEmail` | Sender email address | - | Yes |
+| `FromName` | Sender display name | - | Yes |
+| `Username` | SMTP username | - | Yes (if auth enabled) |
+| `Password` | SMTP password | - | Yes (if auth enabled) |
+| `EnableSsl` | Enable SSL/TLS encryption | true | No |
+| `EnableAuthentication` | Enable SMTP authentication | true | No |
+| `BaseUrl` | Base URL for booking links | "https://wph-hotel.gregdoesdev.xyz" | No |
+
+#### Hotel Information Configuration
+```json
+{
+  "HotelInfo": {
+    "Name": "WPH Hotel",
+    "Address": "123 Hotel Street, City, Country",
+    "Phone": "+1 (555) 123-4567",
+    "Email": "info@wphhotel.com",
+    "Website": "https://www.wphhotel.com",
+    "LogoUrl": "https://your-domain.com/logo.png"
+  }
+}
+```
+
+### Email Templates
+
+All emails use professional HTML templates with:
+- **Responsive Design**: Mobile-friendly layouts
+- **Hotel Branding**: Consistent styling with hotel colors
+- **Clear Information**: Well-organized booking details
+- **Call-to-Action**: Links to view booking summary
+- **Contact Information**: Hotel details for support
+
+### Security Features
+
+- **SSL/TLS Encryption**: All email communications are encrypted
+- **App Password Support**: Secure authentication for Gmail and Yahoo
+- **Rate Limiting**: Prevents email abuse
+- **Error Handling**: Comprehensive logging and error recovery
+- **Template Validation**: Ensures email content is properly formatted
+
+### Testing Email Configuration
+
+#### Test Endpoint
+```http
+POST /api/booking/test-email
+Content-Type: application/json
+
+{
+  "email": "test@example.com"
+}
+```
+
+#### Manual Testing
+The system automatically sends emails for:
+- Booking confirmations (after OTP verification)
+- Booking updates (date changes)
+- Booking cancellations
+- OTP verification codes
+- Contact message replies
+
+### Email Service Integration
+
+The email service is integrated throughout the booking system:
+- **Automatic Triggers**: Emails sent automatically based on booking events
+- **Error Recovery**: Failed emails are logged for debugging
+- **Async Processing**: Non-blocking email sending for better performance
+- **Template Management**: Centralized email templates for consistency
